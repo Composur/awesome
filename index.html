@@ -367,7 +367,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/09/04/hello-world/" itemprop="url">Hello World</a></h1>
+                <a class="post-title-link" href="/2018/09/04/hello-world/" itemprop="url">Untitled</a></h1>
         
 
         <div class="post-meta">
@@ -419,15 +419,188 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+            <h3 id="ubuntu运行sh脚本sudo自动输入密码"><a href="#ubuntu运行sh脚本sudo自动输入密码" class="headerlink" title="ubuntu运行sh脚本sudo自动输入密码"></a>ubuntu运行sh脚本sudo自动输入密码</h3><ul>
+<li><p>第一种方法（文本块，重定向）</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">sudo -S apt-get update &lt;&lt; EOF </span><br><span class="line">Your password</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第二种方法（使用管道）</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">echo password | sudo -S apt-get update</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="磁盘管理"><a href="#磁盘管理" class="headerlink" title="磁盘管理"></a>磁盘管理</h3><ul>
+<li>查看磁盘空间 df -h</li>
+<li>查看目录大小 du -sh</li>
+<li>打包 tar -cvf</li>
+<li>解包 tar -xvf</li>
+<li>压缩 gzip</li>
+<li>解压缩 gunzip bzip<h3 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h3></li>
+<li>lsof(list open files)，列举系统中已经被打开的文件！</li>
+<li>ps -ef | grep user 查询当前用户下的进程</li>
+<li>lsof -i:27017 查看端口占用的状态</li>
+<li>lsof +d mydir/ 查看指定文件夹下被进程开启的文件</li>
+<li>kill pid (process ID)杀死指定的PID进程</li>
+<li>kill -9 pid 杀死相关进程</li>
+<li>top 资源管理器，键入top后键入P(根据CPU大小排序),M(根据驻留内存大小排序),</li>
+<li>也可以安装htop功能更强大<h3 id="性能监控"><a href="#性能监控" class="headerlink" title="性能监控"></a>性能监控</h3></li>
+<li>查看CPU的使用频率  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sar -u 1 2 //每秒采样一次，总共采样两次</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="网络工具"><a href="#网络工具" class="headerlink" title="网络工具"></a>网络工具</h3><ul>
+<li><p>查询网络服务和端口</p>
+<ul>
+<li><p>列出所有TCP端口号</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -at</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用netstat工具查询端口:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -antp | grep 27017</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用ps工具查询进程详情</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -fe | grep 19034</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>下载网页</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -p -H -e robots=off https://www.baidu.com ./</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>ftp/sftp文件传输</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sftp ID@host</span><br></pre></td></tr></table></figure>
+<ul>
+<li>get filename # 下载文件</li>
+<li>put filename # 上传文件</li>
+<li>ls # 列出host上当前路径的所有文件</li>
+<li>cd # 在host上更改当前路径</li>
+<li>lls # 列出本地主机上当前路径的所有文件</li>
+<li>lcd # 在本地主机更改当前路径</li>
+</ul>
+</li>
+<li><p>网络复制</p>
+<ul>
+<li><p>将本地localpath指向的文件上传到远程主机的path路径:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$scp localpath username@host:path</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>以ssh协议，遍历下载path路径下的整个文件系统，到本地的localpath:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$scp -r username@host:path localpath</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>当scp定时脚本的时候要输入密码的时候我们可以这样免密码操作</p>
+<ul>
+<li><p>在脚本所在服务器上操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>出来的提示可以用默认值,然后将产生的公共密钥传到目标机器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp ~/.ssh/id_rsa.pub username@IP:/home、username/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="用户管理工具"><a href="#用户管理工具" class="headerlink" title="用户管理工具"></a>用户管理工具</h3><ul>
+<li><p>查看所有用户</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cut -d: -f1 /etc/passwd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看所有用户及权限</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">more /etc/passwd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>更改读写权限</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$chmod a+x main         对所有用户给文件main增加可执行权限</span><br><span class="line">$chmod g+w blogs        对组用户给文件blogs增加可写权限</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>增加用户</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo adduser new_username</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="系统管理"><a href="#系统管理" class="headerlink" title="系统管理"></a>系统管理</h3><ul>
+<li><p>查看liunx版本</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsb_release -a</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看CPU的使用情况</p>
+</li>
+<li><p>查看CPU的核的个数</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$cat /proc/cpuinfo | grep processor | wc -l</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看内存信息</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/meminfo</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置系统时间</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$date -s 2018-05-05 00:00:00</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置时区</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tzselect</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>强制把系统时间写入CMOS</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$clock -w</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看当前时间状态</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">timedatectl status</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改时区为上海</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">timedatectl set-timezone &quot;Asia/Shanghai&quot;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="mongodb-backup-script"><a href="#mongodb-backup-script" class="headerlink" title="mongodb backup script"></a>mongodb backup script</h3><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/sh</span><br><span class="line"># dump 命令执行路径，根据mongodb安装路径而定</span><br><span class="line">DUMP=/usr/bin/mongodump</span><br><span class="line"># 临时备份路径</span><br><span class="line">#OUT_DIR=/var/mongodb-data-backup/uncompress</span><br><span class="line">OUT_DIR=/root/mongo-data-newDisk/mongoDB_Backup/mongodb-data-backup/compress</span><br><span class="line"># 压缩后的备份存放路径date</span><br><span class="line">#TAR_DIR=/var/mongodb-data-backup/compress</span><br><span class="line">TAR_DIR=/root/mongo-data-newDisk/mongoDB_Backup/mongodb-data-backup/uncompress</span><br><span class="line"># 当前系统时间</span><br><span class="line">DATE=`date +%Y-%m-%d`</span><br><span class="line"># 数据库账号</span><br><span class="line">//DB_USER=user</span><br><span class="line"># 数据库密码</span><br><span class="line">//DB_PASS=password</span><br><span class="line"># 代表删除7天前的备份，即只保留近 7 天的备份</span><br><span class="line">DAYS=7</span><br><span class="line"># 最终保存的数据库备份文件</span><br><span class="line">TAR_BAK=&quot;mongod_bak_$DATE.tar.gz&quot;</span><br><span class="line">cd $OUT_DIR</span><br><span class="line">rm -rf $OUT_DIR/*</span><br><span class="line">mkdir -p $OUT_DIR/$DATE</span><br><span class="line">#$DUMP -h 127.0.0.1:27017 -u $DB_USER -p $DB_PASS -d dbname -o $OUT_DIR/$DATE</span><br><span class="line">$DUMP -o $OUT_DIR/$DATE</span><br><span class="line"># 压缩格式为 .tar.gz 格式</span><br><span class="line">tar -zcvf $TAR_DIR/$TAR_BAK $OUT_DIR/$DATE</span><br><span class="line"># 删除 7 天前的备份文件</span><br><span class="line">find $TAR_DIR/ -mtime +$DAYS -delete</span><br><span class="line"></span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
+</code></pre><h3 id="备份到FTP"><a href="#备份到FTP" class="headerlink" title="备份到FTP"></a>备份到FTP</h3><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash           </span><br><span class="line">HOST=you-ftp-Address                   </span><br><span class="line">USER=username                    </span><br><span class="line">PASSWORD=pwd                    </span><br><span class="line">ftp -inv $HOST &lt;&lt;EOF            </span><br><span class="line">user $USER $PASSWORD</span><br><span class="line">cd Ubuntu-mongoBackup/					</span><br><span class="line">lcd /var/mongodb-data-backup/compress             </span><br><span class="line">mput *.tar.gz                     </span><br><span class="line">bye                     </span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</code></pre><h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><p>##check version<br>lsb_release -a</p>
+<p>#杀死进程<br>sudo netstat -tulpn | grep :80</p>
+<p>sudo kill -9 1066<br>$ pm2 delete 0           # 杀死指定的进程<br>$ pm2 delete all         # 杀死全部进程<br>pm2 monit               #监视每个 node 进程的 CPU 和内存的使用情况。</p>
+<p>#查看文件大小的命令：<br>~$   ls  -l    filename</p>
+<p>#查看文件夹大小<br>~$ cd  Foldename进到Foldename 目录<br>~$  du    -sh</p>
+<p>#Linux命令行下修改文件或文件夹名<br>$ mv file1 file2</p>
+<p>#查看磁盘的使用情况命令：</p>
+<p>~$  df    -h</p>
+<p>#压缩文件文件夹<br>tar zcvf Retail.tar.gz Retail/</p>
+<p>#解压<br>tar -xvf Retail.tar.gz</p>
+<p>#查看swap file<br>~$ free -m<br>~$ top</p>
+<h1 id="查看物理CPU个数"><a href="#查看物理CPU个数" class="headerlink" title="查看物理CPU个数"></a>查看物理CPU个数</h1><p>  cat /proc/cpuinfo| grep “physical id” | sort| uniq | wc -l</p>
+<h1 id="查看每个物理CPU中core的个数-即核数"><a href="#查看每个物理CPU中core的个数-即核数" class="headerlink" title="查看每个物理CPU中core的个数(即核数)"></a>查看每个物理CPU中core的个数(即核数)</h1><p>  cat /proc/cpuinfo| grep “cpu cores”| uniq</p>
+<h1 id="查看逻辑CPU的个数"><a href="#查看逻辑CPU的个数" class="headerlink" title="查看逻辑CPU的个数"></a>查看逻辑CPU的个数</h1><p>  cat /proc/cpuinfo| grep “processor”| wc -l</p>
+<h1 id="路由追踪"><a href="#路由追踪" class="headerlink" title="路由追踪"></a>路由追踪</h1><pre><code>tracert ip
+</code></pre><p>#防火墙<br>sudo ufw allow from 192.168.1.1 允许此IP访问所有的本机端口</p>
+<p>##查看已经连接的服务端口（ESTABLISHED）</p>
+<p>netstat -a</p>
+<p>##查看所有的服务端口（LISTEN，ESTABLISHED）</p>
+<p>netstat -ap</p>
+<p>##查看指定端口，可以结合grep命令：</p>
+<p>netstat -ap | grep 8080</p>
+<p>###也可以使用lsof命令：</p>
+<p>lsof -i:8888</p>
+<p>sudo lsof -i | grep ssh</p>
+<p>##若要关闭使用这个端口的程序，使用kill + 对应的pid</p>
+<p>kill -9 PID号</p>
+<p>##查看本机上所有cron服务<br>ls -l /etc/init.d</p>
+<p>##备份mongo数据库<br>mongodump –host=127.0.0.1 –db amss_backup –o /xt/amss_backup</p>
+<p>##<br>ln -s /usr/local/share/phantomjs/bin/phantomjs /usr/local/bin/phantomjs </p>
+<p>1.安装phantomjs</p>
+<p>—-下载程序文件</p>
+<p>wget <a href="https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x86_64.tar.bz2" target="_blank" rel="noopener">https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x86_64.tar.bz2</a><br>32位ubuntu下载链接是<a href="https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-i686.tar.bz2。" target="_blank" rel="noopener">https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-i686.tar.bz2。</a></p>
+<p>—-解压文件</p>
+<p>tar -xvf phantomjs-1.9.7-linux-x86_64.tar.bz2<br>–将程序移到一个合适的位置</p>
+<p>sudo mv phantomjs-1.9.7-linux-x86_64 /usr/local/src/phantomjs<br>—-创建软链接到环境变量中。这样可以直接在shell中使用phantomjs命令</p>
+<p>sudo ln -sf /usr/local/src/phantomjs/bin/phantomjs /usr/local/bin/phantomjs<br>—-检查是否正常工作<br>2) Error: /node_modules/node-highcharts-exporting/node_modules/phantomjs/lib/phantom/bin/phantomjs: error while loading shared libraries: libfontconfig.so.1: cannot open shared object file: No such file or directory<br>SOLUTION:<br>TRY:<br>$ sudo apt-get install libfontconfig<br>phantomjs</p>
+<p>##Windows远程桌面连接<br>    mstsc</p>
+<p>百度 ip119.75.217.109</p>
+<p>npm install -g cnpm –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="noopener">https://registry.npm.taobao.org</a></p>
+<p>2、启动pm2 start ./bin/www</p>
+<p>可以通过pm2 startup来实现开机自启动。细节可参考。大致流程如下</p>
+<p>通过pm2 save保存当前进程状态。<br>通过 pm2 startup [ubuntu|centos|gentoo|systemd]生成开机自启动的命令。（记得查看控制台输出）<br>将步骤2生成的命令，粘贴到控制台进行，搞定。</p>
+<h1 id="删除软件及其配置文件"><a href="#删除软件及其配置文件" class="headerlink" title="删除软件及其配置文件"></a>删除软件及其配置文件</h1><p>apt-get –purge remove <package></package></p>
+<h1 id="删除没用的依赖包"><a href="#删除没用的依赖包" class="headerlink" title="删除没用的依赖包"></a>删除没用的依赖包</h1><p>apt-get autoremove <package></package></p>
+<h1 id="此时dpkg的列表中有“rc”状态的软件包，可以执行如下命令做最后清理："><a href="#此时dpkg的列表中有“rc”状态的软件包，可以执行如下命令做最后清理：" class="headerlink" title="此时dpkg的列表中有“rc”状态的软件包，可以执行如下命令做最后清理："></a>此时dpkg的列表中有“rc”状态的软件包，可以执行如下命令做最后清理：</h1><p>dpkg -l |grep ^rc|awk ‘{print $2}’ |sudo xargs dpkg -P<br>关于部署;<br>不要把代码发布在user home 如果删除user会删除application 要放到 var/www 目录下</p>
+<p>1、我们需要在虚拟机得Ubuntu系统安装ssh服务，其安装命令为：</p>
+<p>sudo apt-get install openssh-server</p>
+<p>查询其服务时候安装成功的命令：</p>
+<p>netstat -tlp<br>如显示如下结果，即表明服务启动成功：</p>
+<p>source /etc/network/interfaces.d</p>
+<h1 id="The-loopback-network-interface"><a href="#The-loopback-network-interface" class="headerlink" title="The loopback network interface"></a>The loopback network interface</h1><p>auto lo<br>iface lo inet loopback</p>
+<h1 id="The-primary-network-interface"><a href="#The-primary-network-interface" class="headerlink" title="The primary network interface"></a>The primary network interface</h1><p>auto ens33<br>iface ens33 inet static<br>address 192.168.0.238<br>netmask 255.255.255.0<br>gateway 192.168.0.1</p>
+<p>dns-nameservers 8.8.8.8</p>
+<h2 id="ssh-id-rsa"><a href="#ssh-id-rsa" class="headerlink" title="ssh id_rsa"></a>ssh id_rsa</h2><p>ssh-keygen -t rsa</p>
+<h1 id="authorized-keys-不存在"><a href="#authorized-keys-不存在" class="headerlink" title="authorized_keys 不存在"></a>authorized_keys 不存在</h1><p>scp ~/.ssh/id_rsa.pub <a href="mailto:username@example.com" target="_blank" rel="noopener">username@example.com</a>:~/.ssh/authorized_keys</p>
+<h1 id="无论存不存在"><a href="#无论存不存在" class="headerlink" title="无论存不存在"></a>无论存不存在</h1><p>ssh-copy-id <a href="mailto:username@example.com" target="_blank" rel="noopener">username@example.com</a></p>
+<p>#提升用户权限，普通用户访问root文件夹<br>chmod a+rx /root<br>mkdir /root/a<br>chmod 777 /root/a</p>
+<h1 id="挂载硬盘"><a href="#挂载硬盘" class="headerlink" title="挂载硬盘"></a>挂载硬盘</h1><p>mount  /dev/sdb /root路径</p>
+<p>//开机自动挂载<br>sudo vi /etc/fstab<br>add UUID=3736236a1d-11f4-4880-be50e-f3e3acd2a06634235 /root/mongo-data-newDisk exts4 defaults 0 0<br>37366a1d-11f4-4880-be0e-f3e3acd2a0436624234234</p>
+<p>#find uuid<br>cd /dev/disk/by-uuid<br>ll</p>
+<p>//过滤cron日志<br>grep CRON /var/log/syslog</p>
+<p>//To list all local users you can use:<br>cut -d: -f1 /etc/passwd</p>
 
           
         
