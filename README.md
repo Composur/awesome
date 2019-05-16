@@ -9,3 +9,4 @@
 + [new操作符做了什么](./doc/2019-05-08.md)
 + [JavaScript原型到原型链](./doc/2019-05-09.md)
 + [JavaScript作用域](./doc/2019-05-13.md)
++ [JavaScript this](./doc/2019-05-15.md)
