@@ -12,3 +12,4 @@
 + [JavaScript作用域](./doc/2019-05-13.md)
 + [JavaScript this](./doc/2019-05-15.md)
 + [JavaScript call 和 apply 的实现](./doc/2019-05-16.md)
++ [JavaScript new 的实现](./doc/2019-05-17.md)
