@@ -18,3 +18,5 @@ class Child extends Person{
 const child=new Child('张三',18,'hahah')
 
 console.log(child)
+
+
