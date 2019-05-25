@@ -1,0 +1,11 @@
+{
+  "name": "note",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Composur/Composur.github.io.git",
+  "author": "composure <xutong1107@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0"
+  }
+}
