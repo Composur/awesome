@@ -15,3 +15,4 @@
 + [JavaScript new 的实现](./doc/2019-05-17.md)
 + [JavaScript arguments](./doc/2019-05-20.md)
 + [promise、axios、fetch](./doc/2019-05-24.md)
++ [JavaScript module语法](./doc/2019-05-31.md)
