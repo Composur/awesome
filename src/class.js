@@ -31,3 +31,28 @@ class B extends A {
 }
 
 var  s=new B()
+
+
+function Person1(name,age){
+    this.name=name
+    this.age=age
+}
+
+Person1.prototype.showName=function(){
+    console.log(this.name)
+}
+Person1.prototype.showAge=function(){
+    console.log(this.age)
+}
+
+
+function setWorker(name,age,job){
+    Person1.call(this,name,age)
+    this.job=job
+}
+
+setWorker.prototype=new Person1()
+setWorker.prototype.constructor=setWorker
+
+var work=new setWorker(1,2,3)
+console.log(typeof work)
