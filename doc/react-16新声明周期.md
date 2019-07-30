@@ -1,3 +1,4 @@
+![](./img/react-life.png)
 ## 首先生命周期函数调用如下
    + constructor
    + getDerivedStateFromProps（使用场景不多）
