@@ -12,7 +12,7 @@
  1. MVC的方式
   + Model （模型）负责管理数据 ，大部分业务逻辑也应该放在 Model 中；
   + View （视图）负责渲染用户界面，应该避免在 View 中涉及业务逻辑；
-  + Controller （控制器）负责接受用户输入 根据用户输入调用对应的 Model 部分逻辑，把产生的数据结果交给 View 部分，让 View 渲染出必要的输出
+  + Controller （控制器）负责接受用户输入根据用户输入调用对应的Model部分逻辑，把产生的数据结果交给View部分，让View渲染出必要的输出
   ![](./img/1564459765927.jpg)
   上图就是按角色进行代码的划分，这种方式简单明了，一眼就能看出这个文件夹的作用，这种方式就是把所有的Conoller代码放在controllers录下，把所有的Model代码放在models目录下，把View代码放在views目录下，这种组织代码的方式，叫做“按角色组织”。把一个应用划分成多个组件，采用分而治之的策略,需要新增一个功能的时候每个文件夹都要打开一遍，稍微繁琐，二期model和view存在多对多的关系，容易乱掉。
 2. MVVM
@@ -31,10 +31,10 @@
   ![](./img/function.jpg)
   + actionTypes.js定义action类型；
   + actions.js定义 action 构造函数，决定了这个功能模块可以接受的动作；
-  + reducer.js定义这个功能模块如何相应 actions. 中定义的动作；
-  + views目录,包含这个功能模块中所有的 React 组件，包括傻瓜组件和容器组件；
+  + reducer.js定义这个功能模块如何响应actions.js中定义的动作，就是根据传入的state和action生成新的state然后返回给组件。
+  + views目录,包含这个功能模块中所有的React组件，包括傻瓜组件和容器组件；
   + index.js 这个文件把所有的角色导人，然后统一导出
-  这样修改对应的功能的时候只需要进入对应的目录，所关联的文件都在这个目录下。不同的模块之间的依赖关系比较弱，自己不依赖于外界，外界不依赖于自己
+  这样修改对应的功能的时候只需要进入对应的目录，所关联的文件都在这个目录下。不同的模块之间的依赖关系比较弱，自己不依赖于外界，外界不依赖于自己。
   因为每个模块间免不了的有依赖，所以我们这样把自己暴露出去,依todoList功能为例：
   ```
   import * as actions from './actons'
@@ -43,6 +43,7 @@
   export {actions,reudcer,view}
   ```
   其它文件想用的时候可以导入这个todoList文件夹
+
   ```
   import {actions,reudcer,view as todoList} from '../todoList';
   ```
@@ -117,4 +118,29 @@ export default class TodoApp extends Component{
   }
 }
 
+```
+设计好状态树之后我们就可以开始写action了,action构造函数就是创造action的对象的函数，返回的action对象必须有一个type字段代表此action的类型，通常也会带有其它要返回的字段承载的数据。
+注意：返回的action对象，我们统一用圆括号的写法来省略了return，不习惯这样的写法请忽略采用显示的方式进行return。
+
+```
+import {ADD_TODO,TOGGLE_TODO,REMOVE_TODO} from './actionTypes'
+
+let nextTodoId=0
+
+export const addTodo=(text)=>({
+  type:ADD_TODO,
+  id:nextTodoId++,//每增加一项id加一
+  text:text,
+  complete:false
+})
+
+export const toggleTodo=(id)=>({
+  type:TOGGLE_TODO,
+  id:id
+})
+
+export const removeTodo=(id)=>({
+  type:REMOVE_TODO,
+  id:id
+})
 ```
