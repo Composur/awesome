@@ -31,7 +31,7 @@
   ![](./img/function.jpg)
   + actionTypes.js定义action类型；
   + actions.js定义 action 构造函数，决定了这个功能模块可以接受的动作；
-  + reducer.js定义这个功能模块如何响应actions.js中定义的动作，就是根据传入的state和action生成新的state然后返回给组件。
+  + reducer.js定义这个功能模块如何响应actions.js中定义的动作，就是根据传入的state和action生成新的state然后返回给组件,组件重新渲染。
   + views目录,包含这个功能模块中所有的React组件，包括傻瓜组件和容器组件；
   + index.js 这个文件把所有的角色导人，然后统一导出
   这样修改对应的功能的时候只需要进入对应的目录，所关联的文件都在这个目录下。不同的模块之间的依赖关系比较弱，自己不依赖于外界，外界不依赖于自己。
@@ -119,7 +119,7 @@ export default class TodoApp extends Component{
 }
 
 ```
-设计好状态树之后我们就可以开始写action了,action构造函数就是创造action的对象的函数，返回的action对象必须有一个type字段代表此action的类型，通常也会带有其它要返回的字段承载的数据。
+设计好状态树之后我们就可以开始写action了,action构造函数就是创造action的对象的函数，返回的action对象必须有一个type字段代表此action的类型，通常也会带有其它要返回的字段承载的数据。action只是描述了有事情发生这一事实，并不管如何更新state。
 注意：返回的action对象，我们统一用圆括号的写法来省略了return，不习惯这样的写法请忽略采用显示的方式进行return。
 
 ```
@@ -144,3 +144,10 @@ export const removeTodo=(id)=>({
   id:id
 })
 ```
+
+todo模块的reducer。
+请注意reducer是一个纯函数，不要做如下操作
++ 修改传入参数；
++ 执行有副作用的操作，如 API 请求和路由跳转；
++ 调用非纯函数，如 Date.now() 或 Math.random()。
+
