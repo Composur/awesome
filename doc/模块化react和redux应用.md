@@ -119,9 +119,12 @@ export default class TodoApp extends Component{
 }
 
 ```
-设计好状态树之后我们就可以开始写action了,action构造函数就是创造action的对象的函数，返回的action对象必须有一个type字段代表此action的类型，通常也会带有其它要返回的字段承载的数据。action只是描述了有事情发生这一事实，并不管如何更新state。
-注意：返回的action对象，我们统一用圆括号的写法来省略了return，不习惯这样的写法请忽略采用显示的方式进行return。
+设计好状态树之后我们就可以开始写action了,action构造函数就是创造action的对象的函数，返回的action对象必须有一个type字段代表此action的类型，通常也会带有其它要返回的字段承载的数据。action只是描述了有事情发生这一事实，并不管如何更新state。action是store的唯一数据来源，一般通过store.dispatch()将action穿到store
+注意：
+1. 我们应该尽量减少在action中传递的数据
+2. 返回的action对象，我们统一用圆括号的写法来省略了return，不习惯这样的写法请忽略采用显示的方式进行return。
 
+todo的action
 ```
 import {ADD_TODO,TOGGLE_TODO,REMOVE_TODO} from './actionTypes'
 
@@ -145,9 +148,99 @@ export const removeTodo=(id)=>({
 })
 ```
 
+filter的action,我们只需要定义一个过滤动作的type和通过用户传入的filterType，一起返回。
+
+```
+import {SET_FILTER} from './actionTypes'
+
+export const setFilter= (filterType)=>({
+  type:SET_FILTER,
+  filters:filterType 
+})
+```
+
 todo模块的reducer。
 请注意reducer是一个纯函数，不要做如下操作
 + 修改传入参数；
 + 执行有副作用的操作，如 API 请求和路由跳转；
 + 调用非纯函数，如 Date.now() 或 Math.random()。
+```
+import {
+  TOGGLE_TODO,
+  ADD_TODO,
+  REMOVE_TODO
+} from './actionTypes'
 
+export default (state = [], action) => {
+  switch (action.type) {
+    case ADD_TODO:
+      return [ //不修改state字段，返回一个新的添加传入action的数组
+        ...state,
+        {
+          id: action.id,
+          text: action.text,
+          complete: false
+        }
+      ]
+    case TOGGLE_TODO:
+      const currentId = state[action.id].id
+      return state.map(item => {
+        if (currentId === action.id) {
+          return {
+            ...item,
+            complete: !action.complete
+          } //展开运算符，后面complete字段会覆盖当前展开对象的complete
+        } else {
+          return item
+        }
+      })
+    case REMOVE_TODO:
+      return state.filter(item => {
+        return item.id !== action.id
+      })
+    default:
+      return state
+  }
+}
+```
+
+filter的reducer,返回了一个过滤的类型（根据store上的字段，设置action的filter）
+
+```
+import {SET_FILTER} from './actionTypes'
+import {FilterTypes} from '../../src/constants'
+
+export default (state=FilterTypes.ALL,action)=>{
+  switch(action.type){
+    case SET_FILTER:
+    return action.filter
+    default:
+    return state
+  }
+}
+```
+
+整合reducer-store的设计
+因为createStore只能接受一个reducer,但是我们现在有两个reducer（实际项目会很多），别急，我们可以用redux提供的combinReducers()方法把所有要传递进去的reducer组合成一个对象，然后放到createStore中。
+```
+/**
+ * store的写法比较固定
+ * 1.适合异步action
+ * 2.适合没有异步操作的项目
+ */
+
+// import {createStore,applyMiddleware} from 'redux'
+// import chunk from 'redux-thunk'
+// import {composeWithDevTools} from 'redux-devtools-extension'
+// import AppReducers from './reducers' //根reduce人 汇总
+// export default createStore(AppReducers,composeWithDevTools(applyMiddleware(chunk)))
+
+import {createStore,combineReducers} from 'redux'
+import {reducer as filterReducer} from './filter'
+import {reudcer as todoReducer} from './todoList'
+const rudecer=combineReducers({
+  filterReducer,todoReducer
+})
+
+export default createStore(rudecer)
+```
