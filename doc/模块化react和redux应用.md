@@ -14,7 +14,7 @@
   + View （视图）负责渲染用户界面，应该避免在 View 中涉及业务逻辑；
   + Controller （控制器）负责接受用户输入根据用户输入调用对应的Model部分逻辑，把产生的数据结果交给View部分，让View渲染出必要的输出
   ![](./img/1564459765927.jpg)
-  上图就是按角色进行代码的划分，这种方式简单明了，一眼就能看出这个文件夹的作用，这种方式就是把所有的Conoller代码放在controllers录下，把所有的Model代码放在models目录下，把View代码放在views目录下，这种组织代码的方式，叫做“按角色组织”。把一个应用划分成多个组件，采用分而治之的策略,需要新增一个功能的时候每个文件夹都要打开一遍，稍微繁琐，二期model和view存在多对多的关系，容易乱掉。
+  上图就是按角色进行代码的划分，这种方式简单明了，一眼就能看出这个文件夹的作用，这种方式就是把所有的Conoller代码放在controllers录下，把所有的Model代码放在models目录下，把View代码放在views目录下，这种组织代码的方式，叫做“按角色组织”。把一个应用划分成多个组件，采用分而治之的策略,需要新增一个功能的时候每个文件夹都要打开一遍，稍微繁琐，二是model和view存在多对多的关系，容易乱掉。
 2. MVVM
   + MVC的思想是用户请求先到达controller，然后controller调用model得到数据，然后把数据交给view，但是实际情况是，总是允许model和view直接通信
   + 服务端的MVC是controller-model-view走一圈把结果返回给浏览器就结束这个过程，是严格的单向数据流。但在浏览器端，存在用户交互，model和view依旧存在浏览器中，为了方便二者对话就有了mvvm
@@ -119,7 +119,7 @@ export default class TodoApp extends Component{
 }
 
 ```
-设计好状态树之后我们就可以开始写action了,action构造函数就是创造action的对象的函数，返回的action对象必须有一个type字段代表此action的类型，通常也会带有其它要返回的字段承载的数据。action只是描述了有事情发生这一事实，并不管如何更新state。action是store的唯一数据来源，一般通过store.dispatch()将action穿到store
+设计好状态树之后我们就可以开始写action了,action构造函数就是创造action的对象的函数，返回的action对象必须有一个type字段代表此action的类型，通常也会带有其它要返回的字段承载的数据。action只是描述了有事情发生这一事实，并不管如何更新state。action是store的唯一数据来源，一般通过store.dispatch()将action传到store
 注意：
 1. 我们应该尽量减少在action中传递的数据
 2. 返回的action对象，我们统一用圆括号的写法来省略了return，不习惯这样的写法请忽略采用显示的方式进行return。
@@ -204,7 +204,16 @@ export default (state = [], action) => {
 }
 ```
 
-filter的reducer,返回了一个过滤的类型（根据store上的字段，设置action的filter）
+filter的reducer,返回了一个过滤的类型（根据store上的字段，设置action的filter），我们导出一个表示todo的常量对象。
+constants.js
+```
+export const FilterTypes = {
+  ALL: '全部',
+  COMPLETED: '已完成',
+  UNCOMPLETED: '未完成'
+}
+```
+
 
 ```
 import {SET_FILTER} from './actionTypes'
@@ -224,16 +233,8 @@ export default (state=FilterTypes.ALL,action)=>{
 因为createStore只能接受一个reducer,但是我们现在有两个reducer（实际项目会很多），别急，我们可以用redux提供的combinReducers()方法把所有要传递进去的reducer组合成一个对象，然后放到createStore中。
 ```
 /**
- * store的写法比较固定
- * 1.适合异步action
- * 2.适合没有异步操作的项目
+ * store的写法比较固定（这种适合没有异步请求的应用）
  */
-
-// import {createStore,applyMiddleware} from 'redux'
-// import chunk from 'redux-thunk'
-// import {composeWithDevTools} from 'redux-devtools-extension'
-// import AppReducers from './reducers' //根reduce人 汇总
-// export default createStore(AppReducers,composeWithDevTools(applyMiddleware(chunk)))
 
 import {createStore,combineReducers} from 'redux'
 import {reducer as filterReducer} from './filter'
@@ -244,3 +245,5 @@ const rudecer=combineReducers({
 
 export default createStore(rudecer)
 ```
+
+
