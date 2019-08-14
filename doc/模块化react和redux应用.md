@@ -240,10 +240,94 @@ import {createStore,combineReducers} from 'redux'
 import {reducer as filterReducer} from './filter'
 import {reudcer as todoReducer} from './todoList'
 const rudecer=combineReducers({
-  filterReducer,todoReducer
+const rudecer=combineReducers({
+  filter:filterReducer,
+  todos:todoReducer
 })
 
 export default createStore(rudecer)
 ```
 
 
+下面我看还看一下todo的view层
+
+```
+import React, { Component } from 'react'
+import AddTodo from './addTodo';
+import TodoList from './todoList'
+export default class extends Component {
+  render() {
+    return (
+      <div>
+        <AddTodo/>
+        <TodoList/>
+      </div>
+    )
+  }
+}
+
+```
+todos.js文件很简单，把两个组件放在一起导出即可，这里其实可以用function导出。因为是无状态组件。因为我们把todo视图只导出一个view字段，所以里面的文件我们可以按照自己的习惯进行命名。
+addtodo.js
+```
+import React, { Component } from 'react';
+import {connect} from 'react-redux'
+import { addTodo } from '../actons';
+import PropTypes from 'prop-types';
+class AddTodo extends Component {
+  static propTypes={
+    onAdd:PropTypes.func.isRequired
+  }
+ constructor(){
+  super()
+  this.state={
+    value:''
+  }
+  this.onSubmit=this.onSubmit.bind(this)
+  this.onInputChange=this.onInputChange.bind(this)
+ }
+ onSubmit(){
+  const inputValue=this.state.value
+  this.props.onAdd(inputValue)
+  this.setState({value:''})
+ }
+ onInputChange(e){
+  this.setState({
+    value:e.target.value
+  })
+ }
+  render() {
+    return (
+      <div>
+      <input onChange={this.onInputChange} value={this.state.value}/><button onClick={this.onSubmit}>增加</button>
+      </div>
+    );
+  }
+}
+
+
+const mapDispatchToProps=(dispatch)=>({
+  onAdd:(text)=>{
+    dispatch(addTodo(text))
+  }
+})
+
+
+
+export default connect(null,mapDispatchToProps)(AddTodo)
+
+```
+简单地取值，不需要从store上获取任何数据，所以mapStateToProps传null，关于mapDispatchToProps，它产生了一个方法onAdd，这个方法把接收到的id传给action构造函数，然后通过dispatch分发出去。实际上mapDispatchToProps所做的事情就是把props和action构造函数关联起来。redux提供了一个bindActionCreators来简化上面的写法，直接以props作为字段名，以action作为字段值把这样的对象传递给bindActionCreators即可
+
+```
+const mapDispatchToProps=(dispatch)=>bindActionCreators({
+  onAdd:addTodo(text)
+})
+```
+也可以让props得到一个action的映射，这种写法是最简单的也是最常用的,通过this.props.onAdd(inputValue))调用
+```
+const mapDispatchToProps={
+  onAdd:addTodo
+}
+```
+其余的代码就不在贴出来了道理类似，详见[这里]('')
