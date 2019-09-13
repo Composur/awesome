@@ -22,5 +22,5 @@
 + [react-16新声明周期](./doc/react-16新声明周期.md)
 + [模块化react和redux应用](./doc/模块化react和redux应用.md)
 + [react 中的 Fragment](./doc/2019-07-31.md)
-+ [nginx运维命令](./doc/2019-07-31.md)
-+ [记录一次面试](./doc/2019-09-12.md)
++ [nginx运维命令](./doc/nginx命令以及部署vue.md)
++ [记录一次面试](./doc/2019-08-24.md)
