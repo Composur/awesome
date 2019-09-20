@@ -24,3 +24,4 @@
 + [react 中的 Fragment](./doc/2019-07-31.md)
 + [nginx运维命令](./doc/nginx命令以及部署vue.md)
 + [记录一次面试](./doc/2019-08-24.md)
++ [git日常操作](https://github.com/Composur/resume/blob/master/blog/git.md)
