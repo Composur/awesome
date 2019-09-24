@@ -1,5 +1,6 @@
 #### 遇到问题笔记
-+ [vue中key的镇压](./doc/2019-04-16.md)
++ [js用到的知识点整理](https://github.com/Composur/resume/blob/master/blog/js.md)
++ [vue中key](./doc/2019-04-16.md)
 + [连等赋值](./doc/2019-04-17.md)
 + [map](./doc/2019-04-18.md)
 + [防抖和节流](./doc/2019-04-19.md)
