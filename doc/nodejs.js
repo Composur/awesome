@@ -23,3 +23,12 @@ if(userAction===computerAction){
 }else{
   log('你输了！！')
 }
+
+
+var fn=function(x,y){
+  return x+2*y
+}
+var g=function(y){
+  return fn(1,y)
+}
+console.log(g(3))
