@@ -16,7 +16,7 @@
 + [JavaScript new 的实现](./doc/2019-05-17.md)
 + [JavaScript arguments](./doc/2019-05-20.md)
 + [promise、axios、fetch](./doc/2019-05-24.md)
-+ [JavaScript module语法](./doc/2019-05-31.md)
++ [Module语法](./doc/2019-05-31.md)
 + [node中的NODE_ENV](./doc/2019-07-03.md)
 + [HTTP、HTTPS、原理握手过程](./doc/2019-07-07.md)
 + [babel.js编译](./doc/2019-07-09.md)
