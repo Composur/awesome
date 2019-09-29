@@ -18,6 +18,7 @@
 + [promise、axios、fetch](./doc/2019-05-24.md)
 + [Module语法](./doc/2019-05-31.md)
 + [node中的NODE_ENV](./doc/2019-07-03.md)
++ [图解HTTP](./doc/http.md)
 + [HTTP、HTTPS、原理握手过程](./doc/2019-07-07.md)
 + [babel.js编译](./doc/2019-07-09.md)
 + [react-16新声明周期](./doc/react-16新声明周期.md)
