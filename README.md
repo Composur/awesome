@@ -1,5 +1,5 @@
 #### 遇到问题笔记
-+ [js用到的知识点整理](https://github.com/Composur/resume/blob/master/blog/js.md)
+<!-- + [js用到的知识点整理](https://github.com/Composur/resume/blob/master/blog/js.md)
 + [vue中key](./doc/2019-04-16.md)
 + [连等赋值](./doc/2019-04-17.md)
 + [map](./doc/2019-04-18.md)
@@ -29,7 +29,7 @@
 + [git日常操作](https://github.com/Composur/resume/blob/master/blog/git.md)
 + [call 、apply 和bind的实现](./doc/2019-05-16.md)
 + [web性能优化分析](./doc/web性能优化.md)
-+ [常见面试题](./doc/面试2019-09-25.md)<br/>
++ [常见面试题](./doc/面试2019-09-25.md)<br/> -->
 
 | JavaScript | HTTP & NodeJS | React & Vue | 其它 | 
 | ------ | ------  |------ |------ |
