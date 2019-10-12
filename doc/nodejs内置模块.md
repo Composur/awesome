@@ -1,3 +1,5 @@
+### NodeJS
+  通过书写的js代码进入Chrome的v8引擎，然后v8调用操作系统层面的API，得到结果后返回v8，然后在返回js
 1. file system
 2. net
 3. process 进程的信息
