@@ -12,7 +12,7 @@
   + ~~componentWillUpdate~~
 + 新增
   + getDerivedStateFromProps （少用）
-  + getSnapshotBeforeUpdate （在最近一次渲染输出（提交到 DOM 节点）之前调用）
+  + getSnapshotBeforeUpdate （在最近一次渲染输出（提交到 DOM 节点）之前，render之后调用）
 ### 这些⽣命周期被舍弃或新增的原因？以及新增⽣命周期的参数和作⽤？
 1. 会导致组件不必要的更新，父组件渲染即使没有改变props 也会调用componentWillReceivePorps
 2. 异步渲染时间长会导致componentWillUpdate、componentDidUpdate之间的时间变长，这个过程中可能发生一些变化，比如用户行为导致 DOM 发生了新的变化，这时在 componentWillUpdate 获取的信息可能就不可靠了
