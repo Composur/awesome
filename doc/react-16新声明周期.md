@@ -1,10 +1,10 @@
 ![](./img/react-life.png)
-## 首先生命周期函数调用如下
+## 首先生命周期函数调用顺序如下
    + constructor
    + getDerivedStateFromProps（使用场景不多）
    + ~~componentWillMount/UNSAVE_componentWillMount~~
    + render
-   + componentDidMount
+   + componentDidMount(第一次render之后执行)
 ### 有哪些⽣命周期被舍弃（3个），哪些⽣命周期是新增（2个）？
 + 舍弃
   + ~~componentWillMount~~
