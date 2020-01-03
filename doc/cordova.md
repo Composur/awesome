@@ -25,7 +25,13 @@ cordova requirements
     ![](./img/sdk.jpg)
 #### 4.2 确保安装成功所有依赖
   ![](./img/require_success.jpg)
-### 5.设置环境变量
+### 5.设置环境变量 OS X and Linux (关键的一步 决定后面能不能启动模拟器)
+ ```
+  $ 一般路径为 Users/zhangsan/Library/Android/sdk
+  export ANDROID_SDK='你的Android sdk 路径'
+  export PATH=${PATH}:${ANDROID_SDK}/emulator:${ANDROID_SDK}/tools
+ ```
+  
 ### 6.创建一个安卓程序，并运行
   
 ```
@@ -42,3 +48,10 @@ cordova build android
   + [解决问题](https://developer.android.com/studio/run/managing-avds.html) 创建和管理虚拟设备
   + 根据需要进行选择 然后选择对应的 level 然后点击 next 进行下载 时间会久一点
   ![](./img/dva.jpg)
+  + 再次执行
+   ```
+  cordova run android
+  ```
+  ![](./img/run_success.jpg)
+
+
