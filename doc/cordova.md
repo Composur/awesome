@@ -53,5 +53,7 @@ cordova build android
   cordova run android
   ```
   ![](./img/run_success.jpg)
+  ![](./img/run_success.jpg)
+
 
 
