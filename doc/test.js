@@ -1,2 +1,6 @@
-const test =require('./nodejs')
-console.log(test.ff())
+setImmediate(()=>{
+  console.log('setImmediate')
+})
+setTimeout(()=>{
+  console.log('setTimeout')
+})
