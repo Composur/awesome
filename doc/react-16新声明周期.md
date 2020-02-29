@@ -1,16 +1,29 @@
 ![](./img/react-life.png)
-## 首先生命周期函数调用顺序如下
+## 首次生命周期函数调用顺序如下
    + `constructor`
+        + 初始化，组件状态
+        + 唯一可以直接修改 state 的地方
    + `getDerivedStateFromProps（使用场景不多）`
+        + 用外部的属性来初始化内部的状态
+        + 当 state 需要从 props 初始化时使用
+        + 使用不当，易产生 bug
+        + 每次 render 都会调用
    + `~~componentWillMount/UNSAVE_componentWillMount~~`
    + `render`
+        + 必须定义，UI 渲染
    + `componentDidMount(第一次render之后执行)`
+        + 获取外部资源，只执行一次。
 ### 当组件的 `props` 或 `state` 发生变化时会触发更新。组件更新的生命周期调用顺序如下：
   + `static getDerivedStateFromProps()`
   + `shouldComponentUpdate()`
+      + 用户可以介入，性能优化的过程。组件是否更新。
+      + 一般由 PureComponent 自动实现
   + `render()`
   + `getSnapshotBeforeUpdate()`
+      + 页面更新前调用，state 已更新
+      + 获取 render 前的 DOM 状态时可用 
   + `componentDidUpdate()`
+      + 每次更新都会调用
 ### 卸载 当组件从 `DOM `中移除时会调用如下方法：
   + `componentWillUnmount()`
 ### 有哪些⽣命周期被舍弃（3个），哪些⽣命周期是新增（2个）？
@@ -47,7 +60,7 @@
 1. 会导致组件不必要的更新，父组件渲染即使没有改变`props` 也会调用`componentWillReceivePorps`
 2. 异步渲染时间长会导致`componentWillUpdate、componentDidUpdate`之间的时间变长，这个过程中可能发生一些变化，比如用户行为导致 DOM 发生了新的变化，这时在 `componentWillUpdate `获取的信息可能就不可靠了
 3. 作用` static getDerivedStateFromProps(nextProps, prevState)`接收两个参数（它内部你只能访问到组件上的这两个参数），第一个为接收到的新参数，第二是是当前的`state`。会返回一个对象用来更新`state`不需要可以返回`null`
- 
+
   ```
   class Hehe extends React.Component {
     state={
