@@ -21,7 +21,16 @@
 
 ##### 1. useState 
 
+返回一个 state，以及更新 state 的函数。
+
 ```js
+//setState 函数用于更新 state。它接收一个新的 state 值并将组件的一次重新渲染加入队列
+const [state, setState] = useState(initialState);
+```
+
+例子：
+
+```jsx
 import React ,{useState} from 'react'
 
 function Example() {
