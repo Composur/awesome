@@ -1,10 +1,25 @@
-function New(func) {
-  if (!func) return
-  const obj = {}
-  if (func.prototype !== null) {
-    obj.__proto__ = func.prototype
+Function.prototype.bind2 = function (scope) {
+  let args = [...arguments].slice(1)
+  let fn = this
+  return function () {
+   return fn.apply(scope, args.concat(...arguments))
   }
-  const applyObj = func.apply(obj,Array.prototype.slice.call(arguments,1))
-  if (typeof applyObj === 'object' || 'function' && applyObj !== null) return applyObj
-  return obj
 }
+
+
+x = 321
+var a = {
+  x: 123,
+  getX() {
+    return this.x
+  }
+}
+console.log(a.getX());
+
+var b = a.getX
+
+console.log(b());
+
+var b = a.getX.bind2(a, 2)
+
+console.log(b());
