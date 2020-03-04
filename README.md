@@ -8,8 +8,8 @@
 |           [new操作符做了什么](./doc/2019-05-08.md)           |                                         |   [请简述 React 任意组件之间如何通信](./doc/2019-04-30.md)   | [深度优先遍历和广度优先遍历](./doc/2019-04-25.md) |
 |        [JavaScript原型到原型链](./doc/2019-05-09.md)         |                                         |           [React Hook 速学](./doc/react-hooks.md)            | [用到的liunx命令整理](./doc/linux.md)             |
 |     [JavaScript任务队列 event loop](./doc/2019-05-12.md)     |                                         | [Redux 命名规范](https://github.com/Composur/resume/blob/master/blog/react.md) | [babel.js编译](./doc/2019-07-09.md)               |
-|           [JavaScript作用域](./doc/2019-05-13.md)            |                                         |                                                              | [promise、axios、fetch](./doc/2019-05-24.md)      |
-|            [JavaScript this](./doc/2019-05-15.md)            |                                         |                                                              | [Module语法](./doc/2019-05-31.md)                 |
+|           [JavaScript作用域](./doc/2019-05-13.md)            |                                         | [React 进阶](https://github.com/Composur/resume/blob/master/blog/react.md) | [promise、axios、fetch](./doc/2019-05-24.md)      |
+|            [JavaScript this](./doc/2019-05-15.md)            |                                         |        [React 实现列表拖动效果](./doc/react_drag.md)         | [Module语法](./doc/2019-05-31.md)                 |
 |    [JavaScript call 和 apply 的实现](./doc/2019-05-16.md)    |                                         |                                                              |                                                   |
 |         [JavaScript new 的实现](./doc/2019-05-17.md)         |                                         |                                                              |                                                   |
 |         [JavaScript arguments](./doc/2019-05-20.md)          |                                         |                                                              |                                                   |
