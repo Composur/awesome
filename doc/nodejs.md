@@ -1,14 +1,14 @@
 
 
-### Node.js 简介
+## Node.js 简介
 
-#### 1. Node 环境的 js 和 Chrome 环境的 js 运行的不同点
+### 1. Node 环境的 js 和 Chrome 环境的 js 运行的不同点
 
 + Nodejs 没有浏览器的 API，如 document、window等。
 + 加入了许多 NodeJS 的 API。
 + Js 控制浏览器，Node.js 控制计算机。
 
-#### 2. Node.js 应用领域
+### 2. Node.js 应用领域
 
 + web 服务
   + 搜索引擎优化，首屏加速。采取服务端渲染。
@@ -85,6 +85,7 @@
 3. 监听输入
 
    ```js
+   const playAction=require('./lib/common') 
    let result=0;
    // 让程序不中断，一直执行
    process.stdin.on('data',e=>{
@@ -226,4 +227,226 @@ webpack 打包后：
 /******/ 		return module.exports;
 /******/ 	}
 ```
+
+### 5. Node.js 内置模块
+
+![nodejs](./img/nodejs.jpg)
+
+根据上图所示，由 JavaScript 到 V8 再到 Node.js 的能力大部分是由内置模块提供的，所以我们必须要了解一些核心 `fs` `os` `net` `Process` ... 等模块。
+
+#### 5.1 js 和 node.js 的交互
+
+例如我们想通过 js 获取计算机的 `cpu` 信息：
+
+1. 打开 node 的 [os.js](https://github.com/nodejs/node/blob/master/lib/os.js) 模块（在 lib 文件夹里面）。
+
+```js
+const {
+  getCPUs,
+  ...
+} = internalBinding('os'); // internalBinding 是 V8 的方法 
+
+function cpus() {
+  // 通过引入的 os 得到 getCPUs() 
+  const data = getCPUs() || [];
+  const result = [];
+  let i = 0;
+  while (i < data.length) {
+    result.push({
+      model: data[i++],
+      speed: data[i++],
+      times: {
+        user: data[i++],
+        nice: data[i++],
+        sys: data[i++],
+        idle: data[i++],
+        irq: data[i++]
+      }
+    });
+  }
+  return result;
+}
+
+module.exports = {
+  cpus, // 一个方法
+  ...
+};
+```
+
+2. C++ 提供的方法
+
+[node_os.cc](https://github.com/nodejs/node/blob/master/src/node_os.cc)
+
+```c++
+// node_os.cc
+//  v8 转化 js
+
+static void GetCPUInfo(const FunctionCallbackInfo<Value>& args) {
+  Environment* env = Environment::GetCurrent(args);
+  Isolate* isolate = env->isolate();
+
+  uv_cpu_info_t* cpu_infos;
+  int count;
+
+  int err = uv_cpu_info(&cpu_infos, &count);
+  if (err)
+    return;
+  
+  std::vector<Local<Value>> result(count * 7);
+  for (int i = 0, j = 0; i < count; i++) {
+    uv_cpu_info_t* ci = cpu_infos + i;
+    result[j++] = OneByteString(isolate, ci->model);
+    result[j++] = Number::New(isolate, ci->speed);
+    result[j++] = Number::New(isolate, ci->cpu_times.user);
+    result[j++] = Number::New(isolate, ci->cpu_times.nice);
+    result[j++] = Number::New(isolate, ci->cpu_times.sys);
+    result[j++] = Number::New(isolate, ci->cpu_times.idle);
+    result[j++] = Number::New(isolate, ci->cpu_times.irq);
+  }
+	
+  // C++ 的方法去获取 cpu 信息
+  uv_free_cpu_info(cpu_infos, count);
+  
+  // 转成 js 能用的
+  args.GetReturnValue().Set(Array::New(isolate, result.data(), result.size()));
+}
+
+
+void Initialize(Local<Object> target,
+                Local<Value> unused,
+                Local<Context> context,
+                void* priv) {
+  Environment* env = Environment::GetCurrent(context);
+  
+  // 这里提供了 GetCPUInfo 方法
+  env->SetMethod(target, "getCPUs", GetCPUInfo);
+	...
+  target->Set(env->context(),
+              FIXED_ONE_BYTE_STRING(env->isolate(), "isBigEndian"),
+              Boolean::New(env->isolate(), IsBigEndian())).Check();
+}
+```
+
+#### 5.2 实现一个事件收发器
+
+操作系统底层通过 node.js 到 js 的过程，用我们上面的小游戏举例（node环境）：
+
+```js
+// 获取控制台的输入
+// 这里用到了 EventEmitter 模块
+process.stdin.on('data',e=>{
+  const userInputValue=e.toString().trim()
+  ...
+})
+```
+
+`EventEmitter` 可以从 node 层抛出一些数据给 js 
+
+**观察者模式**举例：
+
+> 观察者（Observer）模式的定义：指多个对象间存在一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。这种模式有时又称作发布-订阅模式、模型-视图模式，它是对象行为型模式。
+
+后端每隔 2 秒通知一次前端：
+
+*observer(观察者)*
+
+```js
+const EventEmitter=require('events').EventEmitter
+class Test extends EventEmitter{
+  constructor(){
+    super()
+    setInterval(() => {
+      // 发射事件，给外面的业务代码抛出一些东西出去
+      this.emit('listen',{date:Date(),test:'2秒触发一次'})
+    }, 2000);
+  }
+}
+module.exports=Test
+```
+
+*subscribe(订阅者)*
+
+```js
+const Test = require('./lib/EventEmitter') 
+const test01 = new Test 
+
+// 接收事件
+test01.addListener('listen',(res)=>{
+  // 这里可以进行业务逻辑处理
+  console.log(res)
+})
+
+// {
+//   date: 'Sat Mar 07 2020 21:10:50 GMT+0800 (GMT+08:00)',
+//   test: '2秒触发一次'
+// }
+// {
+//   date: 'Sat Mar 07 2020 21:10:52 GMT+0800 (GMT+08:00)',
+//   test: '2秒触发一次'
+// }
+// {
+//   date: 'Sat Mar 07 2020 21:10:54 GMT+0800 (GMT+08:00)',
+//   test: '2秒触发一次'
+// }
+```
+
+这样我们就实现了一个简单的事件收发器。这样做的缺点是：
+
+1. 不知道被通知者是否存在。被通知者也不知道通知者是否存在。
+2. 不知道被通知者是谁，谁都可以被通知到，广播的性质。
+
+### 6. Node.js 的异步、非阻塞 I/O
+
+> 阻塞 I/O 非阻塞 I/O 的区别就是：**系统在接收输入再到输出期间，还能不能再接收其它输入**。
+>
+> "I/O" 主要指由 [libuv](https://libuv.org/) 支持的，与系统磁盘和网络之间的交互。
+
+[阻塞对比非阻塞一览](https://nodejs.org/zh-cn/docs/guides/blocking-vs-non-blocking/)
+
+##### 6.1 同步（阻塞）举例：
+
+在学校食堂窗口买饭，需要到窗口排队，你必须等到排到你才能选餐。需要等待。
+
+<small>插队什么的不在考虑范围，会被女同学骂</small>。
+
+##### 6.2 异步（非阻塞）举例：
+
+去外面餐厅吃饭，进门就有服务员招呼你点餐，不用等待就可以选餐。
+
+<small>餐厅生意火爆需要等几个小时的不在此考虑范围。</small>
+
+##### 6.3 [nodejs中的阻塞与非阻塞](https://nodejs.org/zh-cn/docs/guides/blocking-vs-non-blocking/)
+
++ 照搬链接中的同步举例：
+
+```js
+const fs = require('fs');
+// 文件的读取会耗时，这里会发生阻塞
+const data = fs.readFileSync('/file.md'); 
+console.log(data);
+// 因为代码会同步执行，所以必须等到打印出 data 后，才能进行其他任务的处理
+moreWork(); 
+```
+
++ 异步非阻塞：
+
+```js
+const fs = require('fs');
+// 这里是非阻塞的
+fs.readFile('/file.md', (err, data) => {
+  if (err) throw err;
+  console.log(data);
+});
+moreWork();// 不必等到文件读取结束就可以执行此方法，此方法的执行不受文件读取的影响。
+```
+
+这个例子就是 nodejs 的核心：**异步非阻塞 I/O**。用等待时间，去做其它的事情，充分利用 CPU 。
+
+**`nodejs` 通过一个 [libuv](https://libuv.org/) 实现了异步非阻塞 I/O , 上面的操作都是在一个线程里面进行，通过  [libuv](https://libuv.org/) **
+
+**把大量的计算分发给 `C++` 的众多模块去做，等到计算完成再把结果返回给 `nodejs` 线程，然**
+
+**后`nodejs` 再把结果返回给应用程序。**
+
+以去餐厅点餐为例：**`JavaScript + v8 + nodejs + libuv ` 就是服务员，`libuv + C++` 模块就是后厨**。<small> `libuv` 一半是服务员，一半是后厨。</small>
 
