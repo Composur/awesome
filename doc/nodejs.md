@@ -403,19 +403,19 @@ test01.addListener('listen',(res)=>{
 
 [阻塞对比非阻塞一览](https://nodejs.org/zh-cn/docs/guides/blocking-vs-non-blocking/)
 
-##### 6.1 同步（阻塞）举例：
+####  6.1 同步（阻塞）举例：
 
 在学校食堂窗口买饭，需要到窗口排队，你必须等到排到你才能选餐。需要等待。
 
 <small>插队什么的不在考虑范围，会被女同学骂</small>。
 
-##### 6.2 异步（非阻塞）举例：
+#### 6.2 异步（非阻塞）举例：
 
 去外面餐厅吃饭，进门就有服务员招呼你点餐，不用等待就可以选餐。
 
 <small>餐厅生意火爆需要等几个小时的不在此考虑范围。</small>
 
-##### 6.3 [nodejs中的阻塞与非阻塞](https://nodejs.org/zh-cn/docs/guides/blocking-vs-non-blocking/)
+#### 6.3 [nodejs中的阻塞与非阻塞](https://nodejs.org/zh-cn/docs/guides/blocking-vs-non-blocking/)
 
 + 照搬链接中的同步举例：
 
@@ -442,11 +442,216 @@ moreWork();// 不必等到文件读取结束就可以执行此方法，此方法
 
 这个例子就是 nodejs 的核心：**异步非阻塞 I/O**。用等待时间，去做其它的事情，充分利用 CPU 。
 
-**`nodejs` 通过一个 [libuv](https://libuv.org/) 实现了异步非阻塞 I/O , 上面的操作都是在一个线程里面进行，通过  [libuv](https://libuv.org/) **
+**`nodejs` 通过一个 [libuv](https://libuv.org/) 实现了异步非阻塞 I/O , 上面的操作（点餐）都是在一个线程里面进行，通过  [libuv](https://libuv.org/) **
 
 **把大量的计算分发给 `C++` 的众多模块去做，等到计算完成再把结果返回给 `nodejs` 线程，然**
 
 **后`nodejs` 再把结果返回给应用程序。**
 
 以去餐厅点餐为例：**`JavaScript + v8 + nodejs + libuv ` 就是服务员，`libuv + C++` 模块就是后厨**。<small> `libuv` 一半是服务员，一半是后厨。</small>
+
+#### 6.4 事件循环
+
+每次点餐都是一个新的线程（你对服务员说，服务员再通知后厨做），例如：
+
++ 点一份生蚝炒蛋，开启线程一。
++ 点一份蒜蓉西蓝花，开启线程二。
+
+**模拟 eventloop ** 极简版
+
+```js
+// 用队列 模拟调用栈
+const eventLoop = {
+  queue: [],
+  init() {
+    this.loop()
+  },
+  loop() {
+    // 循环检测队列
+    //每一次事件循环都是一次全新的调用栈，从这里开始才是js代码，之前都是c++
+    while (this.queue.length) { 
+      const callback = this.queue.shift()
+      callback() //这里就是nodejs调用栈的底部
+    }
+    // 每隔 50ms 检测一次，这是模拟的情况，实际会更快。
+    setTimeout(this.loop.bind(this), 50) 
+  },
+  // 添加函数
+  add(callback) {
+    this.queue.push(callback)
+  }
+}
+
+eventLoop.init()
+
+
+// 下面的代码可以理解为是 C++ 代码的处理过程
+
+// 这是生蚝炒蛋的处理
+setTimeout(() => {
+  eventLoop.add(() => {
+    console.log(500)
+  })
+}, 500)
+
+// 这是蒜蓉西蓝花的处理
+setTimeout(() => {
+  eventLoop.add(() => {
+    console.log(1000)
+  })
+}, 1000)
+```
+
+
+
+### 7. Node.js 异步编程 -- callback
+
+#### 7.1 callback 规范
+
++ error-first callback
++ Node-style callback 
+
+**第一个参数是 `error ` 后面的才是结果。**
+
+```js
+callback(err,result)
+```
+
+为什么需要这样，我们看一个例子：
+
+下面会抛出一个全局的 `error`  
+
+```js
+function interview(callback) {
+  const random = Math.random();
+  console.log(random);
+  setTimeout(function() {
+    if (random > 0.5) {
+      callback(random);
+    } else {
+      throw new Error("error");
+    }
+  }, 500);
+}
+
+try {
+  interview(function(res) {
+    console.log(res);
+  });
+} catch (error) {
+  // 我们期望能够在这里捕获 error ,但是并没有。
+  // nodejs 抛出了一个全局的错误，并使程序中断。这是非常可怕的结果。
+  console.log("error", error);
+}
+
+// 0.10791201989335986
+// /Users/haizhi/personal/v2ex-nodejs/async/callback.js:8
+//       throw new Error("error");
+//       ^
+
+// Error: error
+//     at Timeout._onTimeout (/Users/haizhi/personal/v2ex-nodejs/async/callback.js:8:13)
+//     at listOnTimeout (internal/timers.js:531:17)
+//     at processTimers (internal/timers.js:475:7)
+```
+
+为什么会这样？`throw` 是在 `interview` 里面抛出的。但是并没有被 `catch` 捕获到。
+
+这就需要了解 node.js 的事件循环机制，因为每一次都是一次新的调用，`interview()` 和它里面的 `setTimeout`根本不在一个调用栈里面。而 `setTimeout` 执行完再次进入主线程调用的时候已经不是在`interview` 中执行的了，所以捕获不到。
+
+既然有这样的错误我们就采用另一种写法：`callback` 的写法
+
+```js
+function interview(callback) {
+  const random = Math.random();
+  console.log(random);
+  setTimeout(function() {
+    if (random > 0.5) {
+      callback(null,random);
+    } else {
+      callback('error')
+    }
+  }, 500);
+}
+
+interview(function(err,result) {
+  // 一般规定第一个参数不为空就是错误的结果
+ if(err){
+   console.log('error')
+ }else{
+   console.log('success',result)
+ }
+});
+
+// 0.4136338806877633
+// error
+// 0.7680882379533018
+// success 0.7680882379533018
+```
+
+#### 7.2 Promise
+
++ 在当期的事件循环中给不了你结果，但在未来的事件循环中会给到你结果。
++ 简单来说 Promise 就是一个容器，里面保存着未来才会结束的事件（通常是一个异步操作）
++ Promise 的构造函数接收一个执行函数，执行函数执行完同步或则异步操作后，调用它的两个参数 `resolve` 和 `rejected`。这两个函数分别只能只能接受一个参数。
++ Promise 有三种状态` padding`（进行中）、`fulfilled`（成功）、`rejected` （失败）。
++ Promise 对象的改变只有从 `pending` 变为 `fulfilled`或 `rejected`，改变后状态就凝固了，然后在`.then(result)`就会得到这个结果。
++ 任何一个 `rejected` 状态且后面没有 `catch` 的` Promise`，都会造成浏览器或 `node` 环境的全局错误。 
+
+模拟一个  Promise
+
+```js
+function Promise_(construstor) {
+  const _this = this;
+  const pending = 'pending'
+  this.status = pending;
+  this.value = undefined;
+  this.reason = undefined;
+
+  function resolve(value) {
+    if (_this.status === pending) {
+      _this.status = "resolved";
+      _this.value = value;
+    }
+  }
+  function reject(reason) {
+    if (_this.status === pending) {
+      _this.status = "rejected";
+      _this.reason = reason;
+    }
+  }
+
+
+  try {
+    construstor(resolve, reject);
+  } catch (error) {
+    reject(error)
+  }
+}
+
+Promise_.prototype.then = function(onfullfiled,onrejected) {
+  const _this = this
+  switch (_this.status) {
+    case "resolved":
+      onfullfiled(_this.value);
+      break;
+    case "rejected":
+      onrejected(_this.reason);
+      break;
+      default:
+  }
+};
+
+var p = new Promise_(function(resolve,reject){resolve(1)});
+console.log(p) // Promise_ { status: 'fulfilled', value: 1, reason: undefined }
+p.then(function(x){console.log(x)}) // 1
+```
+
+出现的意义是为了解决异步流程控制问题。
+
+#### 7.3 Async、await
+
+
+
+
 
