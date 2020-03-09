@@ -651,6 +651,112 @@ p.then(function(x){console.log(x)}) // 1
 
 #### 7.3 Async、await
 
+##### 7.3.1 Aaync 和 Promise 的关系
+
+先下面代码执行后的结果：
+
+```js
+const promise =(
+  function(){
+    return new Promise(resolve=>{
+      resolve()
+    })
+}
+)()
+// Promise {<resolved>: undefined}
+const asyncFn= (
+  async function(){
+  
+  }
+)()
+// Promise {<resolved>: undefined}
+```
+
+均为：<code>Promise {<resolved>: undefined}</code> 。
+
+得出结论：
+
+**`async` 就是一个返回 `Promise` 的函数，是 `Promise` 的语法糖**
+
+`async` 根据内部的返回值进行 `resolve` `reject`
+
+##### 7.3.2 await
+
++ **`await` 以同步的方式写异步**
+
++ `try-catch` 可以获取到 `await` 的错误
+
++ 可以暂停 `function` 的执行
+
+  ```js
+  async function wait(){
+    // 暂停执行
+    await fetch('http://go')
+    
+    doSomethingWork()
+  }
+  ```
+
+  
+
+### 8. HTTP 服务
+
++ 解析进来的 HTTP 请求报文
++ 返回对应的 HTTP 响应报文
+
+```js
+// 一个简单的 http 服务
+const server = require('http')
+server.createServer(function(req,res){
+  res.writeHead(200)
+  res.end('success')
+}).listen(3000)
+```
+
+#### 8.1 OSI 七层参考模型
+
+#### 8.2 koa
+
+微内核，不挂载任何中间件。为了弥补 Express 的不足而诞生
+
+##### 8.2.1 中间件
+
+在 Express 的中间件中，异步调用会开启另一个线程，返回的结果同一个中间件中的其它函数无法得到。但是 koa 可以 利用了 async、await
+
+```js
+// 得到程序执行完的时间
+app.use(async (ctx, next) => {
+  const start = Date.now();
+  //  等待中间件的执行
+  await next();
+  const ms = Date.now() - start;
+  console.log(`${ctx.method} ${ctx.url} - ${ms}ms`);
+});
+```
+
+##### 8.2.2 Context, Request and Response
+
+```js
+// Request and Response 都挂到 ctx 上。ctx.request,ctx.response
+app.use(async (ctx, next) => {
+  await next();
+  ctx.response.type = 'xml';
+  ctx.response.body = fs.createReadStream('really_large.xml');
+});
+```
+
++ 请求和返回的处理更加明显,直接赋值。
+
+
+
+
+
+
+
+
+
+
+
 
 
 
