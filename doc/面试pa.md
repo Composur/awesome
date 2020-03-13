@@ -3,7 +3,7 @@
   #### NodeJS中的Event Loop
   #### 浏览器中的Event Loop
   #### 二者的区别
-  + 浏览器环境下，microtask的任务队列是每个macrotask执行完之后执行。而在Node.js中，microtask会在事件循环的各个阶段之间执行，也就是一个阶段执行完毕，就会去执行microtask队列的任务。
+  + 浏览器环境下，microtask 的任务队列是每个 macrotask 执行完之后执行。而在 Node.js中，microtask 会在事件循环的各个阶段之间执行，也就是一个阶段执行完毕，就会去执行microtask队列的任务。
 ### 3.解释函数柯里化
   1. 函数是x和y的映射关系
   2. 偏函数

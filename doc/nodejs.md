@@ -393,6 +393,52 @@ test01.addListener('listen',(res)=>{
 1. 不知道被通知者是否存在。被通知者也不知道通知者是否存在。
 2. 不知道被通知者是谁，谁都可以被通知到，广播的性质。
 
+
+
+#### 5.3 Buffer (缓冲器)
+
+> `Buffer` 类是作为 Node.js API 的一部分引入的，用于在 TCP 流、文件系统操作、以及其他上下文中与八位字节流进行交互。
+
+#### 5.4 NET (网络)
+
+> `net` 模块用于创建基于流的 TCP 或 [IPC](http://nodejs.cn/s/rAdYjf) 的服务器（[`net.createServer()`](http://nodejs.cn/s/e8cikS)）与客户端（[`net.createConnection()`](http://nodejs.cn/s/RTNxdX)）。
+
++ 服务端
+
+  ```js
+  const net = require('net')
+  
+  const server = net.createServer(socket=>{
+    socket.on('data',data=>{
+      // get client send data 
+      console.log(data,data.toString()) // <Buffer 30 31> 01
+    })
+  })
+  
+  server.listen(12345,()=>{
+    console.log(12345) 
+  })
+  ```
+
++ 客户端
+
+  ```js
+  const net = require('net')
+  // Socket 网络中写入和取出的代理对象
+  const socket = new net.Socket({}) 
+  
+  socket.connect({
+    host:'127.0.0.1',
+    port:12345
+  },()=>{
+    console.log('establish on 12345')
+  })
+  //单工模式 只能客户端向浏览器端发送数据
+  socket.write('01') 
+  ```
+
+  
+
 ### 6. Node.js 的异步、非阻塞 I/O
 
 > 阻塞 I/O 非阻塞 I/O 的区别就是：**系统在接收输入再到输出期间，还能不能再接收其它输入**。
@@ -866,6 +912,24 @@ app.use(async (ctx, next) => {
 ```
 
 + 请求和返回的处理更加明显,直接赋值。
+
+### 9. RPC通信
+
++ Remote Procedure Call （远程调用）
++ 按 ajax  来说相同点
+  + 都是两个计算机之间的网络通信
+  + 都需要双方约定一个数据格式
++ 按 ajax  来说不同点
+  + 不一定使用 DNS 作为寻址服务（因为它是内网通信，会使用(id)唯一标识符进行寻址）
+  + 应用层协议不使用 HTTP （使用二进制协议）
+  + 基于 TCP 或者 UDP 协议
++ TCP 通信
+  + 单工通信（例如 客户端发给服务端包，只能单向通信）
+  + 半双工通信，客户端发包期间服务端不能给客户端发包，同一时间段只允许一方发送数据。
+  + 全双工通信
++ 二进制协议
+  + 更小的数据包体积
+  + 更快的编码速率（更利于计算机理解）
 
 
 
