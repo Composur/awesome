@@ -931,9 +931,139 @@ app.use(async (ctx, next) => {
   + 更小的数据包体积
   + 更快的编码速率（更利于计算机理解）
 
+### 10. API 服务
+
+#### 10.1 Restful
+
++ 简单易懂 （get 、post、pull、delete）,根据 methods 知意
+
+  ```json
+  http://127.0.0.1/user/1 GET 请求用户信息 
+  
+  http://127.0.0.1/user/  POST 新增用户信息 
+  
+  http://127.0.0.1/user/1 PUT 修改用户信息 
+  
+  http://127.0.0.1/user/1 DELETE 删除用户信息 
+  ```
+
+  + url风格，路由（HTTP请求函数）风格
+  + 根据URL知道这个路由是干嘛的
+
++ 便于快捷搭建
+
++ 缺点
+
+  + 在数据聚合方面有很大劣势，会返回许多不需要的数据
+
++ 解决方案
+
+  + GraphQL
+
+#### 10.2 GraphQL
+
+专注于数据聚合，前端要什么就返回什么，不会冗余。
+
++ 让前端有自定义查询数据的能力
+
+### 11. Node.js 性能优化
+
+#### 11.1 HTTP 服务性能测试
+
+想要优化性能，需要进行性能测试。
+
++ 压力测试
+  + ab （ApacheBench）
+    + qps 
+    + 吞吐量
+  + wbbench
++ 性能瓶颈
+  + top  （cpu、内存方面）
+  + iostat （硬盘 I/O）
+
+#### 11.2 Node.js 性能测试工具
+
++ profile ( node 自带，性能分析那个模块占用资源多)
+
+  ```js
+  node --prof index.js // 然后进行请求得到一个文件 打开进行分析 xx > profile.txt
+  ```
+
++ Chrome devtool  (调试居多，使用 profile 面板进行分析)
+
+  ```js
+  node --inspect index.js
+  ```
+
++ clinic (诊所)
+  + 图表的形式
+  + npm 包 使用方便
+
+#### 11.3 JavaScript 性能优化
+
+压测得知 buffer 操作耗费资源较多。定位代码如下 `readFileSync`
+
+![性能优化 fs](./img/pref_fs.jpg)
+
+```js
+// 下载页面
+app.use(
+  mount(async (ctx, next) => {
+    ctx.body  =   fs.readFileSync(path.resolve(__dirname, "./source/index.htm"),"utf-8");
+  })
+);
+
+```
+
+优化后qps 翻番：<small>提升的空间还是很大的</small>
+
+```js
+// 下载页面
+const str =  fs.readFileSync(path.resolve(__dirname, "./source/index.htm"),"utf-8");
+app.use(
+  mount(async (ctx, next) => {
+    // 移除中间价每次访问的计算
+    ctx.body  =  str
+  })
+);
+```
+
+![优化 utf-8](./img/pref_utf-8.jpg)
+
+优化后我们已经看不到 耗时的 slice Function 了取而代之的是 byte-UTF-8
+
+以为底层是 C++ ,所以字符串，是不能直接识别的还是需要转为 buffer 
+
+```js
+// 下载页面
+app.use(
+  mount(async (ctx, next) => {
+    ctx.status = 200
+    // 不设置 type type 就是 buffer 浏览器回去执行下载的操作
+    ctx.type = 'html'
+    ctx.body  =   str
+  })
+);
+```
+
+再去压测：
+
+![性能优化](./img/pref.jpg)
 
 
 
+**总结：**
+
++ 减少不必要的运算
+  + 精灵图，减少 HTTP 请求
++ 空间换时间
+  + 缓存计算结果
++ 提前计算
+  + 用的时候提前计算好，存在内存中，用的时候直接用不用再耗时计算。
+
+#### 11.4 内存优化管理（垃圾回收）
+
++ 通过 Chrome 的 memory 面板进行内存分析（看是否有内存泄漏）
 
 
 

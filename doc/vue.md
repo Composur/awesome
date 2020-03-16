@@ -1,26 +1,26 @@
 ### Vue 源码
 
-vue的初始化，发生了什么？
+1. vue 的初始化，发生了什么？	
+   1. 它将 `data` 对象中的所有的属性加入到 Vue 的**响应式系统**中。当这些属性的值发生改变时，视图将会产生“响应”，即匹配更新为新的值。
+   2. 初始化事件、生命周期、注入、校验。
+   3. 生命周期
+      1. `beforeCreate`
+      2. `created`
 
-vue的模板解析，是如何进行的？
-
-如何形成AST？
-
-render函数的生成？
-
-什么是依赖收集？
-
-什么是patch？
-
-数据更新策略是什么？
-
-混入mixins、$options，vuex、router他们各自如何通过这些api，实现各自的功能？
+2. vue 的模板解析，是如何进行的？
+   1. 
+3. 如何形成 AST ？
+4. render 函数的生成？
+5. 什么是依赖收集？
+6. 什么是 patch？
+7. 数据更新策略是什么？
+8. 混入 、$options，vuex、router他们各自如何通过这些api，实现各自的功能？
 
 
 
 ###  MVVM运行机制
 
-> vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过`Object.defineProperty()`来劫持各个属性的`setter`，`getter`，在数据变动时发布消息给订阅者，触发相应的监听回调.
+> `vue.js` 采用数据劫持结合发布者-订阅者模式的方式，通过`Object.defineProperty()`来劫持各个属性的`setter`，`getter`，在数据变动时发布消息给订阅者，触发相应的监听回调.
 
 
 
@@ -32,7 +32,7 @@ render函数的生成？
 ![](./img/WeChatcdec629d4babf2a5dc7b07850a351b72.png)
 
 
-#### 实例化 Vue 
+#### 1. 实例化 Vue 
 
 ```javascript
 class Vue {
@@ -128,7 +128,7 @@ class Vue {
       }
     ```
 
-#### Dep
+#### 2. Dep
 
 关联 Observer 和 Watcher
 
@@ -155,7 +155,7 @@ class Dep {
 
 ```
 
-#### Watcher
+#### 3. Watcher
 
 ```javascript
 // 观察者
@@ -190,14 +190,13 @@ class Watcher { // 什么时候绑定？ 在解析、更新数据的时候
 
 
 
-
-  ## Vuex
+### Vuex
 
 什么需要放到 vuex 上，需要共享的数据。
 
 + token、名称、位置、头像、商品、收藏等。
 
-### 获取veux上的state
+#### 1. 获取veux上的state
 
 由于 Vuex 的状态存储是响应式的，从 store 实例中读取状态最简单的方法就是在计算属性中返回某个状态：
 ```javascript
@@ -224,16 +223,10 @@ computed: {
     address:state => state.address
   }),
 ```
-### actions 和 mutations 有什么区别
+#### 2. actions 和 mutations 有什么区别
 
 + 事实上在 vuex 里面 actions 只是一个架构性的概念，并不是必须的，说到底只是一个函数，你在里面想干嘛都可以，只要最后触发 mutation 就行。异步竞态怎么处理那是用户自己的事情
 + Action 提交的是 mutation，而不是直接变更状态。 Action 可以包含任意异步操作。个人觉得这个 action 的产生就是因为 mutation 不能进行异步操作，如果有异步操作那么就用 action 来提交mutation
-
-### vue 模板上的数据来源
-
-+ data
-+ props
-+ computed
 
 ### 1. slot/插槽
 > 原理类似电脑上的 use 电源 耳机 插槽等，让使用者（一般是父组件传入的html模板）决定怎么使用 这是具名插槽
@@ -377,33 +370,27 @@ computed: {
 
 ### 7. 组件的生命周期
 
-    1). vue的生命周期: 创建=>挂载=>更新=>销毁
-    2). vue的生命周期勾子:
-        初始化(一次): beforeCreate() => created() => beforeMount() => mounted()
-        更新(n次): beforeUpdate() => updated()
-        销毁(一次): beforeDestroy() => destroyed()
-    3). 一些细节
-    	beforeCreate(): 在实例初始化之后，立即同步调用，在数据观察(data observer)和 event/watcher 配置之前被调用。
-    	created(): 可以读取或修改data中的数据, 已经完成数据观察(data observer)和 event/watcher 配置
-    	beforeMount(): 模板已经在内存中编译, 但还没有挂载到页面上, 不能通过ref找到对应的标签
-    	mounted(): 页面已经初始显示, 可以通过ref找到对应的标签
-    	beforeUpdate(): 在数据更新之后, 界面更新前调用, 只能访问到原有的界面
-    	updated(): 在界面更新之后调用, 此时可以访问最新的界面
-    	beforeDestroy(): 实例销毁之前调用, 此时实例仍然完全可用。
-    	destroyed(): Vue 实例销毁后调用, 数据绑定/事件监听器都没了, 但dom结构还在
-      deactivated(): 路由组件失活, 但没有死亡
-      activated(): 路由组件激活, 被复用
+vue的生命周期:  创建 => 挂载 => 更新 => 销毁
+
++ 初始化(一次): `beforeCreate() => created() => beforeMount() => mounted()`
++ 更新(n次):  `beforeUpdate()` => `updated()`
++ 销毁(一次): `beforeDestroy() => destroyed()`
+
+各个生命周期的作用：
+
++ `beforeCreate()` : 在实例初始化之后，立即同步调用，在数据观察 `(data observer)`和 `event/watcher` 配置之前被调用。
++ `created()` : 可以读取或修改 `data` 中的数据, 已经完成数据观察 `(data observer) `和 `event/watcher ` 配置。
++ `beforeMount()` : 模板已经在内存中编译, 但还没有挂载到页面上, 不能通过 `ref` 找到对应的标签
++ `mounted() `: 页面已经初始显示, 可以通过ref找到对应的标签。
++ `beforeUpdate()` : 在数据更新之后, 界面更新前调用, 只能访问到原有的界面。
++ `updated()` : 在界面更新之后调用, 此时可以访问最新的界面。
++ `beforeDestroy()`: 实例销毁之前调用, 此时实例仍然完全可用。
++ `destroyed()` : ` Vue` 实例销毁后调用, 数据绑定/事件监听器都没了, 但 `Dom`结构还在。
++ `deactivated()` : 路由组件失活, 但没有死亡。
++ `activated()` : 路由组件激活, 被复用。
 
 
 ### v-modal 的使用
-```
-data(){
-    $ 模板上绑定的数据类型 v-modal 的类型
-    radios:Boolean,  // 单选框
-    checkBox:Array,  // 多选框
-    select:  String || Array   // 下拉框
-}
-```
 #### 修饰符
 1. v-modal.lazy
     + 事件触发的时候才调用，例如 input 回车的时候取值而不是实时取值
@@ -412,7 +399,7 @@ data(){
 3. v-modal.trim
     + 去除两边的空格
 
-### 组件化
+### Vue 组件化
 1. 构造
     ```javascript
      const component = Vue.extend({
@@ -499,6 +486,22 @@ data(){
   + activated
   + deactivated
   + 可以有 include，exclude  用来排除不需要缓存的组件。`<keep-alive exclude="xxx,xxx"><router-view/><keep-alive/>`
+
+
+
+#### computed 和 watch 有啥区别
+
+computed：
+
++ 用来处理复杂的模板逻辑运算运算。
++ **计算属性是基于它们的响应式依赖进行缓存的**。只在相关响应式依赖发生改变时它们才会重新求值。
++ 计算属性会缓存结果，避免重复计算。组件的 data 发生改变才进行计算。
+
+watch
+
++ 使用 `watch` 选项允许我们执行异步操作 (访问一个 API)，限制我们执行该操作的频率，并在我们得到最终结果前，设置中间状态。这些都是计算属性无法做到的。
+
+
 
 
 
