@@ -473,27 +473,28 @@ vue的生命周期:  创建 => 挂载 => 更新 => 销毁
 + 例如可以在  `beforeEach` 里面实现获取每一个 meta 的 title 改变标签页的 title
 + $router 是路由方法，是 new Router 。
 
-#### 导航守卫
+#### 组件缓存 keep-alive 
 
-##### 全局守卫
-
-+ beforeEnter
-+ afterEnter
-
-##### 组件缓存
+1. 获取`keep-alive`对象包括的第一个子组件对象
+2. 根据白黑名单(inclued excude)是否匹配返回本身的`vnode`
+3. 根据`vnode`的`cid`和`tag`生成的`key`，在缓存对象中是否有当前缓存，如果有则返回，并更新`key`在`keys`中的位置
+4. 如果当前缓存对象不存在缓存，就往`cache`添加这个的内容，并且根据`LRU`算法删除最近没有使用的实例
+5. 设置为第一个子组件对象的`keep-alive`为`true
 
 + keep-alive 包含的组件生命周期可以有下列两个方法
   + activated
   + deactivated
-  + 可以有 include，exclude  用来排除不需要缓存的组件。`<keep-alive exclude="xxx,xxx"><router-view/><keep-alive/>`
-
-
+  + 可以有 include，exclude  用来排除不需要缓存的组件。
+  
+  ```jsx
+  <keep-alive exclude="xxx,xxx"><router-view/><keep-alive/>
+  ```
 
 #### computed 和 watch 有啥区别
 
 computed：
 
-+ 用来处理复杂的模板逻辑运算运算。
++ 用来处理复杂的模板逻辑运算。
 + **计算属性是基于它们的响应式依赖进行缓存的**。只在相关响应式依赖发生改变时它们才会重新求值。
 + 计算属性会缓存结果，避免重复计算。组件的 data 发生改变才进行计算。
 

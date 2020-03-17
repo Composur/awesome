@@ -437,7 +437,36 @@ test01.addListener('listen',(res)=>{
   socket.write('01') 
   ```
 
-  
+#### 5.5 Cluster (集群)
+
+作用：分发 `HTTP` 请求。
+
+`Node.js` 对浏览器提供服务，浏览器请求 `Node.js`，请求到了 master（主进程），假如 `fork` 4 个子进程（ `CPU`4 核心），每个子进程都运行一个 `HTTP` 服务，收到 `HTTP` 请求后并处理完成后返回给主进程，主进程再返回浏览器。
+
+上面的逻辑可以借助 Cluster 这个模块进行处理。
+
+```js
+// 添加启动脚本 app.js 进行多进程启动 充分利用 CPU 的多核心
+const cluster = require("cluster");
+const os = require("os");
+const cpus = os.cpus();
+if (cluster.isMaster) {
+  // 根据 CPU 的最大核心数进行启动
+  // 这样 会造成一定的浪费 内存空间使用率较高
+  // 根据实际情况开启进程，一般开启一半就可以
+  for (let i = 0; i < cpus.length; i++) {
+    cluster.fork();
+  }
+} else {
+  require("./app"); // 这样就会有多个进程监听 3000 端口
+}
+```
+
+问题：多个进程是如何无冲突的监听一个端口？<small>理论上应该报错才对</small>
+
+
+
+
 
 ### 6. Node.js 的异步、非阻塞 I/O
 
@@ -1001,6 +1030,8 @@ app.use(async (ctx, next) => {
 
 #### 11.3 JavaScript 性能优化
 
+**js 是单线程的 下面优化都是基于一个线程中的优化**
+
 压测得知 buffer 操作耗费资源较多。定位代码如下 `readFileSync`
 
 ![性能优化 fs](./img/pref_fs.jpg)
@@ -1065,13 +1096,99 @@ app.use(
 
 + 通过 Chrome 的 memory 面板进行内存分析（看是否有内存泄漏）
 
+#### 11.5 编写 C++ 插件
 
++ 将计算量转移到 `C++` 进行运算
+  + 益处：`C++` 运算比 `js` 更快。
+  + 成本: `C++` 和 `V8` 变量的转换。<small>js 变量和 C++ 变量的互相转换</small>
+    + 不同的平台编译后 `xx.oc` 生成 `.node`文件被 `js `文件 `require` 使用都需要时间成本。
+    + 这个时间可能会大于 `js` 直接运算的成本。
 
+#### 11.6 进程优化
 
+**利用计算机的多核 CPU 进行优化**
 
+ ##### 16.1 Node.js 中的进程和线程
 
++ 进程
 
+  + 操作系统挂载运行的独立单元
+    + 启动一个 `node.js` 程序就是启动了一个进程
+  + 拥有一些独立的资源，如内存等
 
+   ![进程](./img/process.jpg)
 
++ 线程
 
+  + 进程运算调度的单元
+
+    ```js
+    let a = 1+1; // 需要线程去执行运算
+    ```
+
+  + 进程内的线程共享进程内的资源
+
+  + 多核 `CPU`
+    + 单个时间内可以执行多个计算，每个核心负责一个运算。
+
++ 举例
+
+  + 进程--公司
+  + 线程--职员
+  + 一对多的关系，公司（<small>提供资源</small>）发布指令，职员（<small>使用资源</small>）进行执行。
+
+##### 16.2 Node.js 子进程与线程
+
++ 事件循环（<small>举个例子</small>）
+  + Node.js 是一个进程
+    + 创建一个主线程（老板）去运行 V8  和  JavaScript 
+    + 一般一个 Node.js 进程（公司）会创建 4 个子线程（职员）进行运算
+    + 主线程（老板）一旦有任务可以处理，就会分配给子线程（职员）去处理
+      + 子线程（职员）处理主线程（老板）分配任务的过程中，主线程（老板）就去做别的事情
+      + 一旦子线程（职员）处理完成，就报告（<small>回调函数</small>）主线程（老板），然后等着主线程（老板）分配任务。
+      + 主线程（老板）和子线程（职员）不断的重复这个的过程，就是事件循环。
++ 事件循环（<small>图片说明</small>）
+
+尽管 `Node.js` 是高效的，主线程通过事件循环和 `libuv` 分配给子线程。这样就保障了主线程不会阻塞（异步操作都给了子线程去做）。
+
+但是当需要分配的任务非常多的时候一个主线程（老板）就不够用了。这个时候还是一个线程，还是单线程在执行任务。  只能利用 `CPU` 的一个核心就行运算，多核 `CPU` 就显得浪费。这个时候就需要 Node.js 的子进程和子线程了。
+
+相当于公司规模变大成为集团（进程），下面有多个子公司（主线程）。
+
++ 父进程与子进程通信
+
+  ```js
+  // master.js
+  const cp = require('child_process')
+  
+  // 开启一个子进程
+  const child_process = cp.fork(__dirname+'/child.js')
+  
+  // 给子进程发送消息
+  child_process.send('我是父进程')
+  
+  child_process.on('message',str=>{
+    console.log('master.js 收到',str)
+  })
+  ```
+
+  执行 `mater.js`
+
+  子进程接收消息
+
+  ```js
+  // child.js
+  process.on('message',str=>{
+    console.log('child.js 收到',str)
+    process.send('我是子进程')
+  })
+  ```
+
+  这个时候子进程会一直在，发送后子进程不会退出不会中断，为了以后还有别的事情。
+
+  ![子进程](./img/process_child.jpg)
+
+  
+
+   
 
