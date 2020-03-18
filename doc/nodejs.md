@@ -443,7 +443,7 @@ test01.addListener('listen',(res)=>{
 
 `Node.js` 对浏览器提供服务，浏览器请求 `Node.js`，请求到了 master（主进程），假如 `fork` 4 个子进程（ `CPU`4 核心），每个子进程都运行一个 `HTTP` 服务，收到 `HTTP` 请求后并处理完成后返回给主进程，主进程再返回浏览器。
 
-上面的逻辑可以借助 Cluster 这个模块进行处理。
+上面的逻辑可以借助 `cluster` 这个模块进行处理。
 
 ```js
 // 添加启动脚本 app.js 进行多进程启动 充分利用 CPU 的多核心
@@ -464,7 +464,7 @@ if (cluster.isMaster) {
 
 问题：多个进程是如何无冲突的监听一个端口？<small>理论上应该报错才对</small>
 
-
+其实是主线程在监听，子线程监听的是一个类似 id 的东西。
 
 
 
@@ -1108,7 +1108,7 @@ app.use(
 
 **利用计算机的多核 CPU 进行优化**
 
- ##### 16.1 Node.js 中的进程和线程
+ ##### 11.6.1 Node.js 中的进程和线程
 
 + 进程
 
@@ -1129,6 +1129,7 @@ app.use(
   + 进程内的线程共享进程内的资源
 
   + 多核 `CPU`
+    
     + 单个时间内可以执行多个计算，每个核心负责一个运算。
 
 + 举例
@@ -1137,7 +1138,7 @@ app.use(
   + 线程--职员
   + 一对多的关系，公司（<small>提供资源</small>）发布指令，职员（<small>使用资源</small>）进行执行。
 
-##### 16.2 Node.js 子进程与线程
+##### 11.6.2 Node.js 子进程与线程
 
 + 事件循环（<small>举个例子</small>）
   + Node.js 是一个进程
@@ -1188,7 +1189,128 @@ app.use(
 
   ![子进程](./img/process_child.jpg)
 
-  
 
+#### 11.7 进程管理与守护
+
+##### 11.7.1 开启多进程
+
+```js
+const cluster = require("cluster");
+const os = require("os");
+const cpus = os.cpus();
+if (cluster.isMaster) {
+   // 启动的时候根据 CPU 的核心数开启多个进程
+  for (let i = 0; i < cpus.length / 2 ; i++) {
+  	 cluster.fork();
+  }
+} else {
+  require("./app")
+}
+```
+
+
+
+##### 11.7.2遇到错误(错误上报)退出并重启进程
+
+```js
+const cluster = require("cluster");
+const os = require("os");
+const cpus = os.cpus();
+if (cluster.isMaster) {
+  for (let i = 0; i < cpus.length / 2; i++) {
    
+    cluster.fork();
+  }
+   // 监听主进程是否挂掉，挂掉 10 秒后重启
+  cluster.on("exit", err => {
+    setTimeout(() => {
+      cluster.fork();
+    }, 10000);
+  });
+} else {
+  require("./app")
+  // 监控错误
+  process.on("uncaughtException", err => {
+     // 在这里可以进行错误上报
+    console.log("error", err);
+    process.exit(1); // node 遇到错误的结束进程的时候需要返回 code=1
+  });
+  // 监控是否有内存溢出
+  setInterval(() => {
+    // 内存大于 700m 退出程序
+    if (process.memoryUsage().rss > 734003200) {
+      // 这里可以进行错误上报
+      console.log("内存溢出");
+      process.exit(1);
+    }
+  }, 5000);
+}
+
+```
+
+##### 11.7.3 判断进程是否处于僵尸状态（进程没断，但无法工作了）
+
+**心跳检测**
+
+```js
+const cluster = require("cluster");
+const os = require("os");
+const cpus = os.cpus();
+let missdPing = 0;
+if (cluster.isMaster) {
+  for (let i = 0; i < cpus.length / 2; i++) {
+    const work = cluster.fork();
+    const timer = setInterval(() => {
+      console.log("ping");
+      work.send("ping");
+      missdPing++;
+      // 心跳检测主要为了子进程时候有死循环等
+      // 心跳超过 3 次未检测到，退出进程
+      if (missdPing >= 3) {
+        clearInterval(timer);
+        console.log("杀死僵死进程");
+        process.kill(work.process.pid);
+      }
+    }, 1000);
+    work.on("message", msg => {
+      if (msg === "pong") {
+        console.log("pong");
+        missdPing--;
+      }
+    });
+  }
+  cluster.on("exit", err => {
+    setTimeout(() => {
+      cluster.fork();
+    }, 10000);
+  });
+} else {
+  require("./app");
+  // 监听心跳事件，发送消息给主进程 进行呼应
+  process.on("message", ping => {
+    if (ping === "ping") {
+      process.send("pong");
+      console.log(missdPing);
+    }
+  });
+  process.on("uncaughtException", function(err) {
+    process.exit(1);
+  });
+  setInterval(() => {
+    if (process.memoryUsage().rss > 734003200) {
+        process.exit(1);
+    }
+  }, 5000);
+}
+```
+
+当子进程中出现：
+
+```js
+while(true){
+  console.log('死循环')
+}
+```
+
+可以杀死进程避免内存飙升。
 

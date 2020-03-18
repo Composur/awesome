@@ -1,20 +1,41 @@
-### Vue 源码
+### Vue 的运行机制简述
 
-1. vue 的初始化，发生了什么？	
-   1. 它将 `data` 对象中的所有的属性加入到 Vue 的**响应式系统**中。当这些属性的值发生改变时，视图将会产生“响应”，即匹配更新为新的值。
-   2. 初始化事件、生命周期、注入、校验。
-   3. 生命周期
-      1. `beforeCreate`
-      2. `created`
+#### 1.初始化阶段
 
-2. vue 的模板解析，是如何进行的？
-   1. 
-3. 如何形成 AST ？
-4. render 函数的生成？
-5. 什么是依赖收集？
-6. 什么是 patch？
-7. 数据更新策略是什么？
-8. 混入 、$options，vuex、router他们各自如何通过这些api，实现各自的功能？
+##### 1.1 初始化
+
+1. 它将 `data` 对象中的所有的属性加入到 `Vue` 的**响应式系统**中。当这些属性的值发生改变时，视图将会产生“响应”，即匹配更新为新的值。
+2. 初始化事件、生命周期、注入、校验。
+3. 初始化生命周期执行 `beforeCreate`、初始化 `data`、`props`、`computed`、`watcher`，执行 `created` 周期函数。
+
+##### 1.2 vue 的模板解析，是如何进行的？
+
+**初始化后，调用 `$mount` 方法对 Vue 实例进行挂载（挂载的核心过程包括**模板编译**、**渲染**以及**更新**三个过程）。**
+
+> 如果没有在实例上定义`render`方法，而是定义了`template`,那么是需要编译的。先将`template` 字符串编译成 `render function`。
+
++ `parse` 正则解析 `template` 字符串形成 AST（抽象语法树，是源代码的抽象语法结构的树状表现形式）
++ `optimize` 标记静态节点
++ `generate` 将 AST 转化成 `render function` 字符串
+
+##### 1.3 render 函数的生成？
+
++ 调用 `render` 方法将 `render function` 渲染成虚拟的 Node ,`render` 方法的第一个参数是 `createElement`
+
+##### 1.4  什么是 patch？
+
++ 生成虚拟 DOM 树后，需要将虚拟 DOM 树转化成真实的 DOM 节点，此时需要调用`update`方法，`update`方法又会调用`pacth`方法把虚拟 DOM 转换成真正的 DOM 节点。
+
++ 如果没有旧的虚拟 Node 直接通过`createElm`创建真实 DOM 节点，否则会通过`sameVnode`判断当前需要更新的 Node 节点是否和旧的 Node 节点相同（因为有key）。节点不同直接替换，否则调用 `patchVNode` 方法执行 diff 算法更新 DOM。
+
+#### 2. 响应式流程 （数据更新策略、依赖收集）
+
++ `vue.js` 在初始化的时候采用数据劫持结合发布者-订阅者模式的方式，通过`Object.defineProperty()` 来劫持各个属性的 `setter`，`getter`
++ 当 `render function` 被渲染的时候，会读取 Vue 实例中和视图相关的响应式数据，此时会触发`getter` 函数进行**依赖收集**（将观察者 `Watcher` 对象存放到当前闭包的订阅者 `Dep` 的 `subs `中）
++ 在数据变动时发布消息给订阅者，触发相应的监听回调即触发数据劫持的`setter`函数。`setter`会通知初始化**依赖收集**中的 `Dep` 中的和视图相应的 `Watcher` ，告知需要重新渲染视图，`Wather`就会再次通过 `update` 方法来更新视图。
+
+1. 如何形成 AST ？
+2. 混入 、$options，vuex、router他们各自如何通过这些api，实现各自的功能？
 
 
 
@@ -378,12 +399,12 @@ vue的生命周期:  创建 => 挂载 => 更新 => 销毁
 
 各个生命周期的作用：
 
-+ `beforeCreate()` : 在实例初始化之后，立即同步调用，在数据观察 `(data observer)`和 `event/watcher` 配置之前被调用。
-+ `created()` : 可以读取或修改 `data` 中的数据, 已经完成数据观察 `(data observer) `和 `event/watcher ` 配置。
++ `beforeCreate()` : 在实例初始化之后，立即同步调用，在数据观察 `(data observer)`和 `event/watcher` 事件配置之前被调用。
++ `created()` : 可以读取或修改 `data` 中的数据, 已经完成数据观察 `(data observer) `和 `event/watcher ` 事件回调。然而，挂载阶段还没开始，`$el` 属性目前尚不可用。
 + `beforeMount()` : 模板已经在内存中编译, 但还没有挂载到页面上, 不能通过 `ref` 找到对应的标签
-+ `mounted() `: 页面已经初始显示, 可以通过ref找到对应的标签。
-+ `beforeUpdate()` : 在数据更新之后, 界面更新前调用, 只能访问到原有的界面。
-+ `updated()` : 在界面更新之后调用, 此时可以访问最新的界面。
++ `mounted() `: 页面已经初始显示, 可以通过ref找到对应的标签。如希望整个视图都重绘完毕可以在 `mounted` 里使用 [vm.$nextTick](https://cn.vuejs.org/v2/api/#vm-nextTick)。
++ `beforeUpdate()` : 在数据更新之后, 界面更新前调用, 只能访问到原有的界面。适合在更新之前访问现有的 `DOM`，比如手动移除已添加的事件监听器。
++ `updated()` : 在界面更新之后调用, 此时可以访问最新的界面。然而在大多数情况下，你应该避免在此期间更改状态。如果要相应状态改变，通常最好使用[计算属性](https://cn.vuejs.org/v2/api/#computed)或 [watcher](https://cn.vuejs.org/v2/api/#watch) 取而代之。注意 `updated` **不会**保证所有的子组件也都一起被重绘。如希望整个视图都重绘完毕可以在 `updated` 里使用 [vm.$nextTick](https://cn.vuejs.org/v2/api/#vm-nextTick)。
 + `beforeDestroy()`: 实例销毁之前调用, 此时实例仍然完全可用。
 + `destroyed()` : ` Vue` 实例销毁后调用, 数据绑定/事件监听器都没了, 但 `Dom`结构还在。
 + `deactivated()` : 路由组件失活, 但没有死亡。
