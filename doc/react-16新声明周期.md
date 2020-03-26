@@ -9,6 +9,7 @@
         + 使用不当，易产生 bug
         + 每次 render 都会调用
    + `~~componentWillMount/UNSAVE_componentWillMount~~`
+           + `render`之前调用，在此声明周期中使用 `setState` 不会触发额外渲染
    + `render`
         + 必须定义，UI 渲染
    + `componentDidMount(第一次render之后执行)`

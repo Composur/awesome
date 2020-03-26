@@ -211,45 +211,85 @@ class Watcher { // 什么时候绑定？ 在解析、更新数据的时候
 
 
 
-### Vuex
+### Vue 问题
 
-什么需要放到 vuex 上，需要共享的数据。
+#### 1. 组件
 
-+ token、名称、位置、头像、商品、收藏等。
+##### 1.1 [`data` 必须是一个函数](https://cn.vuejs.org/v2/guide/components.html#data-必须是一个函数)
 
-#### 1. 获取veux上的state
+ **一个组件的 `data` 选项必须是一个函数**，因此每个实例可以维护一份被返回对象的独立的拷贝：
 
-由于 Vuex 的状态存储是响应式的，从 store 实例中读取状态最简单的方法就是在计算属性中返回某个状态：
-```javascript
-computed: {
-    count () {
-     return this.$store.state.count
-    }
+```js
+data: function () {
+  return {
+    count: 0
   }
+}
 ```
 
-获取多个 辅助函数 mapState 返回的是一个对象
-```javascript
- computed: {
-    ...mapState(['address']) //映射的计算属性的名称与 state 的子节点名称相同,都是address 可以简写成这样
-  },
-  # 相当于
- computed: {
-   address(){
-     return this.$store.state.count
-   }
-  },
-   # 相当于
- computed: mapState({
-    address:state => state.address
-  }),
-```
-#### 2. actions 和 mutations 有什么区别
+##### 1.2 父子组件传参
 
-+ 事实上在 vuex 里面 actions 只是一个架构性的概念，并不是必须的，说到底只是一个函数，你在里面想干嘛都可以，只要最后触发 mutation 就行。异步竞态怎么处理那是用户自己的事情
-+ Action 提交的是 mutation，而不是直接变更状态。 Action 可以包含任意异步操作。个人觉得这个 action 的产生就是因为 mutation 不能进行异步操作，如果有异步操作那么就用 action 来提交mutation
++ 父传子，通过 props
+  + 在子组件绑定 props `v-bind:children-data='data'`  <small>暂不支持驼峰命名</small>
+
++ 子传父，通过自定义事件 `$emit(events)` 发射一个事件
+  + 在子组件通过 `this.$emit('事件名',obj)` <small>事件名不支持驼峰命名</small>
+  + 父组件上监听 `v-on:事件名=methods` 父组件方法中获取`methods($event)` 获取 `obj` 
+
++ 双向数据绑定的时候
+
+  + 子组件
+
+    ```js
+    this.$emit('update:title', newTitle)
+    ```
+
+  + 父组件监听事件并更新本地属性继而更新传递给子组件的 `prop`
+
+    ```vue
+    <text-document
+      v-bind:title="doc.title"
+      v-on:update:title="doc.title = $event"
+    ></text-document>
+    ```
+
+  + 简写
+
+    ```vue
+    <text-document
+      :title.sync="doc.title"
+    ></text-document>
+    ```
+
+    
+
+##### 1.3 批量全局注册
+
+以 icon 组件 为例 全局注册 动态引入 icon 文件
+
+```js
+import Vue from 'vue'
+import SvgIcon from '@/components/SvgIcon'// svg component
+
+// register globally
+Vue.component('svg-icon', SvgIcon)
+ // false 是否查询其子目录
+const req = require.context('./svg', false, /\.svg$/)
+const requireAll = requireContext => requireContext.keys().map(requireContext)
+requireAll(req)
+// 记住全局注册的行为必须在根 Vue 实例 (通过 new Vue) 创建之前发生
+```
+
+
+
+
+
+##### 1.3 **每个组件必须只有一个根元素**
+
+
 
 ### 1. slot/插槽
+
 > 原理类似电脑上的 use 电源 耳机 插槽等，让使用者（一般是父组件传入的html模板）决定怎么使用 这是具名插槽
 ```javascript
 //子组件
@@ -445,16 +485,48 @@ vue的生命周期:  创建 => 挂载 => 更新 => 销毁
    
     + 在创建的实例中使用
 
-### 父子组件传参
-1. 父传子，通过 props
-    + 在子组件绑定props `v-bind:children-data='data'` 暂不支持驼峰命名
-2. 子传父，通过 自定义事件 $emit Events 发射一个事件
-    + 在子组件通过 this.$emit('事件名',obj)，事件名不支持驼峰命名
-    + 父组件上监听 v-on:事件名=methods 父组件方法中获取 obj
+### Vuex 问题
 
+什么需要放到 vuex 上，需要共享的数据。
 
++ token、名称、位置、头像、商品、收藏等。
 
-### vue-router
+#### 1. 获取veux上的state
+
+由于 Vuex 的状态存储是响应式的，从 store 实例中读取状态最简单的方法就是在计算属性中返回某个状态：
+
+```javascript
+computed: {
+    count () {
+     return this.$store.state.count
+    }
+  }
+```
+
+获取多个 辅助函数 mapState 返回的是一个对象
+
+```javascript
+ computed: {
+    ...mapState(['address']) //映射的计算属性的名称与 state 的子节点名称相同,都是address 可以简写成这样
+  },
+  # 相当于
+ computed: {
+   address(){
+     return this.$store.state.count
+   }
+  },
+   # 相当于
+ computed: mapState({
+    address:state => state.address
+  }),
+```
+
+#### 2. actions 和 mutations 有什么区别
+
++ 事实上在 vuex 里面 actions 只是一个架构性的概念，并不是必须的，说到底只是一个函数，你在里面想干嘛都可以，只要最后触发 mutation 就行。异步竞态怎么处理那是用户自己的事情
++ Action 提交的是 mutation，而不是直接变更状态。 Action 可以包含任意异步操作。个人觉得这个 action 的产生就是因为 mutation 不能进行异步操作，如果有异步操作那么就用 action 来提交mutation
+
+### vue-router 问题
 
 > 路由表：是一个映射表，决定了数据包的指向，内网 IP 和 mac 地址绑定。
 >

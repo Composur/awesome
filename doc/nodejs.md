@@ -2,6 +2,8 @@ Node.js 简介
 
 ### 1. Node 环境的 js 和 Chrome 环境的 js 运行的不同点
 
+> js执行为单线程（不考虑web worker），所有代码皆在执行线程调用栈完成执行。当执行线程任务清空后才会去轮询取任务队列中任务。
+
 + Nodejs 没有浏览器的 API，如 document、window等。
 + 加入了许多 NodeJS 的 API。
 + Js 控制浏览器，Node.js 控制计算机。
@@ -575,6 +577,33 @@ setTimeout(() => {
 }, 1000)
 ```
 
+#### 6.5 浏览器和 Node.js 的事件循环机制有什么区别？
+
+**在 node 11 版本中，node 下 Event Loop 已经与浏览器趋于相同。**
+
++ 规范出处不同
+
+  + 浏览器的[Event loop](https://www.w3.org/TR/html5/webappapis.html#event-loops)是在HTML5中定义的规范
+  + node中则由[libuv](http://thlorenz.com/learnuv/book/history/history_1.html)库实现
+
++ 浏览器的事件循环 
+
+  <small>微任务（`microtask`Object.observe、MutationObserver、process.nextTick ，Promise.then catch。</small>
+
+  <small>宏任务（`macroTask`） script 中代码、setTimeout、setInterval、I/O、UI render</small>
+
+  + 在浏览器页面中可以认为初始执行线程中没有代码，每一个 `script` 标签中的代码是一个独立的 `task`，即会执行完前面的 `script` 中创建的 `microtask` 再执行后面的 `script` 中的同步代码。
+  + 如果`microtask` 一直被添加，则会继续执行 `microtask` ，“卡死” `macrotask`。 
+
++ Node.js 事件循环 6 个阶段
+
+  1. timers：执行满足条件的setTimeout、setInterval回调。
+  2. I/O callbacks：是否有已完成的I/O操作的回调函数，来自上一轮的poll残留。
+  3. idle，prepare：可忽略
+  4. poll：等待还没完成的I/O事件，会因timers和超时时间等结束等待。
+  5. check：执行setImmediate的回调。
+  6. close callbacks：关闭所有的closing handles，一些onclose事件。
+
 
 
 ### 7. Node.js 异步编程 -- callback
@@ -661,6 +690,10 @@ interview(function(err,result) {
 // 0.7680882379533018
 // success 0.7680882379533018
 ```
+
+##### 
+
+
 
 #### 7.2 Promise
 
@@ -1313,4 +1346,47 @@ while(true){
 ```
 
 可以杀死进程避免内存飙升。
+
+### 12. 架构优化
+
+#### 12.1 动静分离
+
++ 静态内容 
+
+  + 基本不会变动，也不会因为请求参数不同而变化
+  + 例如：脚本、样式、图片 ...
+  + 解决方案：利用 `CDN` 加速，`HTTP` 缓存
+  + 一般用 `nginx` 进行转发，用 `node` 作为静态服务器的速度比不上 `nginx`
+
++ 动态内容
+
+  + 解决方案：加机器，结合 `nginx`反向代理、负载均衡
+
+  + 缓存服务
+
+    ```shell
+    # nginx 反向代理 配置缓存
+    
+    upstream xxx.com {
+    	server 127.0.0.1:3000
+    	server 127.0.0.1:3001
+    	...
+    }
+    server{
+    	...
+      location ~ /user/(\d*) {
+       # 正则匹配请求 id 省的 node 层去匹配，性能优化
+        proxy_pass http://xxx.com/user/detail?colummid=$1;
+        proxy_cache
+      }
+      ...
+    }
+    
+    ```
+
+    
+
+
+
+
 

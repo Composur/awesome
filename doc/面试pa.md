@@ -42,6 +42,17 @@
 ### 19.git的原理,git和svn的区别
 ### 20.说一下正向代理和反向代理的区别
 ### 21.cookie和session的区别
+
+> Cookie（复数形态Cookies），类型为「小型文本文件」，指某些网站为了辨别用户身份而储存在用户本地终端上的数据。
+
+Cookie 的出现只是为了**解决客户端与服务端会话状态的问题。**
+
+我们可以在浏览器中查看 Cookie 但是这并不意味着 Cookie 文件只是存放在浏览器里的，在 Mac 中`/Users/username/Library/Application Support/Google/Chrome/Default`中会存放一个 `Cookies`的 `SQLit`数据库文件。
+
+
+
+
+
 ### 22.sessionStorage和localStorage的区别
 ### 23.webPack的dev和product的区别
   + 在开发环境中，我们需要：强大的 source map 和一个有着 live reloading(实时重新加载) 或 hot module replacement(热模块替换) 能力的 localhost server。而生产环境目标则转移至其他方面，关注点在于压缩 bundle、更轻量的 source map、资源优化等，通过这些优化方式改善加载时间
@@ -52,10 +63,12 @@
 ### 28.什么是纯函数、高阶函数，二者的区别
   1. 纯函数
   2. 高阶函数（满足一个）
+
     + 接受一个或多个函数作为输入
     + 输出一个函数
     + redux的connect()()，setTimeout(),foreach()等
   3. 高阶组件
+
     + 本质是一个函数，接收一个组件，返回一个组件，新组件内部渲染传入的组件
     + 传入的组件向新组件传入属性
     + 为了扩展组件的功能
