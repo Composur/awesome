@@ -3,11 +3,11 @@
    + `constructor`
         + 初始化，组件状态
         + 唯一可以直接修改 state 的地方
-   + `getDerivedStateFromProps（使用场景不多）`
+   + `getDerivedStateFromProps` 用来替换 `componentWillReceiveProps`
         + 用外部的属性来初始化内部的状态
         + 当 state 需要从 props 初始化时使用
-        + 使用不当，易产生 bug
         + 每次 render 都会调用
+        + 使用不当，易产生 bug
    + `~~componentWillMount/UNSAVE_componentWillMount~~`
            + `render`之前调用，在此声明周期中使用 `setState` 不会触发额外渲染
    + `render`
@@ -20,9 +20,9 @@
       + 用户可以介入，性能优化的过程。组件是否更新。
       + 一般由 PureComponent 自动实现
   + `render()`
-  + `getSnapshotBeforeUpdate()`
-      + 页面更新前调用，state 已更新
-      + 获取 render 前的 DOM 状态时可用 
+  + `getSnapshotBeforeUpdate()` 用来替换 `componentWillUpdate`
+      + 页面更新前调用，`state` 已更新
+      + 可用来获取 `render` 前最新的 `DOM` 数据
   + `componentDidUpdate()`
       + 每次更新都会调用
 ### 卸载 当组件从 `DOM `中移除时会调用如下方法：
