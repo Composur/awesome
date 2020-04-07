@@ -24,12 +24,12 @@
 ### 4.解释闭包的优点及应用
 ### 5.解释原型链
 ### 6.说几个flex的属性，说几种水平垂直居中
-### 7.Dom Diff的原理
-### 8.读过react源码吗？
+### 7.Dom Diff 的原理
+### 8.读过 react 源码吗？
 ### 9.如何设计移动端的适配？
 ### 10.谈谈web性能优化
 ### 11.输入url发生了啥
-### 12.说一下CORS的缺点，以及jsop的实现方式
+### 12.说一下 CORS 的缺点，以及jsop的实现方式
   + Web前端事先定义一个用于获取跨域响应数据的回调函数，并通过没有同源策略限制的script标签发起一个请求（将回调函数的名称放到这个请求的query参数里），然后服务端返回这个回调函数的执行，并将需要响应的数据放到回调函数的参数里，前端的script标签请求到这个执行的回调函数后会立马执行，于是就拿到了执行的响应数据。JSONP只能发起GET请求
   + JSONP只支持GET请求，CORS支持所有类型的HTTP请求
   + JSONP的优势在于支持老式浏览器，以及可以向不支持CORS的网站请求数据
@@ -38,7 +38,18 @@
 ### 15.call、apply、bind的区别
 ### 16.说出防抖和节流的区别
 ### 17.重绘和回流的区别
-### 18.解释一下react的setState
+
+​	`repaint`重绘，当页面中的元素只需要更新样式风格不影响布局，比如更换背景色background-color，这个过程就是重绘。
+
+### reflow 回流
+
+**盒模型**相关的属性: width，height，margin，display，border，etc
+
+**定位属性及浮动**相关的属性: top,position,float，etc
+
+改变节点内部**文字结构**也会触发回流: text-align, overflow, font-size, line-height, vertival-align，etc
+
+### 18.解释一下 react 的 setState
 ### 19.git的原理,git和svn的区别
 ### 20.说一下正向代理和反向代理的区别
 ### 21.cookie和session的区别
@@ -57,7 +68,7 @@ Cookie 的出现只是为了**解决客户端与服务端会话状态的问题�
 ### 23.webPack的dev和product的区别
   + 在开发环境中，我们需要：强大的 source map 和一个有着 live reloading(实时重新加载) 或 hot module replacement(热模块替换) 能力的 localhost server。而生产环境目标则转移至其他方面，关注点在于压缩 bundle、更轻量的 source map、资源优化等，通过这些优化方式改善加载时间
 ### 24.平时如何debug
-### 25.如何mock数据
+### 25.如何mock 数据
 ### 26.浏览器的强缓存和协商缓存
 ### 27.什么情况下会阻塞DOM渲染
 ### 28.什么是纯函数、高阶函数，二者的区别
