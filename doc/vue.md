@@ -452,7 +452,262 @@ vue的生命周期:  创建 => 挂载 => 更新 => 销毁
 + `activated()` : 路由组件激活, 被复用。
 
 
+
+### 8. Vue 3.0
+
+> 将 2.x 中与组件逻辑相关的选项以 API 函数的形式重新设计。
+>
+> 2.x 设计基于选项，3.x 设计基于函数。目的是为了让新 API 抽取逻辑变简单。达到复用，或更为了更好的组织代码。
+
+```js
+import { ref, computed, watch, onMounted } from 'vue'
+
+const App = {
+  template: `
+    <div>
+      <span>count is {{ count }}</span>
+      <span>plusOne is {{ plusOne }}</span>
+      <button @click="increment">count++</button>
+    </div>
+  `,
+  setup() {
+    // reactive state
+    const count = ref(0)
+    // computed state
+    const plusOne = computed(() => count.value + 1)
+    // method
+    const increment = () => { count.value++ }
+    // watch
+    watch(() => count.value * 2, val => {
+     console.log(`count * 2 is ${val}`)
+      })
+      // lifecycle
+      onMounted(() => {
+        console.log(`mounted`)
+      })
+      // expose bindings on render context
+      return {
+        count,
+        plusOne,
+        increment
+      }
+    }
+	}
+
+```
+
+#### 8.1 Vue2.0 存在的问题
+
++ 逻辑复用与组合不清晰，前者模板数据来源不明，存在 Mixins 冲突。后二者需要额外的组件封装逻辑，导致无谓的性能开销。
+  + Mixins
+  + 高阶组件
+  + `slot` / 插槽组件等
+  + 一个请求需要多个选项 api 协助
+    + 要用到 `props`, `data()`, `mounted` 和 `watch`，等。会随着业务的加深变得不好维护。
+
+#### 8.2 使用 function API 解决的问题
+
++ 可以解决上述问题
++ 对 `TS` 支持友好
+  + `TS` 对函数的参数、返回值和泛型的支持已经非常完备
++ 更小的打包尺寸
+  + 函数名和 `setup` 函数体内部的变量名都可以被压缩，但对象和 `class` 的属性/方法名却不可以。
++ 一个 `setup()`函数可以解决上述需要多个选项 api 协助的事情。
+  + 因为我们可以把 `setup`函数内部的逻辑拆分成更小的函数，可以进行剥离，如果基于选项 API 是做不到的，更别提 Mixins 维护它只会让你更烦恼。
+
+#### 8.3 组件状态
+
++ `setup()` (是一个组件选项)
+
+  + 在组件实例被创建时，初始化 `props` 后调用，第一个参数就是 `props`，内部的 `props` 会和外部保持一致。但是你不能在组件内部修改 `props`
+
+    ```js
+    const MyComponent = {
+      props: {
+        name: String
+      },
+      setup(props) {
+        console.log(props.name)
+      }
+    }
+    ```
+
+  + `setup()` 与 2.x 的 `data()` 类似，可以返回一个对象提供给当前模板渲染。
+
++ `setup()` 如何创建一个可以在内部管理的值。
+
+  + `ref()` ，它返回一个包装对象，这个对象只有 `value` 一个属性。包装对象的意义就在于我们在函数之间能够以引用的方式传递任意值类型的容器。下面返回了 `msg`，`appendName`。你可以在当前上下文中任意引用。在 Vue 3.x 中这个数据是响应式的。
+
+    ```js
+    import { ref } from 'vue'
+    
+    const MyComponent = {
+      setup(props) {
+        const msg = ref('hello')
+        const appendName = () => {
+          msg.value = `hello ${props.name}` // 对value属性赋值进行修改
+        }
+        return {
+          msg,
+          appendName
+        }
+      },
+      // msg 在模板中会自动展开内部的值
+      template: `<div @click="appendName">{{ msg }}</div>` 
+    }
+    ```
+
++ `computed() `
+
+  + 包装计算属性返回的值
+
+    ```js
+    import { ref, computed } from 'vue'
+    
+    const count = ref(0)
+    const countPlusOne = computed(() => count.value + 1)
+    
+    console.log(countPlusOne.value) // 1
+    
+    
+    // 请注意：你不能直接修改 countPlusOne.vlaue 因为计算属性的返回值是只读的
+    // 只有当依赖变化的时候它才会被重新计算
+    count.value++ // 修改原始 ref 返回的包装对象，计算机属性会保持同步更新，
+    
+    console.log(countPlusOne.value) // 2
+    ```
+
++ Wathcers
+
+  + `watch()` API 提供了基于观察状态的变化来执行副作用的能力。
+
+  + `watch()` 接收的第一个参数被称作 “数据源”，它可以是下面三种，第二个参数是 callback
+
+    + 一个返回任意值的函数
+    + 一个包装对象
+    + 一个包含上述两种数据源的数组
+
+    ```js
+    const count = ref(0)
+    watch(
+      // getter
+      () => count.value + 1,
+      // callback
+      (value, oldValue) => {
+        console.log('count + 1 is: ', value)
+      }
+    )
+    // -> count + 1 is: 1
+    
+    count.value++
+    // -> count + 1 is: 2
+    ```
+
+  + 与 2.x 的不同
+
+    + callback 在组件创建的时候就会执行一次，2.x 需要设置`immediate: true` 选项。
+
+    + 3.x `watch` 在`DOM` 渲染完成后调用，可以监听参数的变化直接请求数据进行渲染。
+
+      ```js
+      const MyComponent = {
+        props: {
+          id: Number
+        },
+        setup(props) {
+          const data = ref(null)
+          // 监听传入 id 的变化请求数据
+          watch(() => props.id, async (id) => {
+            data.value = await fetchData(id)
+          })
+          return {
+            data
+          }
+        }
+      }
+      ```
+
+      
+
+#### 8.4 生命周期函数
+
+> 所有现有的生命周期钩子都会有对应的 `onXXX` 函数（只能在 `setup()` 中使用）：
+
+```js
+import { onMounted, onUpdated, onUnmounted } from 'vue'
+
+const MyComponent = {
+  setup() {
+    onMounted(() => {
+      console.log('mounted!')
+    })
+    onUpdated(() => {
+      console.log('updated!')
+    })
+    // destroyed 调整为 unmounted
+    onUnmounted(() => {
+      console.log('unmounted!')
+    })
+  }
+}
+```
+
+
+
+#### 8.4 依赖注入
+
+在 2.x 中依赖注入的数据是非响应式的，在 3.x 中如注入一个包装对象数据是响应式的。
+
+```js
+import { provide, inject } from 'vue'
+
+const CountSymbol = Symbol()
+
+const Ancestor = {
+  setup() {
+    // providing a ref can make it reactive
+    const count = ref(0)
+    provide(CountSymbol, count)
+  }
+}
+
+const Descendent = {
+  setup() {
+    // 传入包装对象，Ancestor 改变 count,Descenden 中的 count 会更新。
+    const count = inject(CountSymbol) 
+    return {
+      count 
+    }
+  }
+}
+```
+
+
+
+#### 8.5 升级策略
+
++ 完全兼容旧写法，只是多了一个 `setup` 选项。适合复杂度较高的组件使用。也可以不用。
++ 提供可选的编译项，可以去掉依赖 2.x 的代码，减小打包体积。
+
+#### 8.5 对比 React Hooks
+
+**相同点：**
+
++ 具有同等的基于函数抽取和复用逻辑的能力
+
+**不同点：**
+
++ 组件函数调用次数、调用顺序、是否能有条件的调用都不同。
+  + React Hooks 在每次组件渲染的时候都会调用，通过隐式的将当前状态挂载在当前组件内部节点上，在下一次渲染的时候顺序取出。
+  + Vue 的 `setup` 只会在组件实例化的时候调用一次，通过引用在 `setup` 函数内的闭包达到更新的目的。
+  + `setup`  不受调用顺序的影响，且可以有条件的调用，例如 `if...else` 等。
++ 不需要使用 `useCallback` 缓存给子组件的更新，防止过度回调。
++ 不需要像给 `useEffect、useMemo、useCallback`  传错依赖而导致更新错误，Vue 是响应式的，依赖是全局追踪的，不需要手动维护。
+
+
+
 ### v-modal 的使用
+
 #### 修饰符
 1. v-modal.lazy
     + 事件触发的时候才调用，例如 input 回车的时候取值而不是实时取值
@@ -597,6 +852,40 @@ computed：
 watch
 
 + 使用 `watch` 选项允许我们执行异步操作 (访问一个 API)，限制我们执行该操作的频率，并在我们得到最终结果前，设置中间状态。这些都是计算属性无法做到的。
+
+
+
+#### 依赖注入
+
+**优点**
+
+> 可以理解为大范围有效的 `props` ，它可以使用提供者的方法，而不需要知道提供者是谁。
+
+子元素通过 `inject['方法名']` 的方式接收指定的父元素的方法。父元素通过 `provide` 给后代组件提供方法或数据。
+
+`provide` 和 `inject` 是组件上的实例选项。
+
+```js
+// 祖先组件提供方法。
+provide: function () {
+  return {
+    getMap: this.getMap
+  }
+}
+
+// 子孙组件注入使用
+inject: ['getMap']
+```
+
+
+
++ 祖先组件不需要知道哪些后代组件使用它提供的属性
++ 后代组件不需要知道被注入的属性来自哪里
+
+**缺点**
+
+耦合性高，重构困难。重要的是提供的数据是非响应式的。建议使用 `Vuex` 。
+
 
 
 
