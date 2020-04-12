@@ -527,7 +527,98 @@ moreWork();// 不必等到文件读取结束就可以执行此方法，此方法
 
 #### 6.4 事件循环
 
-每次点餐都是一个新的线程（你对服务员说，服务员再通知后厨做），例如：
+> 事件循环是 Node.js 处理非阻塞 I/O 操作的机制，依托 [libuv](https://libuv.org/)其中的一个操作完成的时候，内核通知 Node.js 将适合的回调函数添加到 *轮询* 队列中等待时机执行。
+
+##### 6.4.1 事件轮询机制解析
+
+Node.js 脚本启动后，开始初始化事件轮询，调用一些异步的 API、调度定时器，或者调用 `process.nextTick()`，然后开始处理事件循环。
+
+下图为轮询的各阶段：一共六个阶段，每个框表示一个阶段。执行到当前阶段时，会把当前阶队列中的所有回调函数执行完毕。然后移动到下一个阶段。
+
+![事件轮询阶段](./img/node_event_loop.jpg)
+
++ timer（定时器阶段）
+  + 轮询阶段（poll）控制何时执行定时器，当它的队列任务执行完毕（异步I/O），回到最接近定时器阀值的那个定时器，执行定时器中的回调。你设定的定时器延迟时间不一定就是真实的时间可能会超过这个时间。
++ poll （轮询阶段）
+  + 计算应该阻塞和轮询 I/O 的时间
+  + 处理 **轮询** 队列里的事件。直到队列为空。
+  + 轮询为空，将检查已经达到阀值的定时器，然后回到 timer 阶段执行定时器的回调。
++ check （检查阶段）
+  + 允许 `setImmediate()` 在当前阶段完成就执行回调。（需轮询队列为空，且使用 `setImmediate()`）
+  + `setImmediate()` 利用 `libuv` API 让回调在 **轮询** 阶段完成后执行。
+
+##### 6.4.2 `setImmediate()` vs `setTimeout()`
+
++ `setImmediate()` 和 `setTimeout() ` 类似，不同的地方上面说了，`setTimeout()` 回调是基于设置的毫秒值来执行，`setImmediate()` 是在当前 **轮询** 阶段完成， 就执行回调。
+
++ 不同情况调用顺序会不一致
+
+  + 不在同一个 I/O ，打印顺序受进程性能的约束，指不定是谁。
+
+    ```js
+    setTimeout(() => {
+      console.log('timeout');
+    }, 0);
+    
+    setImmediate(() => {
+      console.log('immediate');
+    });
+    ```
+
+  + 同一个 I/O 循环内调用，`setImmediate` 总是被优先调用。因为它在轮询结束就执行。
+
+    ```js
+    const fs = require('fs');
+    
+    fs.readFile(__filename, () => {
+      setTimeout(() => {
+        console.log('timeout');
+      }, 0);
+      setImmediate(() => {
+        console.log('immediate');
+      });
+    });
+    ```
+
+
+
+##### 6.4.3 `process.nextTick()`
+
+> 它是一个异步 API，在当前操作完成后处理，而不管是在哪个阶段。不受阶段的影响。
+
+目的是为了让我们可以在当前操作完成后立即调用我们需要执行的脚步。
+
+例如注册一个事件：
+
+```js
+const EventEmitter = require('events');
+const util = require('util');
+
+function MyEmitter() {
+  EventEmitter.call(this);
+
+  //  完成注册立即调用
+  process.nextTick(() => {
+    this.emit('event');
+  });
+}
+util.inherits(MyEmitter, EventEmitter);
+
+const myEmitter = new MyEmitter();
+myEmitter.on('event', () => {
+  console.log('an event occurred!');
+});
+```
+
+
+
+
+
+##### 6.4.4 事件轮询机制举例
+
+例如去餐厅吃饭：每次点餐都是一个新的线程（你对服务员说，服务员再通知后厨做）
+
+例如：
 
 + 点一份生蚝炒蛋，开启线程一。
 + 点一份蒜蓉西蓝花，开启线程二。
