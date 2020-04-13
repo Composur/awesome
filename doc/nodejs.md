@@ -551,7 +551,7 @@ Node.js 脚本启动后，开始初始化事件轮询，调用一些异步的 AP
 
 + `setImmediate()` 和 `setTimeout() ` 类似，不同的地方上面说了，`setTimeout()` 回调是基于设置的毫秒值来执行，`setImmediate()` 是在当前 **轮询** 阶段完成， 就执行回调。
 
-+ 不同情况调用顺序会不一致
++ 不同情况下调用顺序会不一致
 
   + 不在同一个 I/O ，打印顺序受进程性能的约束，指不定是谁。
 
@@ -675,25 +675,25 @@ setTimeout(() => {
 + 规范出处不同
 
   + 浏览器的[Event loop](https://www.w3.org/TR/html5/webappapis.html#event-loops)是在HTML5中定义的规范
-  + node中则由[libuv](http://thlorenz.com/learnuv/book/history/history_1.html)库实现
+  + Node.js 中则由[libuv](http://thlorenz.com/learnuv/book/history/history_1.html)库实现
 
 + 浏览器的事件循环 
 
-  <small>微任务（`microtask`Object.observe、MutationObserver、process.nextTick ，Promise.then catch。</small>
+  <small>微任务（`microtask `）Object.observe、MutationObserver、process.nextTick ，Promise.then/catch。</small>
 
-  <small>宏任务（`macroTask`） script 中代码、setTimeout、setInterval、I/O、UI render</small>
+  <small>宏任务（`macroTask`） script 中代码、setTimeout、setInterval、setImmediate、I/O、UI render</small>
 
-  + 在浏览器页面中可以认为初始执行线程中没有代码，每一个 `script` 标签中的代码是一个独立的 `task`，即会执行完前面的 `script` 中创建的 `microtask` 再执行后面的 `script` 中的同步代码。
+  + 在浏览器页面中可以认为初始执行的线程中没有代码，每一个 `script` 标签中的代码是一个独立的 `task`，即会执行完前面的 `script` 中创建的 `microtask` 再执行后面的 `script` 中的同步代码。
   + 如果`microtask` 一直被添加，则会继续执行 `microtask` ，“卡死” `macrotask`。 
 
 + Node.js 事件循环 6 个阶段
 
-  1. timers：执行满足条件的setTimeout、setInterval回调。
-  2. I/O callbacks：是否有已完成的I/O操作的回调函数，来自上一轮的poll残留。
+  1. timers：执行满足条件的` setTimeout`、`setInterval` 回调。
+  2. I/O callbacks：是否有已完成的I/O操作的回调函数，来自上一轮的 `poll` 残留。
   3. idle，prepare：可忽略
-  4. poll：等待还没完成的I/O事件，会因timers和超时时间等结束等待。
-  5. check：执行setImmediate的回调。
-  6. close callbacks：关闭所有的closing handles，一些onclose事件。
+  4. poll：等待还没完成的I/O事件，会因 `timers` 和超时时间等结束等待 。
+  5. check：执行 `setImmediate` 的回调。
+  6. close callbacks：关闭所有的  closing handles，一些 `onclose` 事件。
 
 
 
@@ -715,9 +715,10 @@ callback(err,result)
 下面会抛出一个全局的 `error`  
 
 ```js
-function interview(callback) {
+function interview(callback) { 
   const random = Math.random();
   console.log(random);
+  // setTimeout 和包裹它的 interview 不在同一个调用栈错误会抛到全局。
   setTimeout(function() {
     if (random > 0.5) {
       callback(random);
@@ -748,9 +749,13 @@ try {
 //     at processTimers (internal/timers.js:475:7)
 ```
 
+
+
 为什么会这样？`throw` 是在 `interview` 里面抛出的。但是并没有被 `catch` 捕获到。
 
-这就需要了解 node.js 的事件循环机制，因为每一次都是一次新的调用，`interview()` 和它里面的 `setTimeout`根本不在一个调用栈里面。而 `setTimeout` 执行完再次进入主线程调用的时候已经不是在`interview` 中执行的了，所以捕获不到。
+这就需要了解 Node.js 的事件循环机制，**因为每一次事件循环，都是一次新的调用，`interview()` 和它里面的 `setTimeout`根本不在一个调用栈里面**。而 `setTimeout` 执行完再次进入主线程调用的时候已经不是在`interview` 中执行的了，所以捕获不到。
+
+那么如何解决这类问题？
 
 既然有这样的错误我们就采用另一种写法：`callback` 的写法
 
@@ -782,20 +787,20 @@ interview(function(err,result) {
 // success 0.7680882379533018
 ```
 
-##### 
+
 
 
 
 #### 7.2 Promise
 
 + 在当期的事件循环中给不了你结果，但在未来的事件循环中会给到你结果。
-+ 简单来说 Promise 就是一个容器，里面保存着未来才会结束的事件（通常是一个异步操作）
++ 简单来说 Promise 就是一个容器，里面保存着未来才会结束的事件（通常是一个异步操作）。
 + Promise 的构造函数接收一个执行函数，执行函数执行完同步或则异步操作后，调用它的两个参数 `resolve` 和 `rejected`。这两个函数分别只能只能接受一个参数。
 + Promise 有三种状态` padding`（进行中）、`fulfilled`（成功）、`rejected` （失败）。
 + Promise 对象的改变只有从 `pending` 变为 `fulfilled`或 `rejected`，改变后状态就凝固了，然后在`.then(result)`就会得到这个结果。
 + 任何一个 `rejected` 状态且后面没有 `catch` 的` Promise`，都会造成浏览器或 `node` 环境的全局错误。 
 
-模拟一个  Promise
+##### 7.2.1 模拟一个  Promise
 
 ```js
 function Promise_(construstor) {
@@ -920,13 +925,15 @@ server.createServer(function(req,res){
 
 ##### 8.1.2 为什么是七层模型
 
+![osi](./img/osi.jpg)
+
+**A 到 B 如何通信？**
+
 a 点到 b 点的通信，过程较为复杂，考虑的问题较多。
 
 例如：在公司通知一件事情，由董事会决定，秘书处起草，集团下达到各个子公司，然后层层下达。
 
-![osi](./img/osi.jpg)
-
-结合上图， a 点到 b 点的通信就是，a应用层--a物理层--路由器--b物理层--b应用层，的传输过程。
+结合上图， a 点到 b 点的通信就是，a应用层--a物理层--路由器--b物理层--b应用层，是一个 U 字形的传输过程。
 
 ![数据传递](./img/data_trans.jpg)
 
@@ -936,7 +943,7 @@ a 点到 b 点的通信，过程较为复杂，考虑的问题较多。
   + 为应用软件提供接口，使应用程序能够使用网络服务。
   + 常见的应用层协议：http(80)、ftp(20/21)、telnet(23)、dns(53)、smtp(25)、pop3(110)
 + 表示层
-  + 对应用层的数据编码解码，加解密，压缩解压缩。
+  + 对应用层的数据编码、解码，加解密，压缩解压缩。
 +  会话层
   + 对话控制、同步。
 
