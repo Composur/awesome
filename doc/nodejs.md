@@ -1454,7 +1454,9 @@ while(true){
   + 基本不会变动，也不会因为请求参数不同而变化
   + 例如：脚本、样式、图片 ...
   + 解决方案：利用 `CDN` 加速，`HTTP` 缓存
+    + CDN，当用户初次访问当前`cdn` 节点的时候该节点会向源站点发送请求，并缓存请求资源供下次使用。
   + 一般用 `nginx` 进行转发，用 `node` 作为静态服务器的速度比不上 `nginx`
+    + 二者性能相差一倍多
 
 + 动态内容
 
@@ -1475,14 +1477,39 @@ while(true){
       location ~ /user/(\d*) {
        # 正则匹配请求 id 省的 node 层去匹配，性能优化
         proxy_pass http://xxx.com/user/detail?colummid=$1;
-        proxy_cache
+        proxy_cache 
       }
       ...
     }
     
     ```
 
-    
+
+#### 12.2 redis
+
+> 原理：使用机器的内存作为存储。适合分布式部署共享数据。空间换时间。
+
+通过异步调用取出 redis 的缓存内容，利用中间件获取缓存。
+
+```js
+const redis = require("redis");
+const { promisify } = require("util");
+const client = redis.createClient();
+const getAsync = promisify(client.get).bind(client);
+ 
+// 伪代码
+// 设置缓存
+client.set("key", "value");
+// 取缓存
+client.get("key",data,{expire:xxx});
+
+app.use(async (req,res)=>{
+  // 让请求的 url 作为 key 取出对应 value 
+  const res = await getAsync(req.url) 
+})
+```
+
+
 
 
 
