@@ -1,37 +1,119 @@
-### web性能优化
-#### 1.缓存
+### web 性能优化 
+
+#### 1.加载渲染层面
+
+##### 1.1 缓存
+
 首次没有缓存
-#### 2.DNS查询
+##### 1.2 DNS查询
+
   + 减少DNS查询
   + 放到一个域名下
-#### 3.建立tcp链接
+##### 1.3 建立tcp链接
+
   + 复用连接数 请求头加上keep-alive
   + http2.0 多路复用
-#### 4.发送请求
+##### 1.4 发送请求
+
   + 减少cookie体积，不滥用cookie
   + 发送多个HTTP请求，增加域名（可以多发送http请求）和减少DNS查询（减少HTTP请求），进行权衡比较，文件多增加，文件少放到一起
   + Cache-Control:no-cache 是不发送请求
-#### 5.接收响应
+##### 1.5 接收响应
+
  + ETag：发送请求返回一个304用本地的
   + gzip压缩
-#### 6.接收完成
+##### 1.6 接收完成
+
   + 得到HTML
-#### 7.解析HTML
+##### 1.7 解析HTML
+
   + 查看 DOCTYPE html
   + 逐行阅读
   + 发现标签<h1>
     + Chrome不渲染
       + 因为解析到css后会重新渲染样式，解析完css再渲染页面能避免重复渲染。
     + IE，Firefox直接渲染
-#### 8.下载CSS
+##### 1.8 下载CSS
+
   + 增加域名,使用CDN（就近访问 ）下载多个css
   + css放到head里，js放到最后（尽早获取DOM节点）
   + Chrome会阻塞html渲染，IE不会
   + 可以同时下载8个，并行下载
   + IE能同时下载4个
-#### 9.依次解析CSS
-#### 10.看到JS
+##### 1.9 依次解析CSS
+
+##### 1.10 看到JS
+
   + 懒加载
   + 有js就下载，不会执行JS
-#### 11.下载JS
+##### 1.11 下载JS
+
   + 会阻塞HTML
+
+
+
+#### 2. 代码编写层面
+
+##### 2.1 循环的性能
+
+考察 `for`、`for...of`、`for...in`、`forEach`、`while`、`do...while`等
+
+可以使用 `console.time` 和 `console.timeEnd` 进行测试
+
+遍历的时候是否存在查找原型链的过程
+
+`v8引擎`新版本针对**对象取值**等操作进行了最大限度的性能优化。
+
+**其实不管是 forEach 还是 for of  在 v8 中随便用，无需考虑性能问题 **
+
+`for循环 while循环 for of 循环`是可以通过`break`关键字跳出的，而`forEach map`这种循环是无法跳出的。
+
+取值循环（列表渲染）：
+
+```js
+const persons = ['郑昊川', '钟忠', '高晓波', '韦贵铁', '杨俊', '宋灿']
+// 方法一 第二快
+for (let i = 0; i < persons.length; i++) {
+  console.log(persons[i])
+}
+// 方法二
+for (let i = 0, len = persons.length; i < len; i++) {
+  console.log(persons[i])
+}
+// 方法三
+for (let i = 0, person; person = persons[i]; i++) {
+  console.log(person)
+}
+// 方法四 平局使用内存最小 速度最快
+// 只创建了一个变量 i
+for (let i = persons.length; i--;) {
+  console.log(persons[i])
+}
+
+```
+
+##### 2.2 if...else switch
+
+数组的写法：
+
+```js
+const statusArr = [function(){
+    console.log(1)
+},
+    function () {
+        console.log(2)
+    },]
+// 执行
+let a = 1
+// 进行匹配
+statusArr[a || 1]()
+
+```
+
+
+
++ 1-4 个条件判断还是推荐 `if-else` 毕竟性能已经不错了和数组平起平坐。
+
++ 4-8 个数量 `switch` 比 `if-else` 好用，但是还是远远不如数组。
+
+  

@@ -107,5 +107,86 @@ after 伪元素其实也是通过 content 在元素的后面生成了内容为�
 - position（absolute，fixed）
 - fieldset 元素
 
+### 4. CSS 开启硬件加速
+
++ 谨慎使用
++ 如果你的页面没有什么性能问题，不要进行过度优化。
+
+现在大多电脑的显卡都支持硬件加速，我们可以在浏览器中用 CSS 开启硬件加速，提升性能。
+
+CSS 的 `animations`、`transforms` 、`translates` 不会自动开启 `GPU` 加速。只是正常的通过浏览器的渲染。
+
+我们可以使用浏览器提供的一些触发 `GPU` 的规则进行开启，当浏览器检测到这些规则就会开启 `GPU` 加速。
+
+一种 hack 的写法
+
+```css
+.speed {
+   -webkit-transform: translateZ(0);
+   -moz-transform: translateZ(0);
+   -ms-transform: translateZ(0);
+   -o-transform: translateZ(0);
+   transform: translateZ(0);
+   /* Other transform properties here */
+}
+```
+
+使用 will-change 达到效果
+
+> will-change 可以告知浏览器该元素会有哪些变化的方法，浏览器可以在真实元素触发前做好对应的优化准备工作。可以将一部分复杂的工作提前准备好。
+
+对可能产生动画的属性设置这个属性，并在动画结束后移除这个属性。进行动态的添加移除。不要固定写上面。
+
+[效果演示](https://codepen.io/mickmetalholic/pen/GxWGVG?__cf_chl_jschl_tk__=427f00c75782e4c5ffc372a7adc68dfc6fb7eb80-1587001785-0-AQtJqGAbVqobFhLupvBT6wt6qKMD2LUAnZm6KRXVM-PgbzYTPJ_J4VYRYCK3GbVZBIGLUDLiDL-g5VA8m4t0adDddKI4zHr4VJ9jUzXzsrr5v4H8cqv2qd9g1gQ3KQjWHGh5sGWoRZUR0PcIqrKoJ5IAuMa_19ZyDSYobnVt37xKAfKmor9xKIppXprkO5WgiQtjwXPxkgdbTZjuPhXUkoWHBjGydad9isvLCz8kPf0OM5Cj_zPUZWHGjCYkHnCMsryZW6Cu0RXTuvAkGvjE3eRyleOIFMceMBgCElbx2OEaGGIGc76fLAZv3B461ivU1I81INwisl_nEijBltJU6brLhpWhlEHIbKvkHx_s11A0h91troV5G6rQ9VwQBX2jwQ)
+
+```css
+#container {
+  width: 300px;
+  height: 300px;
+  position: absolute;
+}
+
+.rect {
+  background-color: #ccc;
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  will-change: left;
+}
+
+.animate .rect  {
+	animation: slide 3.7s ease-in-out infinite;
+}
+
+@keyframes slide {
+	25% {
+		left: 250px;
+		top: 0px;
+	}
+	50% {
+		left: 250px;
+		top: 250px;
+	}
+	75% {
+		left: 0px;
+		top: 250px;
+	}
+}
+```
+
+
+
+不要这样使用：得不偿失。
+
+```css
+* {  will-change: all;}
+```
+
+
+
+
+
 
 
