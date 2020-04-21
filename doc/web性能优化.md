@@ -71,7 +71,7 @@
 取值循环（列表渲染）：
 
 ```js
-const persons = ['郑昊川', '钟忠', '高晓波', '韦贵铁', '杨俊', '宋灿']
+const persons = ['1', '2', '3', '4', '5', '6']
 // 方法一 第二快
 for (let i = 0; i < persons.length; i++) {
   console.log(persons[i])
