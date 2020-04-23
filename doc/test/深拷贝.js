@@ -32,4 +32,4 @@ var result = deepCopy(obj)
 result.test = 124
 console.log(obj)
 console.log(result)
-console.log(result.a.aa.bbbb(12))
+console.log(newObj(obj))
