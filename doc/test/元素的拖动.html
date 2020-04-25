@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ele-drag</title>
+</head>
+<body>
+  <div id="drag" style="width: 100px;height: 100px;background: red;position: absolute;"></div>
+  <script>
+    // 不使用rxjs实现。
+const drag = document.getElementById("drag");
+
+let isDrag = false;
+let initialX = null,
+    initialY = null;
+
+drag.addEventListener("mousedown", function(e) {
+    isDrag = true;
+    const { left, top } = drag.getBoundingClientRect();
+    initialX = e.clientX - left;
+    initialY = e.clientY - top;
+    console.log(initialX,initialY)
+});
+
+document.addEventListener("mouseup", function(e) {
+    isDrag = false;
+    console.log(isDrag)
+});
+
+document.addEventListener("mousemove", function(e) {
+    if (isDrag) {
+        drag.style.left = `${e.clientX - initialX}px`
+        drag.style.top = `${e.clientY - initialY}px`;
+        console.log(drag.style.left,drag.style.top)
+    }
+});
+
+  </script>
+</body>
+</html>
