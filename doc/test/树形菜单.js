@@ -24,11 +24,10 @@ function toTree(data) {
   data.forEach(function (item) {
     map[item.id] = item;
   });
-  console.log(map)
   //        console.log(map);
   var val = [];
   data.forEach(function (item) {
-    // 以当前遍历项，的pid,去map对象中找到索引的id
+    // 以当前遍历项的pid,去map对象中找到索引的id
     var parent = map[item.pid];
     // 如果找到索引，那么说明此项不在顶级当中,那么需要把此项添加到，他对应的父级中
     if (parent) {

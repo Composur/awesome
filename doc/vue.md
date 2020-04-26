@@ -213,7 +213,36 @@ class Watcher { // 什么时候绑定？ 在解析、更新数据的时候
 
 ### Vue 问题
 
-#### 1. 组件
+#### 1. 组件化
+
+1. 构造
+
+   ```javascript
+    const component = Vue.extend({
+        templete:`<div></div>`
+    })
+   ```
+
+   语法糖注册方式
+
+   ```javascript
+   Vue.component('my-component',{
+        templete:`<div></div>` 
+   })
+   ```
+
+2. 注册
+   $ 全局注册
+
+   ```javascript
+   Vue.component('my-component',component)
+   ```
+
+   $ 实例下注册的组件是局部组件
+
+3. 使用
+
+   + 在创建的实例中使用
 
 ##### 1.1 [`data` 必须是一个函数](https://cn.vuejs.org/v2/guide/components.html#data-必须是一个函数)
 
@@ -281,15 +310,7 @@ requireAll(req)
 // 记住全局注册的行为必须在根 Vue 实例 (通过 new Vue) 创建之前发生
 ```
 
-
-
-
-
-##### 1.3 **每个组件必须只有一个根元素**
-
-
-
-### 1. slot/插槽
+#### 2. slot/插槽
 
 > 原理类似电脑上的 use 电源 耳机 插槽等，让使用者（一般是父组件传入的html模板）决定怎么使用 这是具名插槽
 ```javascript
@@ -320,17 +341,20 @@ requireAll(req)
     命名插槽(named slot)
     作用域插槽(scoped slot)（数据由子组件决定，样式由父组件决定）
 
-    ```
-    $ 父 获取数据
-    <template :slot-scope="data">
-        //do
-    </template>
-    $ 子 传递数据
-     <slot :data='data'>
-    
-    </slot>
-    
-    ```
+~~~vue
+```
+$ 父 获取数据
+<template :slot-scope="data">
+    //do
+</template>
+
+$ 子 传递数据
+ <slot :data='data'>
+
+</slot>
+
+```
+~~~
 
 3). 区别
     普通插槽: 子组件只能有一个插槽, 标签体内容在父组件中解析好后(数据在父组件), 传递给这个插槽
@@ -339,7 +363,8 @@ requireAll(req)
                 子组件需要先向父组件传递数据, 父组件根据数据渲染标签结构后传递给子组件的插槽
     需求: todo列表组件: 根据内部的todos数据显示todo列表, 但列表项的样式由使用者决定
 
-### 2. mixin/混合
+#### 3. mixin/混合
+
     1). 作用:
         复用多个组件重复的JS代码(配置)
         一个mixin是一个可复用的组件配置对象
@@ -360,8 +385,8 @@ requireAll(req)
         通过mixins配置引用: mixins: [myMixin]
         mixin中的配置与当前组件的配置会自动合并
 
+#### 4. 动态组件 / 缓存组件 / 异步组件
 
-### 3. 动态组件 / 缓存组件 / 异步组件
     1). 动态组件
         通过<component :is="componentName">来动态决定渲染哪个组件
         被切换的组件默认会被自动销毁
@@ -373,7 +398,8 @@ requireAll(req)
         Vue 能够将组件定义为一个工厂函数(factory function)，此函数可以异步地解析(resolve)组件
         import()的语法比较适合的是路由组件的异步懒加载
 
-### 4. 原生事件 / vue自定义事件 / 全局事件总线
+#### 5. 原生事件 / vue自定义事件 / 全局事件总线
+
     1). 什么条件下绑定的原生DOM事件监听?
         a. 给html标签绑定dom事件监听: <div ="handleClick">
         b. 给组件标签绑定dom事件监听(使用.native): <MyCommponent @click.native="handleClick">
@@ -389,7 +415,8 @@ requireAll(req)
             分发事件/传递数据的组件: this.$bus.$emit('eventName', data)
             处理事件/接收数据的组件: this.$bus.$on('eventName', (data) => {})
 
-### 5. 使用组件标签上使用v-model
+#### 6. 使用组件标签上使用v-model
+
     1). v-model的本质
         <input v-model="name">
         <input :value="name" @input="name = $event.target.value">
@@ -399,7 +426,8 @@ requireAll(req)
             props: ['value']
             <input :value='value' @input="$emit('input', $event.target.value)">
 
-### 6. vue的响应式原理
+#### 7. vue的响应式原理
+
 > Vue在进行DOM渲染时会尽可能的复用已经存在的的元素，而不是重新创建元素。强制不使用的话就加一个key。
     1). 关注点有哪些?
         vue的数据绑定效果: 组件更新data数据后, 当前组件及相关的子组件都会更新相应的节点
@@ -430,7 +458,7 @@ requireAll(req)
             组件会被多次使用, 每次使用都会读取data配置值, 如果是对象, 那就会共用一个data对象
             而函数就没有问题, 因为每次调用函数返回一个新的data对象
 
-### 7. 组件的生命周期
+#### 8. 组件的生命周期
 
 vue的生命周期:  创建 => 挂载 => 更新 => 销毁
 
@@ -451,9 +479,257 @@ vue的生命周期:  创建 => 挂载 => 更新 => 销毁
 + `deactivated()` : 路由组件失活, 但没有死亡。
 + `activated()` : 路由组件激活, 被复用。
 
+#### 9. 组件缓存 keep-alive 
+
+1. 获取`keep-alive`对象包括的第一个子组件对象
+2. 根据白黑名单(inclued excude)是否匹配返回本身的`vnode`
+3. 根据`vnode`的`cid`和`tag`生成的`key`，在缓存对象中是否有当前缓存，如果有则返回，并更新`key`在`keys`中的位置
+4. 如果当前缓存对象不存在缓存，就往`cache`添加这个的内容，并且根据`LRU`算法删除最近没有使用的实例
+5. 设置为第一个子组件对象的`keep-alive`为`true
+
++ keep-alive 包含的组件生命周期可以有下列两个方法
+
+  + activated
+  + deactivated
+  + 可以有 include，exclude  用来排除不需要缓存的组件。
+
+  ```jsx
+  <keep-alive exclude="xxx,xxx"><router-view/><keep-alive/>
+  ```
+
+#### 10. computed 和 watch 有啥区别
+
+相同点：都监听/依赖一个数据，并进行处理。
+
+不同点：`computed`是对同步数据的处理，`watch`主要是观测某个数据的变化进而去执行一大段业务逻辑。
+
+能用 `computed`就不用`watch`。
+
++ `computed`（计算属性）：
+  + 用来处理复杂的模板逻辑运算，类似过滤器，是对同步数据的处理。
+  + **计算属性是基于它们的响应式依赖进行缓存的**。只在相关响应式依赖发生改变时它们才会重新求值。
+  + 计算属性会缓存结果，避免重复计算。组件的 data 发生改变才进行计算。
+
++ `watch`（侦听属性）：
+
+  + 用来观察和响应 Vue 实例上数据的变动，然后进行一些操作，执行一些方法（一般是异步操作）。 
+
+  + 使用 `watch` 选项允许我们执行异步操作 (访问一个 API)，限制我们执行该操作的频率，并在我们得到最终结果前，设置中间状态。这些都是计算属性无法做到的。
+
+  + `watch`初始化的时候不会执行，需要加上`immediate:true`才可以。
+
+  + `deep:true`
+
+    + 深度遍历，因为 Vue 不能检测到对象属性直接的添加或删除。下面的 `obj.a`值的改变是检测不到的。
+
+    ```vue
+    <div id="app">
+      <div>obj.a: {{obj.a}}</div>
+      <input type="text" v-model="obj.a">
+    </div>
+    
+    <script>
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        obj: {
+        	a: 1
+        }
+      },
+      watch: {
+        obj: {
+          handler(val) {
+           console.log('obj.a changed')
+          },
+          immediate: true
+        }
+      }
+    })
+    </script>
+    
+    
+    <script>
+    // 给每个属性都加一层监听性能开销太大,改成下面，只有遇到 `obj.a`才进行监听。
+        watch: {
+        'obj.a': {
+          handler(val) {
+           console.log('obj.a changed')
+          },
+          immediate: true
+          deep: true
+        }
+      }
+    
+    </script>
+    
+    ```
+
+    
 
 
-### 8. Vue 3.0
+
+#### 11. 依赖注入
+
+**优点**
+
+> 可以理解为大范围有效的 `props` ，它可以使用提供者的方法，而不需要知道提供者是谁。
+
+子元素通过 `inject['方法名']` 的方式接收指定的父元素的方法。父元素通过 `provide` 给后代组件提供方法或数据。
+
+`provide` 和 `inject` 是组件上的实例选项。
+
+```js
+// 祖先组件提供方法。
+provide: function () {
+  return {
+    getMap: this.getMap
+  }
+}
+
+// 子孙组件注入使用
+inject: ['getMap']
+```
+
+
+
++ 祖先组件不需要知道哪些后代组件使用它提供的属性
++ 后代组件不需要知道被注入的属性来自哪里
+
+**缺点**
+
+耦合性高，重构困难。重要的是提供的数据是非响应式的。建议使用 `Vuex` 。
+
+### Vuex 问题
+
+什么需要放到 vuex 上，需要共享的数据。
+
++ token、名称、位置、头像、商品、收藏等。
+
+#### 1. 获取veux上的state
+
+由于 Vuex 的状态存储是响应式的，从 store 实例中读取状态最简单的方法就是在计算属性中返回某个状态：
+
+```javascript
+computed: {
+    count () {
+     return this.$store.state.count
+    }
+  }
+```
+
+获取多个 辅助函数 mapState 返回的是一个对象
+
+```javascript
+ computed: {
+    ...mapState(['address']) //映射的计算属性的名称与 state 的子节点名称相同,都是address 可以简写成这样
+  },
+  # 相当于
+ computed: {
+   address(){
+     return this.$store.state.count
+   }
+  },
+   # 相当于
+ computed: mapState({
+    address:state => state.address
+  }),
+```
+
+#### 2. actions 和 mutations 有什么区别
+
++ mutation 做同步、action 做异步。
+
++ 事实上在 vuex 里面 actions 只是一个架构性的概念，并不是必须的，说到底只是一个函数，你在里面想干嘛都可以，只要最后触发 mutation 就行。异步竞态怎么处理那是用户自己的事情
++ Action 提交的是 mutation，而不是直接变更状态。 Action 可以包含任意异步操作。个人觉得这个 action 的产生就是因为 mutation 不能进行异步操作，如果有异步操作那么就用 action 来提交mutation
+
+### vue-router 问题
+
+> 路由表：是一个映射表，决定了数据包的指向，内网 IP 和 mac 地址绑定。
+>
+> 解析过程：
+>
+> 1. 导航被触发。
+> 2. 在失活的组件里调用离开守卫。
+> 3. 调用全局的 `beforeEach` 守卫。
+> 4. 在重用的组件里调用 `beforeRouteUpdate` 守卫 (2.2+)。
+> 5. 在路由配置里调用 `beforeEnter`。
+> 6. 解析异步路由组件。
+> 7. 在被激活的组件里调用 `beforeRouteEnter`。
+> 8. 调用全局的 `beforeResolve` 守卫 (2.5+)。
+> 9. 导航被确认。
+> 10. 调用全局的 `afterEach` 钩子。
+> 11. 触发 DOM 更新。
+> 12. 用创建好的实例调用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数。
+
+#### 1.使用
+
++ 通过 Vue.use(Router) 安装插件
+
++ 通过 mode 配置 hash 和 history 两种模式
+
++ 可以在方法中获取 this.$router
+
+#### 1.1 Router-link
+
+```html
+ <--! 默认是 push 浏览器可以前进、回退 -->
+<router-link to = '/path' replace active-class="active 可以在路由统一定义选中样式">   
+```
+
+#### 1.2 $route vs $router
+
++ `$route` 代表当前路由，可以配置 meta 等属性。例如可以在  `beforeEach` 里面实现获取每一个 meta 的 title 改变标签页的 title
++ `$router` 是路由方法，是 new Router 。
+
+#### 1.3 前端路由原理
+
+> 本质是监听 url 的变化，根据匹配的规则动态显示网页。
+
++ `hash` 模式
+
+  + 通过 `hasChange` 事件监听 `/#/` 后面 `URL` 的变化跳转到对应的页面。
+
+    ```js
+    window.location.hash="#search"
+    window.location.replace(path);
+    
+    function matchAndUpdate () {
+       // todo 匹配 hash 做 dom 更新操作
+    }
+    
+    window.addEventListener('hashchange', matchAndUpdate)
+    
+    ```
+
+  + `/#/` 后 `URL` 的变化不会向服务端请求数据。
+
+  + 手动刷新当前页面的时候不会触发 `hasChange` 事件。
+
++ `history` 模式
+
+  + `html5` 新模式，比 `hash` 模式美观（没有 `/#/`），又提供了 `history` API。
+
+    ```js
+    window.history.pushState(null, null, path);
+    window.history.replaceState(null, null, path);
+    ```
+
+  + 通过调用 `pushState` `go` 等方法实现跳转。
+
+  + `URl` 改变的时候会向服务端请求，所以部署的时候需要进行重定向。
+
+    ```sh
+     # nginx config
+     location @router {
+                rewrite ^.*$ /index.html break;
+        }
+    ```
+
+    
+
+
+
+### Vue 3.0
 
 > 将 2.x 中与组件逻辑相关的选项以 API 函数的形式重新设计。
 >
@@ -496,7 +772,7 @@ const App = {
 
 ```
 
-#### 8.1 Vue2.0 存在的问题
+#### 1. Vue2.0 存在的问题
 
 + 逻辑复用与组合不清晰，前者模板数据来源不明，存在 Mixins 冲突。后二者需要额外的组件封装逻辑，导致无谓的性能开销。
   + Mixins
@@ -505,7 +781,7 @@ const App = {
   + 一个请求需要多个选项 api 协助
     + 要用到 `props`, `data()`, `mounted` 和 `watch`，等。会随着业务的加深变得不好维护。
 
-#### 8.2 使用 function API 解决的问题
+#### 2. 使用 function API 解决的问题
 
 + 可以解决上述问题
 + 对 `TS` 支持友好
@@ -515,7 +791,7 @@ const App = {
 + 一个 `setup()`函数可以解决上述需要多个选项 api 协助的事情。
   + 因为我们可以把 `setup`函数内部的逻辑拆分成更小的函数，可以进行剥离，如果基于选项 API 是做不到的，更别提 Mixins 维护它只会让你更烦恼。
 
-#### 8.3 组件状态
+#### 3. 组件状态
 
 + `setup()` (是一个组件选项)
 
@@ -629,7 +905,7 @@ const App = {
 
       
 
-#### 8.4 生命周期函数
+#### 4. 生命周期函数
 
 > 所有现有的生命周期钩子都会有对应的 `onXXX` 函数（只能在 `setup()` 中使用）：
 
@@ -654,7 +930,7 @@ const MyComponent = {
 
 
 
-#### 8.4 依赖注入
+#### 5. 依赖注入
 
 在 2.x 中依赖注入的数据是非响应式的，在 3.x 中如注入一个包装对象数据是响应式的。
 
@@ -684,12 +960,12 @@ const Descendent = {
 
 
 
-#### 8.5 升级策略
+#### 6. 升级策略
 
 + 完全兼容旧写法，只是多了一个 `setup` 选项。适合复杂度较高的组件使用。也可以不用。
 + 提供可选的编译项，可以去掉依赖 2.x 的代码，减小打包体积。
 
-#### 8.5 对比 React Hooks
+#### 7. 对比 React Hooks
 
 **相同点：**
 
@@ -703,192 +979,6 @@ const Descendent = {
   + `setup`  不受调用顺序的影响，且可以有条件的调用，例如 `if...else` 等。
 + 不需要使用 `useCallback` 缓存给子组件的更新，防止过度回调。
 + 不需要像给 `useEffect、useMemo、useCallback`  传错依赖而导致更新错误，Vue 是响应式的，依赖是全局追踪的，不需要手动维护。
-
-
-
-### v-modal 的使用
-
-#### 修饰符
-1. v-modal.lazy
-    + 事件触发的时候才调用，例如 input 回车的时候取值而不是实时取值
-2. v-modal.number
-    + 必须是数字，因为v-modal 赋值的时候是 string 类型
-3. v-modal.trim
-    + 去除两边的空格
-
-### Vue 组件化
-1. 构造
-    ```javascript
-     const component = Vue.extend({
-         templete:`<div></div>`
-     })
-    ```
-    语法糖注册方式
-    ```javascript
-    Vue.component('my-component',{
-         templete:`<div></div>` 
-    })
-    ```
-
-2. 注册
-    $ 全局注册
-    
-    ```javascript
-    Vue.component('my-component',component)
-    ```
-    $ 实例下注册的组件是局部组件
-3. 使用
-   
-    + 在创建的实例中使用
-
-### Vuex 问题
-
-什么需要放到 vuex 上，需要共享的数据。
-
-+ token、名称、位置、头像、商品、收藏等。
-
-#### 1. 获取veux上的state
-
-由于 Vuex 的状态存储是响应式的，从 store 实例中读取状态最简单的方法就是在计算属性中返回某个状态：
-
-```javascript
-computed: {
-    count () {
-     return this.$store.state.count
-    }
-  }
-```
-
-获取多个 辅助函数 mapState 返回的是一个对象
-
-```javascript
- computed: {
-    ...mapState(['address']) //映射的计算属性的名称与 state 的子节点名称相同,都是address 可以简写成这样
-  },
-  # 相当于
- computed: {
-   address(){
-     return this.$store.state.count
-   }
-  },
-   # 相当于
- computed: mapState({
-    address:state => state.address
-  }),
-```
-
-#### 2. actions 和 mutations 有什么区别
-
-+ mutation 做同步、action 做异步。
-
-+ 事实上在 vuex 里面 actions 只是一个架构性的概念，并不是必须的，说到底只是一个函数，你在里面想干嘛都可以，只要最后触发 mutation 就行。异步竞态怎么处理那是用户自己的事情
-+ Action 提交的是 mutation，而不是直接变更状态。 Action 可以包含任意异步操作。个人觉得这个 action 的产生就是因为 mutation 不能进行异步操作，如果有异步操作那么就用 action 来提交mutation
-
-### vue-router 问题
-
-> 路由表：是一个映射表，决定了数据包的指向，内网 IP 和 mac 地址绑定。
->
-> 解析过程：
->
-> 1. 导航被触发。
-> 2. 在失活的组件里调用离开守卫。
-> 3. 调用全局的 `beforeEach` 守卫。
-> 4. 在重用的组件里调用 `beforeRouteUpdate` 守卫 (2.2+)。
-> 5. 在路由配置里调用 `beforeEnter`。
-> 6. 解析异步路由组件。
-> 7. 在被激活的组件里调用 `beforeRouteEnter`。
-> 8. 调用全局的 `beforeResolve` 守卫 (2.5+)。
-> 9. 导航被确认。
-> 10. 调用全局的 `afterEach` 钩子。
-> 11. 触发 DOM 更新。
-> 12. 用创建好的实例调用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数。
-
-#### 1.使用
-
-+ 通过 Vue.use(Router) 安装插件
-
-+ 通过 mode 配置 hash 和 history 两种模式
-
-+ 可以在方法中获取 this.$router
-
-#### 1.1 Router-link
-
-```html
- <--! 默认是 push 浏览器可以前进、回退 -->
-<router-link to = '/path' replace active-class="active 可以在路由统一定义选中样式">   
-```
-
-#### 1.2
-
-+ $route 代表当前路由，可以配置 meta 等属性。
-+ 例如可以在  `beforeEach` 里面实现获取每一个 meta 的 title 改变标签页的 title
-+ $router 是路由方法，是 new Router 。
-
-#### 组件缓存 keep-alive 
-
-1. 获取`keep-alive`对象包括的第一个子组件对象
-2. 根据白黑名单(inclued excude)是否匹配返回本身的`vnode`
-3. 根据`vnode`的`cid`和`tag`生成的`key`，在缓存对象中是否有当前缓存，如果有则返回，并更新`key`在`keys`中的位置
-4. 如果当前缓存对象不存在缓存，就往`cache`添加这个的内容，并且根据`LRU`算法删除最近没有使用的实例
-5. 设置为第一个子组件对象的`keep-alive`为`true
-
-+ keep-alive 包含的组件生命周期可以有下列两个方法
-  + activated
-  + deactivated
-  + 可以有 include，exclude  用来排除不需要缓存的组件。
-  
-  ```jsx
-  <keep-alive exclude="xxx,xxx"><router-view/><keep-alive/>
-  ```
-
-#### computed 和 watch 有啥区别
-
-computed：
-
-+ 用来处理复杂的模板逻辑运算。
-+ **计算属性是基于它们的响应式依赖进行缓存的**。只在相关响应式依赖发生改变时它们才会重新求值。
-+ 计算属性会缓存结果，避免重复计算。组件的 data 发生改变才进行计算。
-
-watch
-
-+ 使用 `watch` 选项允许我们执行异步操作 (访问一个 API)，限制我们执行该操作的频率，并在我们得到最终结果前，设置中间状态。这些都是计算属性无法做到的。
-
-
-
-#### 依赖注入
-
-**优点**
-
-> 可以理解为大范围有效的 `props` ，它可以使用提供者的方法，而不需要知道提供者是谁。
-
-子元素通过 `inject['方法名']` 的方式接收指定的父元素的方法。父元素通过 `provide` 给后代组件提供方法或数据。
-
-`provide` 和 `inject` 是组件上的实例选项。
-
-```js
-// 祖先组件提供方法。
-provide: function () {
-  return {
-    getMap: this.getMap
-  }
-}
-
-// 子孙组件注入使用
-inject: ['getMap']
-```
-
-
-
-+ 祖先组件不需要知道哪些后代组件使用它提供的属性
-+ 后代组件不需要知道被注入的属性来自哪里
-
-**缺点**
-
-耦合性高，重构困难。重要的是提供的数据是非响应式的。建议使用 `Vuex` 。
-
-
-
-
 
 
 
