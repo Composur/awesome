@@ -1,6 +1,6 @@
 var nav = require('./links/nav.js');
 module.exports = {
-  base: '/awesome/',
+  base: '/Composur.github.io/',
   title: 'Awesome-FE',
   description: '个人笔记',
   themeConfig: {
