@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>JavaScript原型到原型链 | Awesome-FE</title>
+    <meta name="generator" content="VuePress 1.4.1">
+    
+    <meta name="description" content="个人笔记">
+    <link rel="preload" href="/awesome/assets/css/0.styles.d47d1918.css" as="style"><link rel="preload" href="/awesome/assets/js/app.0dd9ff1b.js" as="script"><link rel="preload" href="/awesome/assets/js/2.86c6cace.js" as="script"><link rel="preload" href="/awesome/assets/js/24.5319cb45.js" as="script"><link rel="prefetch" href="/awesome/assets/js/10.15e7062b.js"><link rel="prefetch" href="/awesome/assets/js/11.51dedf6d.js"><link rel="prefetch" href="/awesome/assets/js/12.32d65dc5.js"><link rel="prefetch" href="/awesome/assets/js/13.d47adf54.js"><link rel="prefetch" href="/awesome/assets/js/14.47085b24.js"><link rel="prefetch" href="/awesome/assets/js/15.3166fb60.js"><link rel="prefetch" href="/awesome/assets/js/16.f3b7e4d8.js"><link rel="prefetch" href="/awesome/assets/js/17.7385810a.js"><link rel="prefetch" href="/awesome/assets/js/18.07d29bd5.js"><link rel="prefetch" href="/awesome/assets/js/19.ea248600.js"><link rel="prefetch" href="/awesome/assets/js/20.0837ec41.js"><link rel="prefetch" href="/awesome/assets/js/21.706a322d.js"><link rel="prefetch" href="/awesome/assets/js/22.38563dbb.js"><link rel="prefetch" href="/awesome/assets/js/23.1cf313fc.js"><link rel="prefetch" href="/awesome/assets/js/25.3eafb94f.js"><link rel="prefetch" href="/awesome/assets/js/26.2e3f292e.js"><link rel="prefetch" href="/awesome/assets/js/27.89497a52.js"><link rel="prefetch" href="/awesome/assets/js/28.65df2d79.js"><link rel="prefetch" href="/awesome/assets/js/29.51b66621.js"><link rel="prefetch" href="/awesome/assets/js/3.16ae1fa2.js"><link rel="prefetch" href="/awesome/assets/js/30.130a399e.js"><link rel="prefetch" href="/awesome/assets/js/31.842146c8.js"><link rel="prefetch" href="/awesome/assets/js/32.3b3e1229.js"><link rel="prefetch" href="/awesome/assets/js/33.08fa940f.js"><link rel="prefetch" href="/awesome/assets/js/34.4f015923.js"><link rel="prefetch" href="/awesome/assets/js/35.af0283dd.js"><link rel="prefetch" href="/awesome/assets/js/36.573bdfa9.js"><link rel="prefetch" href="/awesome/assets/js/37.de77995a.js"><link rel="prefetch" href="/awesome/assets/js/38.aaba7ce1.js"><link rel="prefetch" href="/awesome/assets/js/39.16884c3a.js"><link rel="prefetch" href="/awesome/assets/js/4.7951fd60.js"><link rel="prefetch" href="/awesome/assets/js/40.94c05ce5.js"><link rel="prefetch" href="/awesome/assets/js/41.555f6d33.js"><link rel="prefetch" href="/awesome/assets/js/42.f408a246.js"><link rel="prefetch" href="/awesome/assets/js/43.adba2709.js"><link rel="prefetch" href="/awesome/assets/js/44.02d9318f.js"><link rel="prefetch" href="/awesome/assets/js/45.ffd5faf9.js"><link rel="prefetch" href="/awesome/assets/js/46.acdc29a5.js"><link rel="prefetch" href="/awesome/assets/js/47.6e50721d.js"><link rel="prefetch" href="/awesome/assets/js/48.4995db7a.js"><link rel="prefetch" href="/awesome/assets/js/49.945bab08.js"><link rel="prefetch" href="/awesome/assets/js/5.171c3b90.js"><link rel="prefetch" href="/awesome/assets/js/50.9d54dcc4.js"><link rel="prefetch" href="/awesome/assets/js/51.4292033d.js"><link rel="prefetch" href="/awesome/assets/js/52.2c01efeb.js"><link rel="prefetch" href="/awesome/assets/js/53.df1381b4.js"><link rel="prefetch" href="/awesome/assets/js/54.c9f063c1.js"><link rel="prefetch" href="/awesome/assets/js/55.5f0952ae.js"><link rel="prefetch" href="/awesome/assets/js/56.79066060.js"><link rel="prefetch" href="/awesome/assets/js/57.ee0bc84d.js"><link rel="prefetch" href="/awesome/assets/js/58.ee6e866f.js"><link rel="prefetch" href="/awesome/assets/js/59.158ee8c4.js"><link rel="prefetch" href="/awesome/assets/js/6.f2e9ff9e.js"><link rel="prefetch" href="/awesome/assets/js/60.e9f10797.js"><link rel="prefetch" href="/awesome/assets/js/61.3ebc32b9.js"><link rel="prefetch" href="/awesome/assets/js/62.a74013e3.js"><link rel="prefetch" href="/awesome/assets/js/63.38e8c6fa.js"><link rel="prefetch" href="/awesome/assets/js/64.a5bb7c56.js"><link rel="prefetch" href="/awesome/assets/js/65.fac1a749.js"><link rel="prefetch" href="/awesome/assets/js/66.4ca7229b.js"><link rel="prefetch" href="/awesome/assets/js/67.d8c51620.js"><link rel="prefetch" href="/awesome/assets/js/68.79919a47.js"><link rel="prefetch" href="/awesome/assets/js/69.d8eec3f9.js"><link rel="prefetch" href="/awesome/assets/js/7.c2c3765f.js"><link rel="prefetch" href="/awesome/assets/js/8.5bbd57ff.js"><link rel="prefetch" href="/awesome/assets/js/9.e2f61692.js">
+    <link rel="stylesheet" href="/awesome/assets/css/0.styles.d47d1918.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container no-sidebar"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/awesome/" class="home-link router-link-active"><!----> <span class="site-name">Awesome-FE</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/awesome/react-hooks.html" class="nav-link">
+  Awesomes
+</a></div><div class="nav-item"><a href="/awesome/nodejs.html" class="nav-link">
+  博客
+</a></div><div class="nav-item"><a href="/awesome/notes.html" class="nav-link">
+  笔记
+</a></div><div class="nav-item"><a href="/awesome/books.html" class="nav-link">
+  书籍
+</a></div><div class="nav-item"><a href="/awesome/bookmarks.html" class="nav-link">
+  书签
+</a></div><div class="nav-item"><a href="/awesome/interviews.html" class="nav-link">
+  面试
+</a></div><div class="nav-item"><a href="/awesome/recently.html" class="nav-link">
+  最近阅读
+</a></div><div class="nav-item"><a href="https://github.com/ziyi2/awesome" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  GitHub
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/awesome/react-hooks.html" class="nav-link">
+  Awesomes
+</a></div><div class="nav-item"><a href="/awesome/nodejs.html" class="nav-link">
+  博客
+</a></div><div class="nav-item"><a href="/awesome/notes.html" class="nav-link">
+  笔记
+</a></div><div class="nav-item"><a href="/awesome/books.html" class="nav-link">
+  书籍
+</a></div><div class="nav-item"><a href="/awesome/bookmarks.html" class="nav-link">
+  书签
+</a></div><div class="nav-item"><a href="/awesome/interviews.html" class="nav-link">
+  面试
+</a></div><div class="nav-item"><a href="/awesome/recently.html" class="nav-link">
+  最近阅读
+</a></div><div class="nav-item"><a href="https://github.com/ziyi2/awesome" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  GitHub
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div> <!----></nav>  <!----> </aside> <main class="page"> <div class="theme-default-content content__default"><h3 id="javascript原型到原型链"><a href="#javascript原型到原型链" class="header-anchor">#</a> JavaScript原型到原型链</h3> <div class="language- extra-class"><pre class="language-text"><code>var log=console.log.bind(console)
+function Person(){ //创建一个构造函数
+
+}
+
+var person1=new Person() //构造一个实例对象person1
+
+person1.name='张三'
+
+log(person1.name)
+
+
+// 每个函数都有一个prototype属性，这是函数特有的属性
+
+Person.prototype.name='李四'
+
+var person2=new Person()
+
+log(person2.name) //李四
+
+person2.name='张三'
+log(person2.name)//张三
+delete person2.name
+log(person2.name) //李四
+
+log(person1.__proto__===Person.prototype)//true
+log(person2.__proto__===Person.prototype)//true
+
+// constructor
+
+log(Person===person1.constructor)//true
+log(Person===person2.constructor)//true
+log(Person.prototype.constructor===person2.constructor)//true
+
+
+var obj=new Object()
+log(Object.prototype.__proto__)//null
+
+
+</code></pre></div></div> <footer class="page-edit"><!----> <!----></footer> <!----> </main></div><div class="global-ui"></div></div>
+    <script src="/awesome/assets/js/app.0dd9ff1b.js" defer></script><script src="/awesome/assets/js/2.86c6cace.js" defer></script><script src="/awesome/assets/js/24.5319cb45.js" defer></script>
+  </body>
+</html>
