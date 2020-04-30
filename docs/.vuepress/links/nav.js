@@ -9,26 +9,26 @@ module.exports = [
   },
   {
     text: '笔记',
-    link: '/notes',
+    link: '/vue',
   },
   {
     text: '书籍',
-    link: '/books',
+    link: '/nodejs',
   },
   {
     text: '书签',
-    link: '/bookmarks',
+    link: '/nodejs',
   },
   {
     text: '面试',
-    link: '/interviews',
+    link: '/nodejs',
   },
   {
     text: '最近阅读',
-    link: 'recently',
+    link: 'nodejs',
   },
   {
     text: 'GitHub',
-    link: 'https://github.com/ziyi2/awesome',
+    link: 'https://github.com/Composur',
   },
 ];

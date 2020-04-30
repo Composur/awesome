@@ -1,6 +1,9 @@
-### Vue 的运行机制简述
+---
+sidebar: auto
+---
+# Vue 的运行机制简述
 
-#### 1.入口
+## 初始化
 
 这个阶段完成了全局方法（原型方法和静态方法）的定义：`state`、`component`、`lifecycle`、`dirctive` ...
 
@@ -31,7 +34,7 @@ export default Vue
 
 ```
 
-#### 2.  初始化，执行 this._init()方法
+### this._init() 
 
 ```js
 this._init(options)
@@ -41,7 +44,7 @@ Vue.prototype._init = function (options?: Object) {
 }
 ```
 
-##### 2.1 合并 `options` 
+#### 合并 `options` 
 
 把我们传入的 `options` 合并到 `vm.$options`
 
@@ -59,7 +62,9 @@ if (options && options._isComponent) {
 ...
 ```
 
-##### 2.2 初始化事件、state、生命周期、注入、校验
+
+
+#### 初始化事件、state、生命周期、注入、校验
 
 ```js
 ... 
@@ -130,7 +135,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 this.message 等价于 this._data.message
 ```
 
-##### 2.4 挂载
+#### 挂载
 
 + 在 `this._init()`
 
@@ -144,11 +149,11 @@ Vue.prototype._init = function (options?: Object) {
 }
 ```
 
-##### 2.5 总结
+#### 总结
 
 Vue 初始化主要就干了几件事情，合并配置，初始化生命周期，初始化事件中心，初始化渲染，初始化 data、props、computed、watcher 等
 
-#### 3. Vue 模板是如何挂载的？
+## Vue 模板挂载
 
 ```js
 // main.js
@@ -157,7 +162,7 @@ new Vue({
 }).$mount('#app')
 ```
 
-##### 3.1 运行时，和运行+编译时的挂载
+### 运行时，和运行+编译时的挂载
 
 **初始化后，调用 `$mount` 方法对 Vue 实例进行挂载（挂载的核心过程包括**模板编译**、**渲染**以及**更新**三个过程）。**
 
@@ -165,7 +170,7 @@ new Vue({
 
 组件挂载二者都是调用 `mountComponent()` 进行挂载，不同的是编译版本，多了对节点的编译处理。
 
-##### 3.1.1 运行+编译
+#### 运行+编译
 
 `entry-runtime-with-compiler.js` 中具体的实现：
 
@@ -217,7 +222,7 @@ Vue.prototype.$mount = function (
 
 
 
-##### 3.1.2 运行时
+#### 运行时
 
 项目大多采用这个版本
 
@@ -231,7 +236,7 @@ Vue.prototype.$mount = function (
 }
 ```
 
-##### 3.1.3 挂载
+#### 挂载
 
 ```js
 export function mountComponent (
@@ -273,9 +278,7 @@ export function mountComponent (
 }
 ```
 
-
-
-##### 3.1.4 render 函数的生成？
+## render 函数的生成
 
 `_render` 是内部的私有方法
 
@@ -342,6 +345,249 @@ new Vue({
 	<div id='#app'>{{message}}</div>  
 </template>
 ```
+
+## Virtual DOM
+
+> 虚拟 DOM 不是真实的 DOM，是一种用 JS 描述 DOM 节点的数据结构。
+
+### 为什么需要 Virtual DOM
+
+我们先看一浏览器是怎么绘制`DOM`的
+
+1、创建`DOM`树 2、创建`style rules` 3、构建 `Render` 树 4、布局 `Layout` 5、绘制 `Painting`  
+
++ 第一步，构建 `DOM` 树，用 `HTML` 分析器，分析 `HTML` ，生成一颗 `DOM` 树
++ 第二步，构建 `CSS` 样式表，用 `CSS` 分析器，分析 `.css` 文件和 `inline` 样式 ，生成样式表
++ 第三步，构建 `Render` 树，将 `DOM` 树和样式表关联起来生成 `Render` 树，每个 `DOM` 节点都有`attach` 方法用于接收新的样式，它返回一个 `render` 对象，最终被构建成 `Render`树
++ 第四步，确定`DOM` 节点在浏览器上的位置，根据 `Render` 树和节点坐标，调用节点的 `paint` 方法进行绘制
+
+我们再看一下真实的 `DOM ` 节点挂载了多少属性
+
+```js
+count = 0
+for(let i in app){ // app 是一个 dom 节点
+    console.log(i)
+    count++
+}
+```
+
+测试结果为 `count` 值为 289，每次操作更新 `DOM` 都要带上他们，重复执行绘制`DOM`的步骤，如节点很多（上万），加上浏览器回流，就会产生一定的渲染性能问题（卡顿）。
+
+### Vue Virtual DOM
+
+>  `Vue.js` 中 `Virtual DOM` 是借鉴了一个开源库  [snabbdom](https://github.com/snabbdom/snabbdom) 的实现，然后加入了一些 `Vue.js` 的一些特性
+
+#### VNode
+
+这里简化了只留了比较重要的属性，它是对真实 `DOM` 的抽象描述。
+
+`src/core/vdom/vnode.js`
+
+```js
+export default class VNode {
+  constructor (
+    tag?: string,
+    data?: VNodeData,
+    children?: ?Array<VNode>,
+    text?: string,
+    elm?: Node,
+    context?: Component,
+  ) {
+    this.tag = tag  // 标签名
+    this.data = data // // 节点属性，事件等
+    this.children = children // vnode 子节点
+    this.text = text // 元素文本
+    this.elm = elm // 对应的真实 dom
+    this.key = data && data.key // vnode 标记方便 dom diff
+  }
+  get child (): Component | void {
+    return this.componentInstance
+  }
+}
+```
+
+#### CreateElement
+
+`render` 无论是处理模板编译出来的 `render ` 函数，还是处理我们手写的 `render` 函数都需要进行，c`reateElement` 函数，而这个函数又调用了内部的私有方法 `_createElement`
+
+```js
+export function createElement (
+ 	//
+  return _createElement(context, tag, data, children, normalizationType)
+}
+```
+
+_createElement
+
+```js
+export function _createElement (
+  context: Component, // 作用域 上下文
+  tag?: string | Class<Component> | Function | Object, // 标签
+  data?: VNodeData, // 节点和属性 {id:'',class:''}
+  children?: any,
+  normalizationType?: number
+): VNode | Array<VNode> {
+  if (isDef(data) && isDef((data: any).__ob__)) {
+    return createEmptyVNode()
+  }
+  // object syntax in v-bind
+  if (isDef(data) && isDef(data.is)) {
+    tag = data.is
+  }
+  if (!tag) {
+    // in case of component :is set to falsy value
+    return createEmptyVNode()
+  }
+  // support single function children as default scoped slot
+  if (Array.isArray(children) &&
+    typeof children[0] === 'function'
+  ) {
+    data = data || {}
+    data.scopedSlots = { default: children[0] }
+    children.length = 0
+  }
+  if (normalizationType === ALWAYS_NORMALIZE) {
+    // render 函数不是编译产生的
+    children = normalizeChildren(children)
+  } else if (normalizationType === SIMPLE_NORMALIZE) {
+      // render 函数是编译产生的
+    children = simpleNormalizeChildren(children)
+  }
+  let vnode, ns
+  if (typeof tag === 'string') {
+    let Ctor
+    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    if (config.isReservedTag(tag)) {
+      // 创建虚拟 DOM
+      vnode = new VNode(
+        config.parsePlatformTagName(tag), data, children,
+        undefined, undefined, context
+      )
+    } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+      // component
+      vnode = createComponent(Ctor, data, context, children, tag)
+    } else {
+      // unknown or unlisted namespaced elements
+      // check at runtime because it may get assigned a namespace when its
+      // parent normalizes children
+      vnode = new VNode(
+        tag, data, children,
+        undefined, undefined, context
+      )
+    }
+  } else {
+    // direct component options / constructor
+    vnode = createComponent(tag, data, context, children)
+  }
+  if (Array.isArray(vnode)) {
+    return vnode
+  } else if (isDef(vnode)) {
+    if (isDef(ns)) applyNS(vnode, ns)
+    if (isDef(data)) registerDeepBindings(data)
+    return vnode
+  } else {
+    return createEmptyVNode()
+  }
+}
+```
+
+看一下打印出的 `VNode` 节点
+
+
+
+#### Update
+
+被调用的时机：
+
++ 首次渲染的时候
++ 数据更新的时候
+
+首次渲染
+
+```js
+
+vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
+```
+
++ `vm.$el` 是 `<div id='#app'></div>`
++ `vnode` 是 `render` 函数的返回值
++ `hydrating`是是否服务端渲染
+
+Patch 函数的执行
+
+```js
+// 主要是调用了 createElm 方法，创建真实的 node 
+function patch (oldVnode, vnode, hydrating, removeOnly) {
+  createElm(
+    vnode,
+    insertedVnodeQueue,
+    // extremely rare edge case: do not insert if old element is in a
+    // leaving transition. Only happens when combining transition +
+    // keep-alive + HOCs. (#4590)
+    oldElm._leaveCb ? null : parentElm,
+    nodeOps.nextSibling(oldElm)
+  )
+}
+```
+
+createElm
+
+```js
+function createElm (
+  vnode,
+  insertedVnodeQueue,
+  parentElm,
+  refElm,
+  nested,
+  ownerArray,
+  index
+) {
+    // 主要执行了
+    // 创建子组件
+if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+    return
+  }
+    // 创建子元素 nodeOps 的方法都是一些实际的 dom 操作
+    vnode.elm = vnode.ns
+      ? nodeOps.createElementNS(vnode.ns, tag)
+      : nodeOps.createElement(tag, vnode)
+    setScope(vnode)
+}
+```
+
+
+
+## 总结
+
+![new-vue](./img/new-vue.png)
+
+
+
+`new Vue` &rarr; `init` &rarr; `$mount ` &rarr; `complie` &rarr; `render` &rarr; `vnode` &rarr; `patch` &rarr; `DOM`
+
+
+
+
+
+
+
+
+
+因为我们在挂载节点的时候实例化了一个 `Watcher `来监测数据的变化，一旦响应式系统中的数据发生了变化，负责收集依赖管理的 `Dep` 就会执行 `dep.notify()` 通知 `Watcher ` ，`Watcher `再调用 `updateComponent` 方法更新。
+
+```js
+ new Watcher(vm, updateComponent, noop, { // noop 是空函数
+    before () {
+      if (vm._isMounted && !vm._isDestroyed) {
+        callHook(vm, 'beforeUpdate')
+      }
+    }
+  }, true /* isRenderWatcher */)
+```
+
+
+
+通过 `VNode`类生成的节点就是我们在初始化挂载
 
 
 
@@ -773,9 +1019,6 @@ $ 子 传递数据
         vue的异步更新: 
             vue 在内部尝试对异步队列使用原生的 Promise.then 和 MessageChannel，
             如果执行环境不支持，会采用 setTimeout(fn, 0) 代替
-        关于<Root>组件标签: 
-            整体应用界面的根标签不是<App>, 而是<Root>, 
-            <Root>对应的是vm
             index页面中的的div元素会被替换, 而不是插入其中
         组件的data配置不能是对象?
             组件会被多次使用, 每次使用都会读取data配置值, 如果是对象, 那就会共用一个data对象
