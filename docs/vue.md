@@ -88,7 +88,7 @@ vm._self = vm
 function initData (vm: Component) {
   let data = vm.$options.data
   
-  // 判断是否是 function 推荐函数的写法 data(){return {}}
+  // 判断是否是 function 推荐函数的写法 data(){return {}} 每次调用返回一个新对象
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
@@ -375,7 +375,7 @@ for(let i in app){ // app 是一个 dom 节点
 
 ### Vue Virtual DOM
 
->  `Vue.js` 中 `Virtual DOM` 是借鉴了一个开源库  [snabbdom](https://github.com/snabbdom/snabbdom) 的实现，然后加入了一些 `Vue.js` 的一些特性
+>  `Vue.js` 中 `Virtual DOM` 是借鉴了一个开源库  [snabbdom](https://github.com/snabbdom/snabbdom) 的实现，然后加入了一些 `Vue.js` 的一些特性，也是为了跨平台。weex...等其它平台，元素的 dom 不可以。 
 
 #### VNode
 
@@ -597,7 +597,7 @@ if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
 
 + 如果没有旧的虚拟 Node 直接通过`createElm`创建真实 DOM 节点，否则会通过`sameVnode`判断当前需要更新的 Node 节点是否和旧的 Node 节点相同（因为有key）。节点不同直接替换，否则调用 `patchVNode` 方法执行 diff 算法更新 DOM。
 
-#### 2. 响应式流程 （数据更新策略、依赖收集）
+#### 2. 响应式流程（数据更新策略、依赖收集）
 
 + `vue.js` 在初始化的时候采用数据劫持结合发布者-订阅者模式的方式，通过`Object.defineProperty()` 来劫持各个属性的 `setter`，`getter`
 + 当 `render function` 被渲染的时候，会读取 Vue 实例中和视图相关的响应式数据，此时会触发`getter` 函数进行**依赖收集**（将观察者 `Watcher` 对象存放到当前闭包的订阅者 `Dep` 的 `subs `中）
@@ -882,7 +882,7 @@ requireAll(req)
 #### 2. slot/插槽
 
 > 原理类似电脑上的 use 电源 耳机 插槽等，让使用者（一般是父组件传入的html模板）决定怎么使用 这是具名插槽
-```javascript
+```vue
 //子组件
 <header class="header">
     <slot name="left"></slot>
@@ -911,18 +911,15 @@ requireAll(req)
     作用域插槽(scoped slot)（数据由子组件决定，样式由父组件决定）
 
 ~~~vue
-```
-$ 父 获取数据
+<!--父 获取数据-->
 <template :slot-scope="data">
     //do
 </template>
 
-$ 子 传递数据
+<!--子 传递数据-->
  <slot :data='data'>
 
 </slot>
-
-```
 ~~~
 
 3). 区别

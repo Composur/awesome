@@ -2,6 +2,14 @@
 
 #### 1.加载渲染层面
 
+预渲染：
+
+![pre-start](./img/pre-render.jpg)
+
+按需加载：
+
+
+
 ##### 1.1 缓存
 
 首次没有缓存
@@ -115,4 +123,16 @@ statusArr[a || 1]()
 
 + 4-8 个数量 `switch` 比 `if-else` 好用，但是还是远远不如数组。
 
-  
+
+
+
+
+
+### 3. 性能监控
+
++ 性能监测[Lighthouse](https://github.com/GoogleChrome/lighthouse)
+  + 页面跑分、首屏、PWA、等
++ 数据埋点
+  + SDK
++ 
+
