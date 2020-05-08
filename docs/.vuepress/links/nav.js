@@ -1,31 +1,19 @@
 module.exports = [
   {
-    text: 'Awesomes',
-    link: '/react-hooks',
+    text: '前端',
+    link: '/fn',
   },
   {
-    text: '博客',
-    link: '/nodejs',
+    text: '后端',
+    link: '/bn',
   },
   {
     text: '笔记',
-    link: '/vue',
-  },
-  {
-    text: '书籍',
-    link: '/nodejs',
-  },
-  {
-    text: '书签',
-    link: '/nodejs',
+    link: '/note',
   },
   {
     text: '面试',
-    link: '/nodejs',
-  },
-  {
-    text: '最近阅读',
-    link: 'nodejs',
+    link: '/interview',
   },
   {
     text: 'GitHub',

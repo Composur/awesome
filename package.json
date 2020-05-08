@@ -13,7 +13,7 @@
     "vuepress": "^1.4.1"
   },
   "scripts": {
-    "dev": "vuepress dev docs",
+    "dev": "vuepress dev docs --no-cache",
     "build": "vuepress build docs",
     "deploy": "gh-pages -d dist",
     "deploy:build": "yarn build && gh-pages -d dist"

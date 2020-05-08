@@ -35,7 +35,7 @@
 + 新增
   + `getDerivedStateFromProps` （可以用来替换`componentWillReceiveProps()`）
   + 根据`props`更新`state`上的`meuns`
-  ```
+  ```js
    // 这个方法已经不建议使用
   componentWillReceiveProps(next){
     this.setState({
@@ -44,7 +44,7 @@
   }
   ```
   + 替代方法
-  ```
+  ```js
   static getDerivedStateFromProps(nextProps, prevState){
     if (nextProps.role.menus !== prevState.menus) {
       // 额外写一个newMeuns state来记录上一个props，在组件渲染的时候传入这个更新后的newMeuns
@@ -62,7 +62,7 @@
 2. 异步渲染时间长会导致`componentWillUpdate、componentDidUpdate`之间的时间变长，这个过程中可能发生一些变化，比如用户行为导致 DOM 发生了新的变化，这时在 `componentWillUpdate `获取的信息可能就不可靠了
 3. 作用` static getDerivedStateFromProps(nextProps, prevState)`接收两个参数（它内部你只能访问到组件上的这两个参数），第一个为接收到的新参数，第二是是当前的`state`。会返回一个对象用来更新`state`不需要可以返回`null`
 
-  ```
+  ```jsx
   class Hehe extends React.Component {
     state={
       isRight:false,
@@ -84,7 +84,7 @@
   2. 1.6.4 使用旧生命周期，开发者模式下会有警号
   3. 1.7.0 移除旧的生命周期
 ### 为什么要把`getDerivedStateFromProps`设计为静态⽅法？
-  1. 内部不能拿this，比较纯粹，不能用setState(),会在render方法之前被调用，
+  1. 内部不能拿到 `this`，比较纯粹，不能用 `setState()`,会在 `render` 方法之前被调用
 ### `getDerivedStateFromProps`被触发执⾏的条件有哪些？
 + 组件挂载的时候
 + 接收到新的`props`时
