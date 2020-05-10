@@ -11,7 +11,8 @@ function add(a, b) {
   while (a.length || b.length || c) {
     // ~~ 用来把String类型 转为 Number类型
     // 把两位相加的结果 和 进位值相加
-    c += +a.pop() + +b.pop();
+    c += ~~a.pop() + ~~b.pop();
+    // c += parseInt(a.pop()) + parseInt(b.pop());
 
     // 取余，把余数拼接到最终结果中
     res = (c % 10) + res;
@@ -21,4 +22,4 @@ function add(a, b) {
   }
   return res;
 }
-console.log(add("11111111111111111", "22222222222222222"))
+console.log(add("11111111111111111", "222222222222224444444444222"))

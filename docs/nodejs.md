@@ -674,6 +674,16 @@ setTimeout(() => {
 
 **在 node 11 版本中，node 下 Event Loop 已经与浏览器趋于相同。**
 
+浏览器事件循环：
+
+![jsloop.gif](https://user-gold-cdn.xitu.io/2020/4/12/1716eda226b2b0e0?imageslim)
+
+
+
+Node.js 事件循环：
+
+![loop.gif](https://user-gold-cdn.xitu.io/2020/4/12/1716eda1c87fb460?imageslim)
+
 + 规范出处不同
 
   + 浏览器的[Event loop](https://www.w3.org/TR/html5/webappapis.html#event-loops)是在HTML5中定义的规范

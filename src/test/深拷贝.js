@@ -29,7 +29,6 @@ var obj = {
 }
 
 var result = deepCopy(obj)
-result.test = 124
-console.log(obj)
+// result.test = 124
+// console.log(obj)
 console.log(result)
-console.log(newObj(obj))
