@@ -10,7 +10,7 @@ function fibonacci(n) {
 function memozi(fn){
   var r = {}
   return function(n){
-    if(r[n] == null){
+    if(!r[n]){
       r[n] = fn(n)
       return r[n]
     }else{
@@ -20,12 +20,14 @@ function memozi(fn){
 }
 
 var fibfn = memozi(function(n){
-    if(n==0){
-        return 0
-    }else if(n==1){
-        return 1
+    if(n===0){
+        return n
+    }else if(n===1){
+        return n
     }else{
         return fibfn(n-1) + fibfn(n-2)
     }
 })
 console.log(fibfn(100))
+
+

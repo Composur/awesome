@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+sesidebar: auto
 ---
 ## Node.js
 ###  1. Node 环境的 js 和 Chrome 环境的 js 运行的不同点

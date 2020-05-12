@@ -11,7 +11,15 @@ function Child(name) {
   this.name = name
 }
 // 原型链继承
-Child.prototype = new Parent()
+// Child.prototype = new Parent()
+Child.prototype = F(Parent)
+
+function F(o){
+  function F(){}
+  F.prototype = o.prototype
+  return new F()
+}
+
 
 var c = new Child('子')
 var s = new Child('子')

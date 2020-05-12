@@ -1,7 +1,7 @@
 function getArr(nums){
   // let max = nums[0]
   // let min = nums[nums.length]
-  let   = nums[0]
+  let  max = nums[0]
   let min = nums[nums.length]
   const list = []
   for (let i = 0; i < nums.length; i++) {
