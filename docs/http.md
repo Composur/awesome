@@ -13,7 +13,27 @@ sidebar: auto
 GET /home HTTP/1.1
 ```
 
-### HTTPS
+## GET 和 POST 的区别
+
+`GET` 和 `POST` 是 `HTTP` 协议中的两种发送请求的方法。 
+
+`HTTP` 是基于 `TCP/IP` 的关于数据如何在万维网中如何通信的协议 。`HTTP` 的底层是 `TCP/IP`。所以`GET` 和 `POST` 的底层也是 `TCP/IP`。`GET` 和 `POST` 能做的事情是一样一样的。你要给 `GET` 加上`request body`，给 `POST` 带上 `url` 参数，技术上是完全行的通的。
+
+一般的区别都是浏览器层面的限制，根据不同的浏览器对应的限制也不同。
+
+简单来说：
+
+**GET 产生一个 TCP 数据包；POST 产生两个 TCP 数据包**
+
+正常来说：
+
+对于 `GET` 方式的请求，浏览器会把 `http header` 和 `data` 一并发送出去，服务器响应 `200`（返回数据）。
+
+而对于 `POST`，浏览器先发送 `header`，服务器响应`100 continue`，浏览器再发送 `data`，服务器响应 `200 ok`（返回数据）。<small>并不是所有浏览器都会在POST中发送两次包，`Firefox` 就只发送一次</small>
+
+
+
+## HTTPS
 
 > 出现是为了解决 HTTP 明文传输带来的安全性问题，因在 HTTP 传输的过程中任何人都可以截获，修改等。HTTPS 提供了三个保障：加密（客户端和服务端交互），数据一致性（传输的数据一致），身份认证（防止中间人攻击）。
 
@@ -59,11 +79,15 @@ GET /home HTTP/1.1
 + 服务端采用散列算法生成 hash(随机数1，随机数2，随机数3)
 + 客户端也生成  hash(随机数1，随机数2，随机数3) 生成一个 key 服务端的 key 和 客户端的 key 均不在网络上传输，做本地校验使用。
 
-**总结：**
+**刷新页面不需要重新建立 SSL 连接？**
+
+`TCP` 连接有的时候会被浏览器和服务端维持一段时间。`TCP` 不需要重新建立，`SSL` 自然也会用之前的。
+
+**`总结：**
 
 `HTTPS` 采用了非对称加密 + 对称加密 + `CA` + `hash` 算法 
 
-### HTTP 各个版本的区别是什么
+## HTTP 各个版本的区别是什么
 
 *解决了哪些问题？比如头部缩减的优化，那你了解这个优化的具体策略吗？缩减了什么？又增加了什么？要深挖细节。多路复用，是怎么多路复用的？*
 
@@ -83,9 +107,25 @@ HTTP/1.1 有两个主要的缺点：**安全不足和性能不高**。
 connection:keep-alive;
 ```
 
-请求一个数据后不关闭连接继续请求其它数据。在同一个连接中完成多个请求。
+**`TCP` 连接后是否会在一个 `HTTP` 请求完成后断开？什么情况下会断开？一个 `TCP` 连接可以对应几个 `HTTP` 请求？**
 
-也可以同时向服务器建立多个连接，不过是有限制的 Chrome 对同一域名的请求一般是 6 个。如果有 12 个请求是需要等前 6 个完成后后面 6 个才可以建立连接请求。
+`HTTP 1.0` 会断开，`HTTP 1.1` 请求一个数据后可以不关闭连接继续请求其它数据。除非请求中写明 `Connection: close` 。在同一个连接中完成多个请求，上一个请求成功或者是失败后才会进行下一个请求。
+
+**一个 `TCP` 连接中 `HTTP` 请求发送可以一起发送么（同步请求）？**
+
+单个 `TCP` 连接在同一时刻只能处理一个请求，意思是说：两个请求的生命周期不能重叠，任意两个 `HTTP` 请求从开始到结束的时间在同一个 `TCP` 连接里不能重叠。
+
+<small>在 HTTP/1.1 存在 Pipelining 技术可以完成这个多个请求同时发送，但是由于浏览器默认关闭，需要服务器按顺序返回请求</small>
+
+为了提高页面加载效率，浏览器也可以同时向服务器建立多个 `TCP` 连接，不过是有限制的 `Chrome `对同一域名的请求一般是 `6` 个。如果有 `12` 个请求是需要等前 `6` 个完成后后面 `6` 个才可以建立连接请求。
+
+
+
+
+
+
+
+
 
 
 
@@ -112,6 +152,14 @@ connection:keep-alive;
    所以 `HTTP2.0` 很好的解决了浏览器限制同一个域名下的请求数量的问题，同时也接更容易实现全速传输，一次请求完成（html css js 下载到浏览器）。
 
 4. server 主动 push ，服务器推送
+
+**HTTP2.0 多路复用**
+
+多路复用代替原来的序列和阻塞机制，所有就是请求的都是通过一个 `TCP` 连接并发完成。同一个域名下的所有通信都在一个连接上完成，只需要占用一个 `TCP` 连接。使用一个连接平行发送多个请求和响应。
+
+同时也很好的解决了浏览器限制同一个域名下的请求数量的问题。`Chrome` 允许同一个域名下最多 `6` 个请求。
+
+
 
 **HTTP 3.0**
 
@@ -184,7 +232,7 @@ Forbidden 403，带有认证信息但是服务端认为认证信息对应的用�
 
 客户端向服务器请求资源，服务器返回响应的时候，会返回一组描述响应的内容类型、长度、缓存指令、验证令牌的 HTTP 标头。
 
-![http_res](./img/http_res.tiff)
+![http_res](./img/http_res.jpg)
 
 上图表示：
 
@@ -248,11 +296,11 @@ res.setHeader('Cache-Control', 'public, max-age=86400'); // 一天
 
 ## Cookie
 
-### 1. Cookie 
+### Cookie 
 
 > Cookie（复数形态Cookies），类型为「小型文本文件」，指某些网站为了辨别用户身份而储存在用户本地终端上的数据。
 
-#### 1.1 Cookie 有什么用？
+### Cookie 有什么用？
 
 为了解决 `HTTP` 无状态导致的问题中，客户端与服务端会话状态的问题。这个状态单指后端服务的状态而非通信协议的状态。
 
@@ -260,7 +308,7 @@ res.setHeader('Cache-Control', 'public, max-age=86400'); // 一天
 2. 个性化设置（如用户自定义设置、主题等）
 3. 浏览器行为跟踪（如跟踪分析用户行为等）
 
-#### 1.2 Cookie 有哪些部分组成？
+### Cookie 有哪些部分组成？
 
 作为一段一般不超过 4KB 的小型文本数据，它由一个名称（Name）、一个值（Value）和其它几个用于控制 Cookie 有效期、安全性、使用范围的可选属性组成。
 
@@ -324,14 +372,14 @@ res.setHeader('Cache-Control', 'public, max-age=86400'); // 一天
     + **None** 无论是否跨站都会发送 Cookie
   + 之前默认是 None 的，Chrome80 后默认是 Lax。
 
-#### 1.3 如何查看 Cookie ? 
+### 如何查看 Cookie ? 
 
 + 可以在浏览器的开发者工具中查看到当前页面的 Cookie
 + 可以在计算机上查看本机的 Cookies 文件 (<small>以 Mac 为例</small>)
   + 路径为:`/Users/haizhi/Library/ApplicationSupport/Google/Chrome/Default`
   + 它是一个 `sqlite` 数据库文件，可以用 `sqlite` 客户端打开查看。
 
-#### 1.4 怎么设置 Cookie
+### 怎么设置 Cookie
 
 1. 客户端发送 HTTP 请求到服务器
 
@@ -349,27 +397,27 @@ res.setHeader('Cache-Control', 'public, max-age=86400'); // 一天
    })
    ```
 
-3. 浏览器收到响应后保存下 Cookie
+3. 浏览器收到响应后保存下 `Cookie`
 
    收到响应：
 
-   ![setCookie](/Users/haizhi/personal/awesome/docs/img/set-cookie.jpg)
+   ![setCookie](./img/set-cookie.jpg)
 
    保存 Cookie:
 
-   ![cookie的存储](/Users/haizhi/personal/awesome/docs/img/cookie_store.jpg)
+   ![cookie的存储](./img/cookie_store.jpg)
 
 4. 之后对该服务器每一次请求中都通过 Cookie 字段将 Cookie 信息发送给服务器。
 
-   ![发送Cookie](/Users/haizhi/personal/awesome/docs/img/send-cookie.jpg)
+   ![发送Cookie](./img/send-cookie.jpg)
 
-#### 1.5 Cookie 的缺点
+### Cookie 的缺点
 
 + 大小方向
 + 安全方向
 + 增加请求方向
 
-## 请求库默认携带 cookie 的情况
+### 请求库默认携带 cookie 的情况
 
 + fetch
 
@@ -395,4 +443,8 @@ res.setHeader('Cache-Control', 'public, max-age=86400'); // 一天
   ```
 
   
+
+
+
+
 
