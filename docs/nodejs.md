@@ -41,6 +41,16 @@ sesidebar: auto
 
 用到了 `process` 较多的的属性。如` argv` 、`stdin`...
 
+每个进程都可以使用三个默认的 `streams` 来工作。
+
+它们分别是 `stdin`、`stdout` 和 `stderr` 
+
++ `stdin` 流来处理和你的进程相关的输出。例如按下按钮或重定向输出（我们会在一秒钟之内完成）
+
++ `stdout` 流则用于你的应用程序的输出。
+
++ 最后 `stderr` 用于错误消息。
+
 步骤：
 
 1. 取到用户的控制台输入
@@ -1367,7 +1377,7 @@ if (cluster.isMaster) {
   	 cluster.fork();
   }
 } else {
-  require("./app")
+  require("./app") // 启动 http 服务
 }
 ```
 
