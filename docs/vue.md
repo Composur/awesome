@@ -608,7 +608,7 @@ if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
 
 
 
-###  MVVM运行机制
+# MVVM运行机制
 
 > `vue.js` 采用数据劫持结合发布者-订阅者模式的方式，通过`Object.defineProperty()`来劫持各个属性的`setter`，`getter`，在数据变动时发布消息给订阅者，触发相应的监听回调.
 
@@ -780,7 +780,7 @@ class Watcher { // 什么时候绑定？ 在解析、更新数据的时候
 
 
 
-### Vue 问题
+# Vue 问题
 
 #### 1. 组件化
 
@@ -1162,13 +1162,32 @@ inject: ['getMap']
 
 耦合性高，重构困难。重要的是提供的数据是非响应式的。建议使用 `Vuex` 。
 
-### Vuex 问题
+# Vuex 问题
 
 什么需要放到 vuex 上，需要共享的数据。
 
 + token、名称、位置、头像、商品、收藏等。
 
-#### 1. 获取veux上的state
+## 使用
+
+```js
+Vue.use(Vuex); // 1. vue的插件机制，安装vuex
+let store = new Vuex.Store({ // 2.实例化store，调用install方法
+ 	state,
+ 	getters,
+ 	modules,
+ 	mutations,
+ 	actions,
+ 	plugins
+});
+new Vue({ // 3.注入store, 挂载vue实例
+	store,
+	render: h=>h(app)
+}).$mount('#app');
+
+```
+
+####  获取veux上的state
 
 由于 Vuex 的状态存储是响应式的，从 store 实例中读取状态最简单的方法就是在计算属性中返回某个状态：
 
@@ -1198,14 +1217,59 @@ computed: {
   }),
 ```
 
-#### 2. actions 和 mutations 有什么区别
+#### actions 和 mutations 有什么区别
 
 + mutation 做同步、action 做异步。
-
 + 事实上在 vuex 里面 actions 只是一个架构性的概念，并不是必须的，说到底只是一个函数，你在里面想干嘛都可以，只要最后触发 mutation 就行。异步竞态怎么处理那是用户自己的事情
 + Action 提交的是 mutation，而不是直接变更状态。 Action 可以包含任意异步操作。个人觉得这个 action 的产生就是因为 mutation 不能进行异步操作，如果有异步操作那么就用 action 来提交mutation
 
-### vue-router 问题
+## 原理
+
+### vuex 的 store 是如何注入到组件中的？
+
+`vuex` 利用了 `vue` 的 `mixin` 机制，混合 `beforeCreate` 钩子将 `store` 注入至 `Vue` 组件实例上，并注册了 `vuex store` 的引用属性 `$store` !
+
+### vuex 的 state 和 getter 是如何映射到各个组件实例中自动更新的？ 
+
+本质上就是组件通信问题，`store` 更新后组件进行相应的更新。
+
+`vuex` 采用了中央事件总线的方式进行通信。使各个组件只与其进行通信，达到数据同步的通信目的。
+
+![bus](./img/eventbus.jpg)
+
+```js
+ 
+ let bus = new Vue({
+ 	methods: {
+ 		emit (event, ...args) {
+ 			this.$emit(event, ...args);
+ 		},
+ 		on (event, callback) {
+ 			this.$on(event, callback);
+ 		}
+ 	}
+ });
+ 
+ //component A
+ bus.emit('updateData', data); // 发送数据给 bus。
+ 
+ //component B
+ bus.on('updateData', data => {
+ 	// 接收 updateData事件 发送的数据信息。
+ })
+```
+
+1. **vuex 的 state 是借助 vue 的响应式 data 实现的。**
+2. **getter 是借助 vue 的计算属性 computed 特性实现的。**
+3. **其设计思想与 vue 中央事件总线如出一辙。**
+
+
+
+
+
+
+
+# vue-router 问题
 
 > 路由表：是一个映射表，决定了数据包的指向，内网 IP 和 mac 地址绑定。
 >

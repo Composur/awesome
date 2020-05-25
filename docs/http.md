@@ -31,7 +31,24 @@ GET /home HTTP/1.1
 
 而对于 `POST`，浏览器先发送 `header`，服务器响应`100 continue`，浏览器再发送 `data`，服务器响应 `200 ok`（返回数据）。<small>并不是所有浏览器都会在POST中发送两次包，`Firefox` 就只发送一次</small>
 
+**options 请求**
 
+跨域并写了自定义请求头就会发 `OPTIONS`
+
+MDN的[CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS)一文中提到：
+
+>规范要求，对那些可能对服务器数据产生副作用的 HTTP 请求方法（特别是 GET 以外的 HTTP 请求，或者搭配某些 MIME 类型的 POST 请求），浏览器必须首先使用 OPTIONS 方法发起一个预检请求（preflight request），从而获知服务端是否允许该跨域请求。
+
+触发的条件：
+
++  使用了**PUT/DELETE/CONNECT/OPTIONS/TRACE/PATCH** 任一 `HTTP` 方法。
++ `Content-Type` 的值**不属于**下列之一:
+  + `application/x-www-form-urlencoded、multipart/form-data、text/plain`
+  + 我们有时候会设置为 `application/json`
+
+如何避免：
+
+可以使用第三方库 `axios` 等。避免触发上述条件。
 
 ## HTTPS
 
@@ -292,7 +309,35 @@ res.setHeader('Cache-Control', 'public, max-age=86400'); // 一天
 
 变更文件名，webpack chunk name，强制用户下载更新。这个时候请求地址变了肯定需要从新请求。
 
+### 	强缓存、协商缓存
 
+#### 强缓存
+
+浏览器在加载资源时，根据请求头的`expires`和`cache-control`判断是否命中强缓存，是则直接从缓存读取资源，不会发请求到服务器。
+
+```
+Expires: Wed, 11 May 2018 07:20:00 GMT
+// 或
+Cache-Control: max-age=315360000
+```
+
+#### 协商缓存
+
+如果没有命中强缓存，浏览器一定会发送一个请求到服务器，通过`last-modified`和`etag`验证资源是否命中协商缓存，如果命中，服务器会将这个请求返回，但是不会返回这个资源的数据，依然是从缓存中读取资源 304。
+
++ `Last-Modified` 表示本地文件最后修改日期，浏览器会在request header加上`If-Modified-Since`（上次返回的`Last-Modified`的值），询问服务器在该日期后资源是否有更新，有更新的话就会将新的资源发送回来
++ 但是如果在本地打开缓存文件，就会造成 `Last-Modified` 被修改，所以在 `HTTP / 1.1` 出现了 `ETag`
+
++ `Etag` 就像一个指纹，资源变化都会导致 `ETag` 变化，跟最后修改时间没有关系，`ETag`可以保证每一个资源是唯一的。
++ `If-None-Match`的 `header` 会将上次返回的`Etag`发送给服务器，询问该资源的`Etag`是否有更新，有变动就会发送新的资源回来。
+
+#### 相同点：
+
+如果命中，都是从客户端缓存中加载资源，而不是从服务器加载资源数据；
+
+#### 不同点：
+
+强缓存不发请求到服务器，协商缓存会发请求到服务器。
 
 
 
