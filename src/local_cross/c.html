@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>C-页面</title>
+</head>
+<body>
+<h2>C-页面</h2>
+<script>
+  ;(function (win) {
+    win.addEventListener("message",function(evt){
+      if(win.parent!= evt.source){ return }
+      var options=JSON.parse(evt.data);
+      if(options.type === "get"){
+        var data = win.localStorage.getItem(options.key);
+        win.parent.postMessage(data, "*");
+      }
+      if(options.type === "set"){
+        win.localStorage.setItem(options.key,options.value);
+      }
+      if(options.type === "remove"){
+        win.localStorage.removeItem(options.key);
+      }
+      if(options.type === "clear"){
+        win.localStorage.clear();
+      }
+    },false);
+  })(window);
+</script>
+</body>
+</html>
