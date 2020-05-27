@@ -1,3 +1,6 @@
+---
+sidebar: auto
+---
 ![](./img/react-life.png)
 ## 首次生命周期函数调用顺序如下
    + `constructor`
@@ -6,10 +9,11 @@
    + `getDerivedStateFromProps` 用来替换 `componentWillReceiveProps`
         + 用外部的属性来初始化内部的状态
         + 当 state 需要从 props 初始化时使用
-        + 每次 render 都会调用
+        + 每次（父组件也会引起子组件） render 都会调用
+          + **无论父组件传递的props是否发生变化都会经过 componentWillReceiveProps 函数**
         + 使用不当，易产生 bug
    + `~~componentWillMount/UNSAVE_componentWillMount~~`
-           + `render`之前调用，在此声明周期中使用 `setState` 不会触发额外渲染
+           + `render`之前调用，在此声明周期中使用 `setState` 不会触发额外渲染，因为你不可能在创建期实现把数据渲染出来。只能在 `componentDidMount` 中使用 `setState` 把数据塞回去，通过更新界面来展示数据。
    + `render`
         + 必须定义，UI 渲染
    + `componentDidMount(第一次render之后执行)`
@@ -94,8 +98,6 @@
 可以总结为一句话，此静态方法会在`render`之前被调用，在初始挂载以及后续更新的时候都会被调用。
 ### `Derived state`的定义是？（如何理解`derived state`?）
 派生一个state，根据传入的props进行state的更新
-### 在1.6.3中，`setState()`不会引起`getDerivedFromProps`的执⾏，⽽1.6.4.会，原因是？
-  据说是官方失误
 ### 1.6.2及其以前升级到1.6.4的⽅案是？
 > 虽然废弃了这三个生命周期方法，但是为了向下兼容，将会做渐进式调整。
 V16.3 并未删除这三个生命周期，同时还为它们新增以 UNSAFE_ 前缀为别名的三个函数 UNSAFE_componentWillMount()、UNSAFE_componentWillReceiveProps()、UNSAFE_componentWillUpdate()。
@@ -104,3 +106,42 @@ V16.3 并未删除这三个生命周期，同时还为它们新增以 UNSAFE_ �
 ### 1.6.x升级到1.7的⽅案是？
 + 在 17 版本将会删除 componentWillMount()、componentWillReceiveProps()、componentWillUpdate() 这三个函数，会保留使用 UNSAFE_componentWillMount()、UNSAFE_componentWillReceiveProps()、UNSAFE_componentWillUpdate()
 + 使用 react-lifecycles-compat polyfill
+
+### 生命周期的三个阶段
+
++ 创建期
++ 存活期
++ 清理期
+
+#### 创建期
+
+```jsx
+import Com from './my-component'
+export default class ParentComponent extends React.Component {
+  render() {
+    return (
+      <div>
+        <Com />
+      </div>
+    )
+  }
+}
+```
+
+父组件的 `render` 方法执行的时候会实例化子组件 `<Com/>` ，当真正的 `DOM` 渲染之后，子组件的`componentDidMount` 函数会比父组件的更早执行。
+
+#### 存活期
+
+创建期过去之后，创建期函数不会再被调用。`componentDidMount` 函数是在 `DOM` 被渲染出来之后执行的，`componentDidMount` 中的某些操作将常驻内存，比如绑定了事件，还有一些操作可以带来界面的更新，即在 `componentDidMount` 中调用 `this.setState` 。
+
+进入存活期就存在组件更新的情况，组件有三中更新的方式：
+
++ 自己调用 `this.setState()`
++ 自己调用 `this.forceUpdate()`
++ 父组件更新
+  + 父组件调用 `this.setState` 或 `this.forceUpdate` 或祖组件更新带来的 `props` 更改）时导致自己的 `props` 被更改。
+
+#### 存活期组件更新的要点
+
++ `setState` 是异步的
++ 父组件异步加载数据

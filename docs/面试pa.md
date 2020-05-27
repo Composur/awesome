@@ -1,3 +1,6 @@
+---
+sidebar: auto
+---
 ### 1.自我介绍
 ### 2.Event Loop
   #### NodeJS中的Event Loop
