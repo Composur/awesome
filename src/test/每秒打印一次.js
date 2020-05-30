@@ -13,14 +13,22 @@ const square = (num) => {
 //     console.log(res)
 //   })
 // }
-function test() {
-  list.forEach((x,i) => {
-    setTimeout( async ()=>{
-      const res = await square(x);
-      console.log(res);
-    },i*1000) // 将迭代索引*1000
-  });
+
+// function test() {
+//   list.forEach((x,i) => {
+//     setTimeout( async ()=>{
+//       const res = await square(x);
+//       console.log(res);
+//     },i*1000) // 将迭代索引*1000
+//   });
+// }
+async function test() {
+  for await ( i of list){
+    const res = await square(i)
+    console.log(res)
+  }
 }
+
 // async function test(x) {
 //   const res = await square(x);
 //   console.log(res);
@@ -34,3 +42,5 @@ function test() {
 // }
 // nextStep(0);
 test()
+
+
