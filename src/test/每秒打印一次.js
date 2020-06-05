@@ -8,7 +8,7 @@ const square = (num) => {
 };
 // 原型
 // function test() {
-//   list.forEach(async x=> {
+//   list.forEach(async x=> { //forEach是不能阻塞的，默认是请求并行发起，所以是同时输出1、4、9
 //     const res = await square(x)
 //     console.log(res)
 //   })
@@ -22,12 +22,21 @@ const square = (num) => {
 //     },i*1000) // 将迭代索引*1000
 //   });
 // }
-async function test() {
-  for await ( i of list){
+ async function test() {
+  for(let i of list){
     const res = await square(i)
     console.log(res)
   }
 }
+// 等价于
+// async function test() {
+//   const res = await square(1)
+//   console.log(res)
+//   const res2 = await square(2)
+//   console.log(res)
+//   const res3 = await square(3)
+//   console.log(res)
+// }
 
 // async function test(x) {
 //   const res = await square(x);
