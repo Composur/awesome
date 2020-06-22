@@ -42,6 +42,10 @@ flex 属性：
 }
 ```
 
+**1.4 注意点**
+
+设为 Flex 布局以后，子元素的`float`、`clear`和`vertical-align`属性将失效
+
 ### 2. 移动端适配
 
 vh 和 vw 方案和 rem 类似也是相当麻烦需要做单位转化，而且 px 转换成 vw 不一定能完全整除，因此有一定的像素差。webpack 解析css 的时候用 postcss-loader 有个postcss-px-to-viewport能自动实现 px 到 vw 的转化
