@@ -23,7 +23,7 @@ const square = (num) => {
 //   });
 // }
  async function test() {
-  for(let i of list){
+  for  (let i of list){
     const res = await square(i)
     console.log(res)
   }

@@ -1162,6 +1162,63 @@ inject: ['getMap']
 
 耦合性高，重构困难。重要的是提供的数据是非响应式的。建议使用 `Vuex` 。
 
+
+
+### 12：内部监听生命周期函数
+
+我们通常这样绑定解绑事件监听
+
+```vue
+<template>
+  <div class="echarts"></div>
+</template>
+<script>
+export default {
+  mounted() {
+    // 绑定监听
+    window.addEventListener('resize', this.$_handleResizeChart)
+  },
+  beforeDestroy() {
+    // 组件销毁时，销毁监听事件
+    window.removeEventListener('resize', this.$_handleResizeChart)
+  },
+  methods: {
+    $_handleResizeChart() {
+      this.chart.resize()
+    },
+  }
+}
+</script>
+
+```
+
+可以写成这样：绑定解绑定放到一起容易维护。
+
+```js
+export default {
+  mounted() {
+    // 监听窗口发生变化，resize组件
+    window.addEventListener('resize', this.$_handleResizeChart)
+    // 通过hook监听组件销毁钩子函数，并取消监听事件
+    this.$once('hook:beforeDestroy', () => {
+      window.removeEventListener('resize', this.$_handleResizeChart)
+    })
+  },
+  methods: {
+    $_handleResizeChart() {
+      // this.chart.resize()
+    }
+  }
+}
+
+```
+
+
+
+
+
+
+
 # Vuex 问题
 
 什么需要放到 vuex 上，需要共享的数据。
