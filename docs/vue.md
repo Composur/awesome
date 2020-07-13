@@ -1,5 +1,5 @@
 ---
-sidebar: auto
+I sidebar: auto
 ---
 # Vue 的运行机制简述
 
