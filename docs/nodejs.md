@@ -501,6 +501,18 @@ if (cluster.isMaster) {
 
 其实是主线程在监听，子线程监听的是一个类似 id 的东西。
 
+#### 5.6 PATH
+
+**path.join() 和 path.resolve() 的区别**
+
+二者都能拼接出来一个绝对路径，`path.join()` 是将多个参数字符串拼接成一个路径字符串。
+
+`path.resolve()` 是以程序为根目录，为起点根据参数解析出一个绝对路径。
+
+`path.join(__dirname,'/src','/page')`；` /` 不会影响拼接。解析路径为根路径 `/src/page`
+
+`path.resolve(__dirname,'/src','page')`；`/`会影响拼接，解析路径为 `/src`，因为 `/` 代表跟目录。
+
 
 
 ### 6. Node.js 的异步、非阻塞 I/O

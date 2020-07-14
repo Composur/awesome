@@ -14,6 +14,16 @@
 
 **webpack 自身只能处理`js`、`json`文件，不能处理样式文件和图片。**
 
+前端目前的构建共建都是基于 `Node.js`平台运行的，所以模块化默认采用 `CommonJS`。
+
+```js
+module.exports = {
+  
+}
+```
+
+
+
 ## 五个核心概念
 
 + Entry
