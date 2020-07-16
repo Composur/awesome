@@ -71,6 +71,47 @@ config.module
 }).end()
 ```
 
+### 压缩图片
+
+>  image-webpack-loader
+>
+> 将大的图片进行压缩从而缩小打包体积
+
+```js
+// vue.config.js
+module.exports = {
+    chainWebpack: config => {
+        // ============压缩图片 start============
+        config.module
+            .rule('images')
+            .use('image-webpack-loader')
+            .loader('image-webpack-loader')
+            .options({ bypassOnDebug: true })
+            .end()
+        // ============压缩图片 end============
+    }
+}
+
+```
+
+```js
+// webpack.base.config.js
+rules: [{
+  test: /\.(gif|png|jpe?g|svg)$/i,
+  use: [
+    // 因为用了 url-loader 要先写 file-loader 不然图片出不来
+    'file-loader',
+    {
+      loader: 'image-webpack-loader',
+      options: {
+        bypassOnDebug: true, // webpack@1.x
+        disable: true, // webpack@2.x and newer
+      },
+    },
+  ],
+}]
+```
+
 
 
 ## Vue 的一些用法
