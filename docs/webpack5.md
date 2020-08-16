@@ -75,7 +75,15 @@ module.exports = {
   }
   ```
 
-  
+  + 优先执行
+
+    + 加入 enforce 属性
+
+      ```
+      enforce: 'pre'
+      ```
+
+      
 
 + Plugins
 
@@ -84,4 +92,233 @@ module.exports = {
 + Mode
 
   + Dev 和 Prd
+
+
+
+## 开发环境性能优化
+
++ 优化打包速度
+
+  + HRM 只有 CSS
+
+  + sourceMap 源代码到构建后代码的映射
+
+    + inline 内联
+      + 只生成一个 sourceMap
+      + 可以追踪错误代码的准确信息，和源代码的错误位置。
+    + hidden 外部
+      + 可以追踪错误代码的准确信息，没有源代码错误位置。
+    + eval 
+      + 也是内联，不过每个文件都会生成一个 sourceMap
+      + 可以追踪错误代码的准确信息，和源代码的错误位置。
+      + 代码体积非常大。
+    + nosources
+      + 外部
+      + 可以追踪错误代码的准确信息，没有源代码信息，隐藏源代码。
+    + cheap
+      + 外部
+      + 可以追踪错误代码所在那一行的信息，不能精确定位到具体的列。
+    + module
+      + 和 cheap 效果一样
+
+    构建速度
+
+    eval > cheap > inline 
+
+    ```
+    devtool:eval-cheap-source-map
+    ```
+
+    调试更友好
+
+    cheap-module-source-map
+
+    一般推荐 eval-source-map
+
++ 优化代码调试
+
+## 生成环境性能优化
+
++ 优化打包速度
++ 优化运行性能
+
+### oneOf
+
+`rules` 的属性，每个 `loader` 匹配一个，避免重复匹配。
+
+注意：不能有两个配置处理同一类型文件。
+
+### 文件缓存
+
++ hash
+  + 文件每次缓存都会生成一个` hash`，每次打包都会重新生成
++ thunkhash
+  + 根据 `chunk` 生成 `hash` ，如果打包来源同一个 `thunk` ，那么 `hash` 值一样，
+  + `Js` 中引入` CSS` 二者 `chunkhash` 一致。
++ contenthash 
+  + 根据文件内容生成的 `hash` 值，不同文件 `hash` 值不一样。
+
+### 代码分割
+
++ optimization 将 nodeModules 的代码单独打包成一个 chunk，多入口的时候可以公共文件提取 。
+
+  + splitchunks
+
+  ```js
+  optimization:{
+    splitchunks:{
+       chunks: 'all',
+          cacheGroups: {
+            libs: {
+              name: 'chunk-libs',
+              test: /[\\/]node_modules[\\/]/,
+              priority: 10,
+               // only package third parties that are initially dependent
+              chunks: 'initial' 
+            },
+            elementUI: {
+              // split elementUI into a single package
+              name: 'chunk-elementUI', 
+              priority: 20,
+               // in order to adapt to cnpm
+              test: /[\\/]node_modules[\\/]_?element-ui(.*)/ 
+            },
+            commons: {
+              name: 'chunk-commons',
+               // can customize your rules
+              test: resolve('src/components'),
+               //  minimum common number
+              minChunks: 3, 
+              priority: 5,
+              reuseExistingChunk: true
+            }
+          }
+    	}
+  }
+  ```
+
+  
+
+### 懒加载
+
+ ```js
+// 执行的时候才会加载
+import(/* webpackChunkName:test */'./test').then({fn}=>fn())
+ ```
+
+### 预加载
+
+```js
+// 提前加载好，执行的时候取缓存
+// 并行加载
+import(/* webpackChunkName:test , webpackPrefetch:true */'./test').then({fn}=>fn())
+```
+
+### PWA
+
+**配置**
+
+```js
+const WorkboxPlugin = require('workbox-webpack-plugin')
+// 使用
+new WorkboxPlugin.GenerateSW({
+  // 快速启动
+	clinetsClaim: true,
+  // 删除旧的 serviceWorker
+  skipWaiting: true
+})
+```
+
+
+
+**使用**
+
+```js
+//入口文件
+// Check that service workers are supported
+if ('serviceWorker' in navigator) {
+  // Use the window load event to keep the page load performant
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').then(() => {
+      console.log('sw 注册成功！')
+    }).catch(() => {
+      console.log('sw 注册失败！')
+    })
+  })
+}
+
+```
+
+
+
+### 多进程打包
+
+thread-loader
+
++ 进程的启动需要时间 600ms ,进程间的通信也有开销。适合打包时间较长的项目。
+
+
+
+### 忽略依赖库的打包
+
+external , 前提是你使用了 `CDN`.
+
+```js
+externals:{
+	// 要忽略的包名
+	jquery:'jQuery',
+}
+```
+
+
+
+### 动态修改 webpack 打包路径
+
+__webpack_public_path__ 是webpack特有变量，就是webpack在打包我们代码时外面包裹了一层函数，一些变量通过参数传递进来让我们可以在代码中使用，即使这些变量在宿主环境（比如浏览器）里面是没有的（像require，import，export等）。
+
+我们只需给__webpack_public_path__赋值就可以改变公共路径，建议放在入口文件的最顶部，如下
+
+```js
+// publicConfig.js
+__webpack_public_path__ = 'https://cdn.demo.com';
+
+// 入口文件 index.js
+import './publicConfig.js'   
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+```
+
+**但是这种修改只针对js文件中的公共路径，对html中的css和js文件地址不起作用，css样式文件中通过url()方式引入的图片也无效。**
+
+如果是`css in js`的形式，公共路径的动态修改`css`样式文件是生效的。
+
+>  如果是create-react-app创建的项目，修改__webpack_public_path__可能会不生效，需要通过删除publicPath配置项来解决（是不设置而不是设置为空）
+
+
+
+### webpack5 的新功能
+
++ 通过持久缓存提高构建性能
+
+  + 之前是babel cache 等，现在有个 cache 属性。可以更好的缓存打包后的资源。
+
+    ```
+    cache:{
+    	type: "filesystem",
+    	buildDependencies: {
+    		...
+    	}
+    }
+    ```
+
+    
+
++ 更好的算法和默认值来改善长期缓存
+
++ 更好的 tree-shaking 更加强大，不会打包没有使用的代码，改善打包后的体积
+
++ 
+
+
 

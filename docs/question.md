@@ -112,6 +112,22 @@ rules: [{
 }]
 ```
 
+### 配置 webpack 打包依赖库使用 CommonJS
+
+在项目的`babel.config.js`中写下如下的配置就可以了：
+
+```js
+module.exports = { 
+  ...
+  overrides: [ 
+    {    
+      // 使用的第三方库
+      include: './node_modules/module-name/library-name/name.common.js',        			sourceType: 'unambiguous' 
+    }  
+  ], 
+};
+```
+
 
 
 ## Vue 的一些用法
@@ -171,6 +187,46 @@ export default{
 "scripts": {
     "build": "node --max_old_space_size=4096 build/build.js",
   },
+```
+
+## bus.$event.$on 无效
+
+> https://juejin.im/post/6844903591216414728
+
+**问题描述：**
+
+**从一个页面跳转到另一个页面去选择一些信息，选择好后返回上一个页面，并把选择的信息带过来**
+
+A 组件
+
+```js
+ this.$eventBus.$emit('eventName',data)
+```
+
+B 组件
+
+```js
+ this.$eventBus.$on('eventName',(data)=>data)
+```
+
+但是 B 组件没有监听到事件
+
+在路由切换时，执行的方法依次是：
+
++ 新组件： `beforeCreate`
+
++ 新组件： `created`
++ 新组件： `beforeMount`
++ 旧组件： `beforeDestroy`
++ 旧组件：` destroyed`
++ 新组件： `mounted`
+
+B 组件需要在 A 组件销毁前。
+
+```js
+destroyed () {
+	this.$eventBus.$emit('eventName',data)
+},
 ```
 
 
