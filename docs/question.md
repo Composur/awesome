@@ -229,5 +229,170 @@ destroyed () {
 },
 ```
 
+## 页面间（ifream）通信 PostMessage
 
+假设有 a、b、c 三个页面，需要进行跨域，跨窗口消息传递
+
+a 页面传递信息给 c
+
+b 可以操作传递给 c 的信息，增删改查
+
+a.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>A-页面</title>
+    <style>
+        #child {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>A-页面</h2>
+    <div>
+        <label for="">Key</label>
+        <input type="text" placeholder="输入key" id="itemKey">
+    </div>
+    <div>
+        <label for="">Value</label>
+        <input type="text" placeholder="输入value" id="itemValue">
+    </div>
+    <div>
+        <button id="add">添加</button>
+    </div>
+    <iframe id="child" src="http://localhost:5500/src/local_cross/c.html"></iframe>
+    <script>
+        var add = document.getElementById("add");
+        add.addEventListener('click', function () {
+            var itemKey = document.getElementById("itemKey").value;
+            var itemValue = document.getElementById("itemValue").value;
+            if (itemKey && itemValue) {
+                window.frames[0].postMessage(JSON.stringify({
+                    type: "get",
+                    key: itemKey,
+                    value: itemValue
+                }), '*');
+                alert('添加成功');
+            } else {
+                alert('请输入key或者value');
+            }
+        });
+    </script>
+</body>
+
+</html>
+```
+
+c.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>C-页面</title>
+</head>
+
+<body>
+    <h2>C-页面</h2>
+    <script>
+        ;
+        (function (win) {
+            win.addEventListener("message", function (evt) {
+                debugger;
+                if (win.parent != evt.source) {
+                    return
+                }
+                var options = JSON.parse(evt.data);
+                if (options.type === "get") {
+                    var data = win.localStorage.getItem(options.key);
+                    win.parent.postMessage(data, "*");
+                }
+                if (options.type === "set") {
+                    win.localStorage.setItem(options.key, options.value);
+                }
+                if (options.type === "remove") {
+                    win.localStorage.removeItem(options.key);
+                }
+                if (options.type === "clear") {
+                    win.localStorage.clear();
+                }
+            }, false);
+        })(window);
+    </script>
+</body>
+
+</html>
+```
+
+
+
+b.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>B-页面</title>
+    <style>
+        #child {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>B-页面</h2>
+    <div>
+        <label for="">Key</label>
+        <input type="text" placeholder="输入key" id="itemKey">
+    </div>
+    <div>
+        <button id="getValue">获取</button>
+    </div>
+    <div id="itemValue"></div>
+    <iframe id="child" src="http://localhost:5500/src/local_cross/c.html"></iframe>
+    <script type="text/javascript">
+        var getValue = document.getElementById("getValue");
+        getValue.addEventListener('click', function () {
+            var itemKey = document.getElementById("itemKey").value;
+            var itemValue = document.getElementById("itemValue");
+            if (itemKey) {
+                window.frames[0].postMessage(JSON.stringify({
+                    type: "get",
+                    key: itemKey
+                }), '*');
+                window.addEventListener('message', function (e) {
+                    if (e.origin && e.origin === 'http://localhost:5500') {
+                        var data = e.data;
+                        itemValue.innerHTML = 'value为' + data;
+                    }
+                }, false);
+            } else {
+                alert('请输入key');
+            }
+        });
+    </script>
+</body>
+
+</html>
+```
 

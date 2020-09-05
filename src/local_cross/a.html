@@ -1,43 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
+    <meta charset="UTF-8">
+    <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>A-页面</title>
-  <style>
-    #child{
-      display: none;
-    }
-  </style>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>A-页面</title>
+    <style>
+        #child {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
-<h2>A-页面</h2>
-<div>
-  <label for="">Key</label>
-  <input type="text" placeholder="输入key" id="itemKey">
-</div>
-<div>
-  <label for="">Value</label>
-  <input type="text" placeholder="输入value" id="itemValue">
-</div>
-<div>
-  <button id="add">添加</button>
-</div>
-<iframe id="child" src="http://localhost:3000/c.html"></iframe>
-<script>
-  var add = document.getElementById("add");
-  add.addEventListener('click',function () {
-    var itemKey = document.getElementById("itemKey").value;
-    var itemValue = document.getElementById("itemValue").value;
-    if (itemKey && itemValue){
-      window.frames[0].postMessage(JSON.stringify({type:"set",key: itemKey ,value: itemValue}),'*');
-      alert('添加成功');
-    }else {
-      alert('请输入key或者value');
-    }
-  });
-</script>
+    <h2>A-页面</h2>
+    <div>
+        <label for="">Key</label>
+        <input type="text" placeholder="输入key" id="itemKey">
+    </div>
+    <div>
+        <label for="">Value</label>
+        <input type="text" placeholder="输入value" id="itemValue">
+    </div>
+    <div>
+        <button id="add">添加</button>
+    </div>
+    <iframe id="child" src="http://localhost:5500/src/local_cross/c.html"></iframe>
+    <script>
+        var add = document.getElementById("add");
+        add.addEventListener('click', function () {
+            var itemKey = document.getElementById("itemKey").value;
+            var itemValue = document.getElementById("itemValue").value;
+            if (itemKey && itemValue) {
+                window.frames[0].postMessage(JSON.stringify({
+                    type: "get",
+                    key: itemKey,
+                    value: itemValue
+                }), '*');
+                alert('添加成功');
+            } else {
+                alert('请输入key或者value');
+            }
+        });
+    </script>
 </body>
+
 </html>
