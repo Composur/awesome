@@ -396,3 +396,17 @@ b.html
 </html>
 ```
 
+## vue table 修改的问题
+
+修改 table 弹出 dialog 我们不能直接把 table 的 当前行的数据赋值给 dialog 不然 table 中的数据也会跟着变化，因为是相同的引用
+
+**解决办法：**
+
+```js
+// object
+this.object = Object.assign({},row)
+
+// Array
+newArray = oldArray.slice() // slice 会克隆返回一个新数组
+```
+
