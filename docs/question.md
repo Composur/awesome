@@ -410,3 +410,78 @@ this.object = Object.assign({},row)
 newArray = oldArray.slice() // slice 会克隆返回一个新数组
 ```
 
+
+
+## Vue 刷新当前页面
+
+目的：原生调用h5 方法重载页面，App.vue初始化的时候吧方法赋值给 window
+
+怎么刷新：
+
+1. **`this.$router.go(0)`**。体验很差。页面会一瞬间的白屏。
+2. **`location.reload()`**。这种也是一样，画面一闪，体验不是很好
+
+**用`provide` / `inject` 组合** 注入所有组件方法
+
+来控制 app.vue `router-view`的显示或隐藏
+
+```vue
+<template>
+  <div id="app">
+    <router-view v-if="isRouterAlive"></router-view>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+  provide () {
+    return {
+      reload: this.reload
+    }
+  },
+  data () {
+    return {
+      isRouterAlive: true
+    }
+  },
+  methods: {
+    reload () {
+      this.isRouterAlive = false
+      this.$nextTick(function () {
+        this.isRouterAlive = true
+      })
+    }
+  }
+}
+</script>
+```
+
+组件中使用：
+
+```vue
+<template>
+  <div>
+  </div>
+</template>
+
+<script>
+export default {
+	inject:['reload']
+  methods: {
+   getData() {
+   		this.reload()
+   }
+  }
+}
+</script>
+```
+
+初始化的时候赋值给 window 通过桥接调用
+
+```vue
+created() {
+	window.reload = this.load
+}
+```
+
