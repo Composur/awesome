@@ -1,67 +1,69 @@
 ---
 I sidebar: auto
+
 ---
+
 ## Vue 
 
 1. Vue 实例的 data 属性，可以在哪些生命周期中获取到？`b c d`
-A. beforeCreate
-B. created
-C. beforeMount
-D. mounted
+   A. beforeCreate
+   B. created
+   C. beforeMount
+   D. mounted
 
 2. 下列对 Vue 原理的叙述，哪些是正确的？`a b c d `
-A. Vue 中的数组变更通知，通过拦截数组操作方法而实现
-B. 编译器目标是创建渲染函数，渲染函数执行后将得到 VNode 树
-C. 组件内 data 发生变化时会通知其对应 watcher，执行异步更新
-D. patching 算法首先进行同层级比较，可能执行的操作是节点的增加、删除和更新
+   A. Vue 中的数组变更通知，通过拦截数组操作方法而实现
+   B. 编译器目标是创建渲染函数，渲染函数执行后将得到 VNode 树
+   C. 组件内 data 发生变化时会通知其对应 watcher，执行异步更新
+   D. patching 算法首先进行同层级比较，可能执行的操作是节点的增加、删除和更新
 
 3. 对于 Vue 中响应式数据原理的说法，下列哪项是不正确的？`b d`
-A. 采用数据劫持方式，即 Object.defineProperty() 劫持 data 中各属性，实现响应式数据
-B. 视图中的变化会通过 watcher 更新 data 中的数据
-C. 若 data 中某属性多次发生变化，watcher 仅会进入更新队列一次
-D. 通过编译过程进行依赖收集
+   A. 采用数据劫持方式，即 Object.defineProperty() 劫持 data 中各属性，实现响应式数据
+   B. 视图中的变化会通过 watcher 更新 data 中的数据
+   C. 若 data 中某属性多次发生变化，watcher 仅会进入更新队列一次
+   D. 通过编译过程进行依赖收集
 
 4. 下列说法不正确的是哪项？`b`
-A. key 的作用主要是为了高效地更新虚拟 DOM
-B. 若指定了组件的 template 选项，render 函数不会执行
-C. 使用 vm.$nextTick 可以确保获得 DOM 异步更新的结果
-D. 若没有 el 选项，vm.$mount(dom) 可将 Vue 实例挂载于指定元素上
+   A. key 的作用主要是为了高效地更新虚拟 DOM
+   B. 若指定了组件的 template 选项，render 函数不会执行
+   C. 使用 vm.$nextTick 可以确保获得 DOM 异步更新的结果
+   D. 若没有 el 选项，vm.$mount(dom) 可将 Vue 实例挂载于指定元素上
 
 5. 下列关于 Vuex 的描述，不正确的是哪项？`d`
-A. Vuex 通过 Vue 实现响应式状态，因此只能用于 Vue
-B. Vuex 是一个状态管理模式
-C. Vuex 主要用于多视图间状态全局共享与管理
-D. 在 Vuex 中改变状态，可以通过 mutations 和 actions
+   A. Vuex 通过 Vue 实现响应式状态，因此只能用于 Vue
+   B. Vuex 是一个状态管理模式
+   C. Vuex 主要用于多视图间状态全局共享与管理
+   D. 在 Vuex 中改变状态，可以通过 mutations 和 actions
 
 6. 关于 Vue 组件间的参数传递，下列哪项是不正确的？`b` 
-A. 若子组件给父组件传值，可使用 $emit 方法
-B. 祖孙组件之间可以使用 provide 和 inject 方式跨层级相互传值
-C. 若子组件使用 $emit('say') 派发事件，父组件可使用 @say 监听
-D. 若父组件给子组件传值，子组件可通过 props 接受数据
+   A. 若子组件给父组件传值，可使用 $emit 方法
+   B. 祖孙组件之间可以使用 provide 和 inject 方式跨层级相互传值
+   C. 若子组件使用 $emit('say') 派发事件，父组件可使用 @say 监听
+   D. 若父组件给子组件传值，子组件可通过 props 接受数据
 
 7. 下列关于 vue-router 的描述，不正确的是哪项？`c`
-A. vue-router 的常用模式有 hash 和 history 两种
-B. 可通过 addRoutes 方法动态添加路由
-C. 可通过 beforeEnter 对单个组件进行路由守卫
-D. vue-router 借助 Vue 实现响应式的路由，因此只能用于 Vue
+   A. vue-router 的常用模式有 hash 和 history 两种
+   B. 可通过 addRoutes 方法动态添加路由
+   C. 可通过 beforeEnter 对单个组件进行路由守卫
+   D. vue-router 借助 Vue 实现响应式的路由，因此只能用于 Vue
 
 8. 下列说法不正确的是哪项？`c`
-A. 可通过 this.$parent 查找当前组件的父组件
-B. 可使用 this.$refs 查找命名子组件
-C. 可使用 this.$children 按顺序查找当前组件的直接子组件
-D. 可使用 $root 查找根组件，并可配合 children 遍历全部组件
+   A. 可通过 this.$parent 查找当前组件的父组件
+   B. 可使用 this.$refs 查找命名子组件
+   C. 可使用 this.$children 按顺序查找当前组件的直接子组件
+   D. 可使用 $root 查找根组件，并可配合 children 遍历全部组件
 
 9. 下列关于 v-model 的说法，哪项是不正确的？`c`
-A. v-model 能实现双向绑定
-B. v-model 本质上是语法糖，它负责监听用户的输入事件以更新数据
-C. v-model 是内置指令，不能用在自定义组件上
-D. 对 input 使用 v-model，实际上是指定其 :value 和 :input
+   A. v-model 能实现双向绑定
+   B. v-model 本质上是语法糖，它负责监听用户的输入事件以更新数据
+   C. v-model 是内置指令，不能用在自定义组件上
+   D. 对 input 使用 v-model，实际上是指定其 :value 和 :input
 
 10. 关于 Vue 的生命周期，下列哪项是不正确的？`d`
-A. DOM 渲染在 mounted 中就已经完成了
-B. Vue 实例从创建到销毁的过程，就是生命周期
-C. created 表示完成数据观测、属性和方法的运算和初始化事件，此时 $el 属性还未显示出来
-D. 页面首次加载过程中，会依次触发 beforeCreate，created，beforeMount，mounted，beforeUpdate，updated
+    A. DOM 渲染在 mounted 中就已经完成了
+    B. Vue 实例从创建到销毁的过程，就是生命周期
+    C. created 表示完成数据观测、属性和方法的运算和初始化事件，此时 $el 属性还未显示出来
+    D. 页面首次加载过程中，会依次触发 beforeCreate，created，beforeMount，mounted，beforeUpdate，updated
 
 # Vue 的运行机制简述
 
@@ -392,7 +394,6 @@ export function mountComponent (
 例如：
 
 ```vue
-
 <script>
 new Vue({
   render:  createElement=> createElement('div',{
@@ -567,7 +568,6 @@ export function _createElement (
 首次渲染
 
 ```js
-
 vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
 ```
 
@@ -785,7 +785,6 @@ class Vue {
 关联 Observer 和 Watcher
 
 ```javascript
-
 // 1. 通知 observe(观察者)) 数据变化
 // 2. 添加订阅（搜集 watcher）
 class Dep {
@@ -838,6 +837,7 @@ class Watcher { // 什么时候绑定？ 在解析、更新数据的时候
   }
 }
 ```
+
   observe - dep - watcher - view
 
 
@@ -890,10 +890,11 @@ data: function () {
 ##### 1.2 父子组件传参
 
 + 父传子，通过 props
-  
+
 + 在子组件绑定 props `v-bind:children-data='data'`  <small>暂不支持驼峰命名</small>
-  
+
 + 子传父，通过自定义事件 `$emit(events)` 发射一个事件
+
   + 在子组件通过 `this.$emit('事件名',obj)` <small>事件名不支持驼峰命名</small>
   + 父组件上监听 `v-on:事件名=methods` 父组件方法中获取`methods($event)` 获取 `obj` 
 
@@ -944,6 +945,7 @@ requireAll(req)
 #### 2. slot/插槽
 
 > 原理类似电脑上的 use 电源 耳机 插槽等，让使用者（一般是父组件传入的html模板）决定怎么使用 这是具名插槽
+
 ```vue
 //子组件
 <header class="header">
@@ -1057,11 +1059,11 @@ requireAll(req)
 #### 7. vue的响应式原理
 
 > Vue在进行DOM渲染时会尽可能的复用已经存在的的元素，而不是重新创建元素。强制不使用的话就加一个key。
-    1). 关注点有哪些?
-        vue的数据绑定效果: 组件更新data数据后, 当前组件及相关的子组件都会更新相应的节点
-        如何知道数据变化了?
-        通知哪些组件更新渲染?
-        组件更新渲染是同步还是异步的?
+> 1). 关注点有哪些?
+>    vue的数据绑定效果: 组件更新data数据后, 当前组件及相关的子组件都会更新相应的节点
+>    如何知道数据变化了?
+>    通知哪些组件更新渲染?
+>    组件更新渲染是同步还是异步的?
 
     2). 基本原理
         在初始化时: 利用Object.defineProperty()给data属性添加 setter 监视数据变化
@@ -1069,19 +1071,20 @@ requireAll(req)
         在更新数据后: 对应的setter调用, 通知所有相关的watcher, watcher内异步更新节点或者子组件
     
     3). 一些细节
+
 > 数据上的一些方式是响应式的，通过数组的下标去更改数组的值做不到响应式（vue没有通过这种方式监听） 
-        只有data中属性是响应式的, 只在组件对象上的属性不是响应式的
-        data中所有层次属性都是响应式的
-        直接能data中响应式属性对象添加一个新的属性, 默认不是响应式的, 需要用Vue提供的语法添加
-            Vue.set(obj, propName, value)
-            vm.$set(obj, propName, value)
-        vue的异步更新: 
-            vue 在内部尝试对异步队列使用原生的 Promise.then 和 MessageChannel，
-            如果执行环境不支持，会采用 setTimeout(fn, 0) 代替
-            index页面中的的div元素会被替换, 而不是插入其中
-        组件的data配置不能是对象?
-            组件会被多次使用, 每次使用都会读取data配置值, 如果是对象, 那就会共用一个data对象
-            而函数就没有问题, 因为每次调用函数返回一个新的data对象
+>    只有data中属性是响应式的, 只在组件对象上的属性不是响应式的
+>    data中所有层次属性都是响应式的
+>    直接能data中响应式属性对象添加一个新的属性, 默认不是响应式的, 需要用Vue提供的语法添加
+>        Vue.set(obj, propName, value)
+>        vm.$set(obj, propName, value)
+>    vue的异步更新: 
+>        vue 在内部尝试对异步队列使用原生的 Promise.then 和 MessageChannel，
+>        如果执行环境不支持，会采用 setTimeout(fn, 0) 代替
+>        index页面中的的div元素会被替换, 而不是插入其中
+>    组件的data配置不能是对象?
+>        组件会被多次使用, 每次使用都会读取data配置值, 如果是对象, 那就会共用一个data对象
+>        而函数就没有问题, 因为每次调用函数返回一个新的data对象
 
 #### 8. 组件的生命周期
 
@@ -1131,6 +1134,7 @@ vue的生命周期:  创建 => 挂载 => 更新 => 销毁
 能用 `computed`就不用`watch`。
 
 + `computed`（计算属性）：
+
   + 用来处理复杂的模板逻辑运算，类似过滤器，是对同步数据的处理。
   + **计算属性是基于它们的响应式依赖进行缓存的**。只在相关响应式依赖发生改变时它们才会重新求值。
   + 计算属性会缓存结果，避免重复计算。组件的 data 发生改变才进行计算。
@@ -1191,7 +1195,48 @@ vue的生命周期:  创建 => 挂载 => 更新 => 销毁
 
     
 
++ 监听对象单个属性
 
+  ```js
+  // 方法一：可以直接对用对象.属性的方法拿到属性
+  data(){
+  return{
+      'first':{
+      	second:0
+      }
+    }
+   },
+    watch:{
+      first.second:function(newVal,oldVal){
+      console.log(newVal,oldVal);
+    }
+  },
+      
+  ```
+  
+  ```js
+  // watch如果想要监听对象的单个属性的变化,必须用computed作为中间件转化
+  // 因为computed可以取到对应的属性值
+  data() {
+      return {
+        'first': {
+          second: 0
+        }
+      }
+    },
+    computed: {
+      secondChange() {
+        return this.first.second
+      }
+    },
+    watch: {
+      secondChange() {
+        console.log('second属性值变化了')
+      }
+    }
+  ```
+  
+  
 
 #### 11. 依赖注入
 
