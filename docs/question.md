@@ -1,4 +1,4 @@
-## webpack 
+# webpack 
 
 ### 代码检查
 
@@ -128,9 +128,25 @@ module.exports = { 
 };
 ```
 
+### 编译打包失败，内存溢出
 
+**问题描述**：本机打包没问题，服务器打包出错，出错信息为内存溢出，Node内存不足所导致。
 
-## Vue 的一些用法
+ **Node 中通过 JavaScript 使用内存时只能使用部分内存（64位系统下约为1.4 GB，32位系统下约为0.7 GB）**
+
+初步想法：`require.context(xx,true,/js/)`，递归某个层级很深的文件夹导致。因为暂时无法调整 node 编译内存大小。
+
+没办法只能调整 4G了：
+
+```json
+"scripts": {
+    "build": "node --max_old_space_size=4096 build/build.js",
+  },
+```
+
+## 
+
+# Vue 实用写法
 
 `Vue.config.errorHandler` 捕获声明周期、自定义事件处理函数内部、`v-on DOM` 监听器内部抛出的错误，避免应用崩溃，也可以进行错误上报。
 
@@ -149,7 +165,7 @@ Vue.config.warnHandler = function (msg, vm, trace) {
 }
 ```
 
-### 处理 img 加载失败
+## 处理 img 加载失败
 
 ```vue
 // page 代码
@@ -172,22 +188,6 @@ export default{
 ```
 
 
-
-## 编译打包失败，内存溢出
-
-**问题描述**：本机打包没问题，服务器打包出错，出错信息为内存溢出，Node内存不足所导致。
-
- **Node 中通过 JavaScript 使用内存时只能使用部分内存（64位系统下约为1.4 GB，32位系统下约为0.7 GB）**
-
-初步想法：`require.context(xx,true,/js/)`，递归某个层级很深的文件夹导致。因为暂时无法调整 node 编译内存大小。
-
-没办法只能调整 4G了：
-
-```json
-"scripts": {
-    "build": "node --max_old_space_size=4096 build/build.js",
-  },
-```
 
 ## bus.$event.$on 无效
 
@@ -485,3 +485,10 @@ created() {
 }
 ```
 
+# 实用 API
+
+## IntersectionObserver
+
+用来检测某个（些）元素是否出现在可视窗口中。
+
+用处：图片懒加载、无限滚动等。
