@@ -1528,7 +1528,9 @@ computed: {
 
 
 
-### Vue 3.0
+# Vue 3.0
+
+## 2.0 vs 3.0
 
 > 将 2.x 中与组件逻辑相关的选项以 API 函数的形式重新设计。
 >
@@ -1594,7 +1596,7 @@ const App = {
 
 + `setup()` (是一个组件选项)
 
-  + 在组件实例被创建时，初始化 `props` 后调用，第一个参数就是 `props`，内部的 `props` 会和外部保持一致。但是你不能在组件内部修改 `props`
+  + 在组件实例被创建时，初始化 `props` 后（created 之前）调用，第一个参数就是 `props`，内部的 `props` 会和外部保持一致。但是你不能在组件内部修改 `props`
 
     ```js
     const MyComponent = {
@@ -1780,4 +1782,180 @@ const Descendent = {
 + 不需要像给 `useEffect、useMemo、useCallback`  传错依赖而导致更新错误，Vue 是响应式的，依赖是全局追踪的，不需要手动维护。
 
 
+
+## CompositionAPI
+
+在 2.x 中我们使用 this 的频率是很高的它上面挂载了一些全局 API 以及可以拿到当前组件实例。去调用 methods ，$emit 等。但是在 setUp 函数中 this 指向的是 window ....
+
+### getCurrentInstance
+
+可以通过`getCurrentInstance()`这个接口获取组件实例：
+
+**setup 的执行时间是早于 created 生命周期的**
+
+```vue
+<template>
+  <div>{{ state.foo }}</div>
+  <div>{{ state.test }}</div>
+</template>
+<script>
+import { getCurrentInstance, onMounted, reactive } from "vue"
+export default {
+  props: {
+    a: {
+      type: String,
+      default: "aaa",
+    },
+  },
+  data() {
+    return {
+      foo: "foo",
+    }
+  },
+  setup(props, ctx) {
+    // 不要对 props 解构不然你的数据就不响应了
+    console.log(props, ctx)
+    // getCurrentInstance().emit('emit')
+    // 和 ctx.emit 一样
+    ctx.emit("emit", props)
+    const state = reactive({
+      foo: "foo",
+    })
+    // getCurrentInstance()可以获取组件实例
+    const instance = getCurrentInstance()
+    console.log("instance", instance)
+    onMounted(() => {
+      // 组件实例的上下文才是我们熟悉的this
+      state.test = instance.ctx.foo
+      console.log(instance.ctx.foo)
+      console.log(instance.data.foo)
+      console.log(instance.ctx.bar()) // '我是bar方法'
+    })
+    // 当我们直接导出这个state时，我们在模板中就要带上state这个前缀
+    return { state }
+  },
+  methods: {
+    bar() {
+      console.log("我是bar方法")
+    },
+  },
+}
+</script>
+
+```
+
+### reactive vs Ref vs toRefs
+
+都是为了对数据进行响应式处理。
+
+方法`reactive`，它可以将传入的对象做响应式处理：
+
+```js
+const state = reactive({
+  foo: 'foo',
+})
+watchEffect(() => {
+  console.log(state.foo)
+})
+state.foo = 'foooooo' // 输出 'foooooo'
+```
+
+它和 data 类似不同点在于：
+
+如上面所示当我们直接导出这个state时，我们在模板中就要带上state这个前缀
+
+为了解决这个问题又要引入 toRefs  把它抹平这样可以在模板中直接使用：
+
+```js
+setup() {
+	const state = reactive({})
+	return { ...toRefs(state) }
+}
+```
+
+```html
+<div>
+  {{foo}}
+</div>
+```
+
+单个值时用 reactive() 显得比较多余，于是就有了`Ref`的概念，通过包装单值为`Ref`对象，这样就可以对其做响应式代理，模板中使用还可以省掉前缀，`toRefs`就是利用这一点将 reactive() 返回代理对象的每个 key 对应的值都转换为 Ref。
+
+**Ref 对象的副作用**
+
+```js
+setup() {
+	const foo = ref('foo')
+	setTimeout(() => {
+    // 修改这个值要额外加上 value
+		foo.value++
+	}, 1000)
+	return { foo }
+}
+```
+
+那么问题来了，通过 props 来的值到底是不是`Ref`，我要不要加`.value` ？
+
+可以利用 unref、isRef、isProxy等工具方法来判断。
+
+```js
+setup(props) {
+  const foo = unref(props.foo) // foo是我们要的值
+  // 等效于
+  const foo = isRef(props.foo) ? props.foo.value : props.foo
+}
+```
+
+### watchEffect vs watch 
+
+都是观察响应式数据，变化执行副作用函数。
+
+不同点是 watch 需要明确指定监视目标
+
+```js
+watch(() => state.counter, (val, prevVal) => {})
+```
+
+watchEffect 则不需要
+
+```js
+watchEffect(() => {
+	console.log(state.counter)
+})
+```
+
+应用场景:
+
+watch 是懒执行的，它等效于 vue2 中的`this.$watch()`，watchEffect 为了收集依赖，要立即执行一次。
+
+ ### 生命周期函数执行
+
+在 setUp() 方法中生命周期函数可以有多个可以相同，它会按照书写顺序执行。
+
+```js
+setup() {
+  onMounted(() => {})
+  onMounted(() => {})
+  onMounted(() => {})
+}
+```
+
+实用写法，拆分独立的小方法：
+
+```js
+function fun1() {
+  // 这里可以用onMounted执行代码
+  onMounted(() => {})
+}
+function fun2() {
+  // 这里还可以用onMounted执行代码
+  onMounted(() => {})
+}
+// 引入后
+setup() {
+  fun1()
+  fun2()
+  onMounted(() => {})
+}
+```
 

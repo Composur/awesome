@@ -1,69 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<style>
-  body {
-    height: 100vh;
-  }
-</style>
-
-<body>
-  <script>
-    /**
- * 防抖，在事件触犯 n 秒后才执行，期间如果再次触发事件重新计时。
- */
-    function debounce(fn, immediate = true, wait) {
-      let timer;
-      return function () {
-        if (timer) {
-          clearTimeout(timer)
-        }
-        if (immediate) {
-          const callNow = !timer
-          timer = setTimeout(() => {
-            timer = null
-          }, wait);
-          if (callNow) fn.apply(this, arguments)
-        } else {
-          timer = setTimeout(() => {
-            fn.apply(this, arguments)
-          }, wait);
-        }
-      }
-    }
-    const run = function (e) {
-      console.log(e)
-    }
-    // window.addEventListener('scroll', debounce(run, false, 1000))
-    window.addEventListener('scroll', throttle(run, 1000))
-
-    // 节流，在一定的时间内重复执行，如果小于这个时间重新计时
-
-    function throttle(fn, wait) {
-      let pre = 0
-      return function () {
-        let nowTime = +new Date() // 隐式类型转换，转为 Number 
-        // 执行完的时间减去进入程序的时间大于等待的时间则再次执行
-        if ((nowTime - pre) > wait) {
-          fn.apply(this, arguments)
-          // 执行完时间
-          pre = nowTime
-        }
-      }
-    }
-    const task = timeout => new Promise((resolve) => setTimeout(() => { resolve(timeout); }, timeout));
+const task = timeout => new Promise((resolve) => setTimeout(() => { resolve(timeout); }, timeout));
 const taskList = [1000, 3000, 200, 1300, 800, 2000];
 async function startNoConcurrentControl() {
   console.time();
   await Promise.all(taskList.map(item => task(item)));
   console.timeEnd();
 }
-// startNoConcurrentControl();
+startNoConcurrentControl();
 
 // 队列可以保证任务并发执行的顺序 用数组来模拟队列
 class Queue {
@@ -137,7 +79,3 @@ async function startConcurrentControl() {
 }
 
 startConcurrentControl();
-  </script>
-</body>
-
-</html>

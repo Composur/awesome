@@ -2,6 +2,17 @@
 
 SVG 是一种基于 XML 语法的图像处理格式。可以利用 DOM API 操作 SVG 元素。因为它基本上一个元素对应一个图形。Canvas 上较难实现。
 
+可以通过以下方法创建一个 svg 元素(一个圆)
+
+```js
+// 第一个参数是空间名称，第二个是创建的元素标签名
+const circle = document.createElementNS('http://www.w3.org/2000/svg','circle')
+circle.setAttribute('cx',x)
+...
+```
+
+
+
 属于一种声明式的绘图系统。
 
 ![](./img/svg.png)
