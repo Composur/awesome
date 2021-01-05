@@ -6,7 +6,7 @@
   "author": "composure <xutong1107@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.21.1"
   },
   "devDependencies": {
     "gh-pages": "^2.2.0",
