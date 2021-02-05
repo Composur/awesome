@@ -4,11 +4,22 @@ sidebar: auto
 ## React  Hooks 速学
 
 > Hook 是一些可以让你在函数组件里“钩入” React state 及生命周期等特性的 JavaScript 函数。不编写 class 的情况下使用 state 以及其他的 React 特性。
+>
+> **React Hooks 的设计目的，就是加强版函数组件，完全不使用"类"，就能写出一个全功能的组件。**当你想使用外部功能和副作用的时候，就用钩子函数把外部代码钩进来
 
 #### 出现的原因
 
 + 代码管理困难，每个组件的状态，修改状态改动的文件较多。Hooks 可以把组件相互关联的部分拆分成函数。使其无需按照生命周期划分。
 + class 带来的问题，this 绑定、不能很好的压缩、热重载不稳定等问题。
+
+react 提供了下列四个最常用的钩子函数（）
+
+```js
+- useState()
+- useContext()
+- useReducer()
+- useEffect()
+```
 
 #### 注意事项
 
@@ -71,6 +82,13 @@ export default Example
 ```
 
 执行结束需要清除副作用 的话，需要返回一个函数，在函数内部清除。
+
+useEffect() 的用途
+
+- 获取数据（data fetching）
+- 事件监听或订阅（setting up a subscription）
+- 改变 DOM（changing the DOM）
+- 输出日志（logging）
 
 #### 自定义Hook
 

@@ -256,3 +256,66 @@ undefined // 拿不到 exports 的引用
 + `exports`和 `module.exports`同时存在时只会导出 `module.exports`的内容，会覆盖`exports`
 + `import` 输出的是值得引用（复制一份地址） 
 
+## CommonJS
+
+1. 使用 `require` 和 `exports` 关键字和模块系统进行交互
+2. `CommonJS` 不支持异步加载
+3. 一个文件就是一个模块
+
+## AMD
+
+AMD诞生的原因是，是因为CommonJS不支持异步加载，不适合浏览器环境。
+
+## ES6
+
+ES6 在语言层面上实现了模块机制，与 CommonJS 与 AMD 规范不同的是 ES6 的模块是静态的，不能在文件的任何地方使用。这种行为使得编译器编译时就可以构建依赖关系树。
+
+浏览器中这样使用：
+
+- 对于需要引入模块的`<script>`元素，我们需要添加`type="module"`，这个时候，浏览器会把这段内联script或者外链script认为是ECMAScript模块。
+- 模块 JS 文件，业界或者官方约定俗成命名为`.mjs`文件格式
+
+```html
+<script type="module">
+  // 导入firstBlood模块
+  import { pColor } from './firstBlood.mjs';
+  // 设置颜色为红色
+  pColor('red');
+</script>
+```
+
+firstBlood.mjs
+
+```js
+// export一个改变<p>元素颜色的方法
+export function pColor (color) {
+  const p = document.querySelector('p');
+  p.style.color = color;
+}
+```
+
+
+
+## UMD
+
+UMD 模块是一种通用的模式，用于兼容 AMD 和 CommonJS 的规范。UMD 规范同时兼容 amd 和commonjs，并支持传统的全局变量的模式。
+
+UMD 判断加载环境
+
+```js
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD
+    define(['jquery'], factory);
+  } else if (typeof exports === 'object') {
+    // CommonJS
+    module.exports = factory(require('jquery'));
+  } else {
+    // 全局变量
+    root.returnExports = factory(root.jQuery);
+  }
+}(this, function ($) {
+  // ...
+}));
+```
+

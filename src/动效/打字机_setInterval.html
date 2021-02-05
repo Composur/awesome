@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>setInterval效果</title>
+  <style type="text/css">
+    /* 设置容器样式 */
+    #content {
+      height: 400px;
+      padding: 10px;
+      font-size: 28px;
+      border-radius: 20px;
+      background-color: antiquewhite;
+    }
+
+    /* 产生光标闪烁的效果 */
+    #content::after {
+      content: '|';
+      color: red;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id='content'></div>
+  <script>
+    (function () {
+      // 获取容器
+      const container = document.getElementById('content')
+      // 把需要展示的全部文字进行切割
+      const data = '最简单的打字机效果实现'.split('')
+      // 需要追加到容器中的文字下标
+      let index = 0
+      let timer = null
+      function writing() {
+        if (index < data.length) {
+          // 追加文字
+          container.innerHTML += data[index++]
+        } else {
+          clearTimeout(timer)
+        }
+        console.log(timer)// 1 1 1 1 1
+      }
+      timer = setInterval(writing, 200)
+    })();
+  </script>
+</body>
+
+</html>

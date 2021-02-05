@@ -129,10 +129,11 @@ class TaskPool {
   }
 }
 
-const cc = new TaskPool(2);
+const cc = new TaskPool(5);
 async function startConcurrentControl() {
   console.time();
-  await Promise.all(taskList.map(item => cc.addTask(task, [item])))
+  const res =  await Promise.all(taskList.map(item => cc.addTask(task, [item])))
+  console.log(res)
   console.timeEnd();
 }
 
