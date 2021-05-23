@@ -144,6 +144,31 @@ vm._self = vm
 ...
 ```
 
+初始化 state 
+
+这里进行了 props，data 等属性的初始化，这也是为什么我们可以在计算属性中直接访问 props，data，methods，就是因为它的初始化发生在这三者之后。
+
+```js
+export function initState(vm: Component) {
+  vm._watchers = []
+  const opts = vm.$options
+  if (opts.props) initProps(vm, opts.props)
+  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.data) {
+    initData(vm)
+  } else {
+    observe((vm._data = {}), true /* asRootData */)
+  }
+  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.watch && opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch)
+  }
+}
+
+```
+
+
+
 **为什么data{xx:'xx'}可以通过 this.xx 访问到？**
 
 请看下面 `initState(vm)` 的过程中调用 `initData` 方法
@@ -1271,7 +1296,7 @@ inject: ['getMap']
 
 
 
-### 12：内部监听生命周期函数
+#### 12：内部监听生命周期函数
 
 我们通常这样绑定解绑事件监听
 
@@ -1322,17 +1347,37 @@ export default {
 
 
 
-### this.$nextTick()
+#### 13.this.$nextTick()
 
 **应用场景**
 
-+ 在 `create()` 中进行 `DOM` 操作的时候，
++  在 `create()` 中进行 `DOM` 操作的时候，
 + 在数据变化后执行某个操作，而这个操作需要使用随数据改变而改变的`DOM`结构的时候
   + 如同一个 watcher 被多次触发，只会推入队列中执行一次。
 
+#### 14.[vue 父子组件的生命周期顺序](https://link.zhihu.com/?target=https%3A//www.cnblogs.com/status404/p/8733629.html)
 
++ 加载渲染过程
 
+  ```vue
+  父 beforeCreate
+  父 created
+  父 beforeMount
+  子 beforeCreate
+  子 created
+  子 beforeMount
+  子 mounted
+  父 mounted
+  ```
 
++ 子组件更新过程
+  父 `beforeUpdate ` &rarr;子 `beforeUpdate` &rarr; 子 `updated` &rarr; 父  `updated`
+
++ 父组件更新过程
+  父 `beforeUpdate` &rarr;父 `update`
+
++ 销毁过程
+  父`beforeDestroy`  &rarr; 子 `beforeDestroy`   &rarr; 子 `destroyed`   &rarr; 父`destroyed`
 
 # Vuex 问题
 
