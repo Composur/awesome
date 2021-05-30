@@ -1,12 +1,8 @@
-function foo() {
-    console.log(a);
-    a = 1;
-}
+const animals = [{type:'foo'},{type:'bar'},{type:'bar'},{type:'bar'},{type:'bar'},{type:'foo'}];
+const firstIndex = animals.lastIndexOf(item=>{
+    console.log(item)
+    return item.type==='foo'
+});
+console.log(firstIndex);
 
-foo(); // a is not defined
 
-function bar() {
-    a = 1;
-    console.log(a);
-}
-bar(); // 1
