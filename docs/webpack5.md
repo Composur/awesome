@@ -22,7 +22,37 @@ module.exports = {
 }
 ```
 
+### source map 
 
+> 调试原始源代码会比浏览器下载的转换后的代码更加容易。 [source map](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) 是从已转换的代码映射到原始源的文件，使浏览器能够重构原始源并在调试器中显示重建的原始源。
+
++ source map 较大，会不会影响性能？
+
+  + source map 只有在打开 dev tools 的情况下才会开始下载，一般用户是不会打开的。
+  + 浏览器 Network 一般是默认隐藏 source map 文件的加载，所以我们看不到，可以用抓包工具抓出来。
+
++ 浏览器是如何判断 source map 与原始文件的对应关系？
+
+  + AST
+
++ source map 是如何一一对应到代码的？
+
+  ```js
+  // index.js
+  const a = 1
+  console.log(a);
+  
+  // 打包后 bundle.js
+  console.log(1);
+  //# sourceMappingURL=bundle.js.map
+  
+  ```
+
+  `sourceMappingURL` 就是标记了该文件的 source map 地址。
+
++ 各种打包器和浏览器是怎么做到统一的？有什么标准码？
+
+  + 存在一个标准。
 
 ## 五个核心概念
 
