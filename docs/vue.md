@@ -1379,10 +1379,114 @@ export default {
 + 销毁过程
   父`beforeDestroy`  &rarr; 子 `beforeDestroy`   &rarr; 子 `destroyed`   &rarr; 父`destroyed`
 
-15. 函数式组件和普通的对象类型的组件区
-    1. 函数式组件不会被看作成一个真正的组件
-       1. `patch` 过程中，如果遇到一个节点是组件 `vnode`，会递归执行子组件的初始化过程；而函数式组件的 `render` 生成的是普通的 `vnode`，不会有递归子组件的过程，因此渲染开销会低很多。
-    2. 函数式组件也不会有状态，不会有响应式数据，生命周期钩子函数这些东西。你可以把它当成把普通组件模板中的一部分 DOM 剥离出来，通过函数的方式渲染出来，是一种在 DOM 层面的复用。
+#### 15. 函数式组件和普通的对象类型的组件区别
+
+1. 函数式组件不会被看作成一个真正的组件
+   1. `patch` 过程中，如果遇到一个节点是组件 `vnode`，会递归执行子组件的初始化过程；而函数式组件的 `render` 生成的是普通的 `vnode`，不会有递归子组件的过程，因此渲染开销会低很多。
+2. 函数式组件也不会有状态，不会有响应式数据，生命周期钩子函数这些东西。你可以把它当成把普通组件模板中的一部分 DOM 剥离出来，通过函数的方式渲染出来，是一种在 DOM 层面的复用。
+
+#### 16. 子组件拆分为什么能提高性能
+
+例如组件上有个耗时的方法：
+
+```vue
+<template>
+  <div :style="{ opacity: number / 300 }">
+    <div>{{ heavy() }}</div>
+  </div>
+</template>
+
+<script>
+export default {
+  props: ['number'],
+  methods: {
+    heavy () {
+      const n = 100000
+      let result = 0
+      for (let i = 0; i < n; i++) {
+        result += Math.sqrt(Math.cos(Math.sin(42)))
+      }
+      return result
+    }
+  }
+}
+</script>
+
+```
+
+且这个函数在每次渲染的时候都会执行一次，所以每次组件的渲染都会消耗较长的时间执行 `JavaScript`
+
+可以这样优化：
+
+```vue
+<template>
+  <div :style="{ opacity: number / 300 }">
+    <ChildComp/>
+  </div>
+</template>
+
+<script>
+export default {
+  components: {
+    ChildComp: {
+      methods: {
+        heavy () {
+          const n = 100000
+          let result = 0
+          for (let i = 0; i < n; i++) {
+            result += Math.sqrt(Math.cos(Math.sin(42)))
+          }
+          return result
+        },
+      },
+      render (h) {
+        return h('div', this.heavy())
+      }
+    }
+  },
+  props: ['number']
+}
+</script>
+
+```
+
+这个耗时任务 `heavy` 函数的执行逻辑用子组件 `ChildComp` 封装了，由于 Vue 的更新是组件粒度的，虽然每一帧都通过数据修改导致了父组件的重新渲染，但是 `ChildComp` 却不会重新渲染，因为它的内部也没有任何响应式数据的变化。
+
+**计算属性也可以解决此问题**，空间换时间。
+
+#### 17. 计算属性使用局部变量优化性能
+
+```vue
+<template>
+  <div :style="{ opacity: start / 300 }">{{ result }}</div>
+</template>
+
+<script>
+export default {
+  props: ['start'],
+  computed: {
+    base () {
+      return 42
+    },
+    result () {
+      let result = this.start
+      for (let i = 0; i < 1000; i++) {
+        result += Math.sqrt(Math.cos(Math.sin(this.base))) + this.base * this.base + this.base + this.base * 2 + this.base * 3
+      }
+      return result
+    },
+  },
+}
+</script>
+```
+
+每次访问 `this.base` 的时候，由于 `this.base` 是一个响应式对象，所以会触发它的 `getter`，进而会执行依赖收集相关逻辑代码。类似的逻辑执行多了，像示例这样，千次循环更新千个组件，每个组件触发 `computed` 重新计算，`1000*1000`次的运算就会导致性能下降。
+
+从需求上来说，`this.base` 执行一次依赖收集就够了，把它的 `getter` 求值结果返回给局部变量 `base`，后续再次访问 `base` 的时候就不会触发 `getter`，也不会走依赖收集的逻辑了，性能自然就得到了提升。
+
+
+
+
 
 # Vuex 问题
 
