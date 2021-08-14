@@ -71,3 +71,15 @@ export default class App extends Component {
 
 ```
 
+第三种：setUserAgentString
+
+```
+webview.getString().setUserAgentString('app/xxx')
+```
+
+H5通过
+
+```
+window.navigator.userAgent 获取
+```
+
