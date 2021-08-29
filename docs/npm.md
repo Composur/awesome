@@ -54,3 +54,21 @@ yarn cache clean
 
 ```
 
+## 全局操作
+
+```bash
+# 查看 npm 全局安装过的包
+npm list -g --depth=0
+# 全局移除
+npm uninstall -g vue-cli
+```
+
+```bash
+# 查看 yarn 全局安装过的包
+yarn global list --depth=0
+# 全局移除
+yarn global remove vue-cli
+```
+
+
+
