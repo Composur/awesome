@@ -54,6 +54,18 @@ yarn cache clean
 
 ```
 
+升级操作
+
+```bash
+$ yarn upgrade react@^
+# 或者
+$ yarn upgrade package@[version]
+```
+
+
+
+
+
 ## 全局操作
 
 ```bash
