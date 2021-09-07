@@ -498,11 +498,64 @@ git remote prune origin
 
 ### 19. git 修改 commit message 信息
 
-最近一次的
+#### 最近一次的
 
 ```bash
 git commit --amend
 ```
+
+#### 历史提交的
+
+1. 使用 `git rebase -i HEAD~n` 命令在默认文本编辑器中显示最近 `n` 个提交的列表。
+
+   ```bash
+   git rebase -i HEAD~3
+   ```
+
+   
+
+2. 此列表将类似于以下内容：
+
+   ```bash
+   pick e499d89 Delete CNAME
+   pick 0c39034 Better README
+   pick f7fde4a Change the commit message but push the same commit.
+   
+   # Rebase 9fdb3bd..f7fde4a onto 9fdb3bd
+   #
+   # Commands:
+   # p, pick = use commit
+   # r, reword = use commit, but edit the commit message
+   # e, edit = use commit, but stop for amending
+   # s, squash = use commit, but meld into previous commit
+   # f, fixup = like "squash", but discard this commit's log message
+   # x, exec = run command (the rest of the line) using shell
+   #
+   ```
+
+   
+
+3. 在要更改的每个提交消息的前面，用 `reword` 替换 `pick`。
+
+   ```
+   pick e499d89 Delete CNAME
+   reword 0c39034 Better README
+   reword f7fde4a Change the commit message but push the same commit.
+   ```
+
+   
+
+4. 保存并关闭提交列表文件。
+
+5. 在每个生成的提交文件中，键入新的提交消息，保存文件，然后关闭它
+
+6. 准备好将更改推送到 GitHub 时，请使用 push - force 命令强制推送旧提交。
+
+   ```bash
+   git push --force example-branch
+   ```
+
+   
 
 ### 20. git cherry-pick
 
