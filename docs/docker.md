@@ -36,6 +36,14 @@
       docker ps
       ```
 
+   3. 关闭启动的容器
+
+      ```shell
+      docker stop ID
+      ```
+
+      
+
 5. 浏览器访问 `http://localhost:8080/`
 
 

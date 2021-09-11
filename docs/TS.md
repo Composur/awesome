@@ -71,5 +71,92 @@ const res = foo(123)
 console.log(res)
 ```
 
-**多个参数**
+**例子三：约束类型**
+
+```typescript
+interface Length {
+  length:number
+}
+function foo<T extends Length>(arg: T): T {
+  return arg.length
+}
+```
+
+
+
+**例子四：联合类型&类型断言**
+
+```typescript
+type res = fn => fn()
+interface Cat {
+  run():void
+}
+interface Dog {
+  swim():void
+}
+function foo(arg: Cat | Dog){
+  if(typeof (arg as Dog).swim === 'function'){
+    return res();
+  }
+}
+```
+
+**例子五：类型别名**
+
+```typescript
+type res1 = string
+type res2 = () => string
+
+function foo(arg: res1 |res2){
+  if(typeof arg === 'string'){
+    return arg
+  }
+  return arg()
+}
+```
+
+
+
+# React 实践
+
+> Hook 是能让我们在函数组件中钩入React特性的函数,通常以 use 开头
+
+## 准备工作
+
+### 环境搭建
+
+```bash
+npx create-react-app react-component --typescript
+```
+
+### 基础 Hooks 
+
+**useState**
+
+*例子一：useState 是替换而不是像 setState 那样合并 state*
+
+
+
+*例子二：可以用 useState 把多个 state 拆开，后期可以把相关的逻辑提取到一个自定义 hook*
+
+
+
+**useEffect**
+
++ 无需清除的副作用
+  + Dom 更新后发起网络请求
+  + 组件加载更新后变更 Dom
+  + 记录日志
+
+
+
+
+
+
+
+
+
+
+
+
 
