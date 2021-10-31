@@ -1,4 +1,6 @@
-# Hybrid App
+# 
+
+
 
 ## 通讯方式
 
@@ -73,13 +75,14 @@ export default class App extends Component {
 
 第三种：setUserAgentString
 
-```
+```objective-c
 webview.getString().setUserAgentString('app/xxx')
 ```
 
 H5通过
 
-```
-window.navigator.userAgent 获取
+```js
+# 获取
+window.navigator.userAgent 
 ```
 

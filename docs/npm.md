@@ -60,9 +60,9 @@ yarn cache clean
 $ yarn upgrade react@^
 # 或者
 $ yarn upgrade package@[version]
+# 或者 需要手动选择升级的依赖包，按空格键选择，a 键切换所有，i 键反选选择
+$ yarn upgrade-interactive --latest
 ```
-
-
 
 
 
