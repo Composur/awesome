@@ -41,3 +41,4 @@ sidebar: auto
 ## Hybrid App
 
 - [H5 与 App 的通讯方式](./H5与App的通讯方式.md)
+- [常见移动端兼容方案](./移动端兼容.md)
