@@ -482,3 +482,57 @@ const movePos = useMouseMove()
 
    
 
+### Menu
+
+如何设计一个 menu 组件？
+
+高亮？ 垂直显示？ 点击回调？禁用？添加自定义类？
+
+添加点击事件
+
+
+
+父组件传递数据给子组件 `createContext`
+
+```tsx
+
+// context 类型
+interface MenuContextProps {
+  index?: number,
+  onSelect?: onSelectCb
+}
+// 定义 context
+export const MenuContext = createContext<MenuContextProps>({ index: 0 })
+
+// 父组件
+...
+  const contextValue = {
+    index:0
+  }
+	return (
+    <MenuContext.Provider value={contextValue}>
+      <ul className={classes} style={style}>
+        {children}
+      </ul>
+    </MenuContext.Provider>
+  )
+
+...
+
+```
+
+
+
+子组件`useContext`根据传递过来的 index 进行高亮和 onSelect 进行回调
+
+```tsx
+// 父组件导入的 context 得到 {index:0}
+const MenuProps = useContext(MenuContext)
+```
+
+
+
+
+
+
+
