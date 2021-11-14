@@ -521,6 +521,14 @@ export const MenuContext = createContext<MenuContextProps>({ index: 0 })
 
 ```
 
+**注意：**
+
+上面的 children 我们需要限制一下类型只能是 `MenuItem` 组件
+
+
+
+
+
 
 
 子组件`useContext`根据传递过来的 index 进行高亮和 onSelect 进行回调
@@ -536,3 +544,8 @@ const MenuProps = useContext(MenuContext)
 
 
 
+submenu 子组件也是 menuItem 
+
+
+
+进行 submenu 组件的编写
