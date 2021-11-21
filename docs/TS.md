@@ -115,6 +115,14 @@ function foo(arg: res1 |res2){
 }
 ```
 
+### type vs interface
+
++ interface 描述**数据结构**，用 type 描述**类型关系**。
+
++ type 还可以定义字符串字面量类型，`type x = 'a' | 'b' | 'c'` 那么使用该类型只能从这三个值中取，不在的就会报错。
+
++ 另外使用 type 比较多的地方就是联合类型，如函数返回类型是 `type x = string | object | void`，就不用一次次的写，复用性高。
+
 
 
 # React 实践
@@ -525,27 +533,112 @@ export const MenuContext = createContext<MenuContextProps>({ index: 0 })
 
 上面的 children 我们需要限制一下类型只能是 `MenuItem` 组件
 
+设置一下 menuItem 的 displayName 
 
+```tsx
+SunMenu.displayName = 'MenuItem'
+export default SunMenu
+```
 
+然后在父组件渲染的时候进行判断
 
+```tsx
+ const MenuItemRender = () => {
+    return React.Children.map(children, (child, idx) => {
+      // 为了获取 type 这里需要把 child 断言成 FunctionComponentElement 实例
+      const childEle = child as FunctionComponentElement<MenuItemProps>
+      if (['MenuItem', 'SubMenuItem'].includes(childEle.type.displayName as string)) {
+        return React.cloneElement(childEle, { index: idx });
+      } else {
+        console.error('无法接受非 MenuItem', 'SubMenuItem 以外的组件')
+      }
+    })
+  }
+```
 
-
-
-子组件`useContext`根据传递过来的 index 进行高亮和 onSelect 进行回调
+**子组件`useContext`根据传递过来的 index 进行高亮和 onSelect 进行回调**
 
 ```tsx
 // 父组件导入的 context 得到 {index:0}
 const MenuProps = useContext(MenuContext)
 ```
 
+**`submenu` 子组件也是 `menuItem` 进行 `submenu` 组件的编写**
 
+添加子组件显示隐藏的逻辑
 
+```tsx
+const clickHandle = () => {
+    if (MenuProps.onSelect && typeof index === 'number') {
+      MenuProps.onSelect(index);
+      setMenuOpen(!menuOpen);
+    }
+  }
+```
 
+*这个时候有个问题，点击其它菜单的时候已展开的子菜单并没有隐藏*
 
+**如何在 `menuItem` 中通知 `subMenu` 进行子菜单的显示隐藏？**
 
+可以设置 hover 的显示隐藏，鼠标离开子菜单 `display：none`
 
-submenu 子组件也是 menuItem 
+```tsx
+  // 展开加个延时放置卡顿
+  let timer: any;
+  const mouseHander = (e: MouseEvent, open: boolean) => {
+    clearTimeout(timer);
+    e.preventDefault();
+    timer = setTimeout(() => {
+      setMenuOpen(open)
+    }, 300);
+  }
+  // hover 展开
+  const hoverHander = {
+    onMouseEnter: (e: MouseEvent) => mouseHander(e, true),
+    onMouseLeave: (e: MouseEvent) => mouseHander(e, false)
+  }
+```
 
+**子菜单通过配置展开**
 
+1. 通过 Meun 的 props 设置，通过 MenuContext 进行传递。
+2. 通过自身 props 设置。
 
-进行 submenu 组件的编写
+### ICON
+
+#### react-fontawesome
+
+1. 安装
+
+   ```sh
+   yarn add @fortawesome/fontawesome-svg-core
+   yarn add @fortawesome/free-solid-svg-icons
+   yarn add @fortawesome/react-fontawesome
+   ```
+
+2. 使用
+
+   ```tsx
+   const Icon: FC = () => {
+     return (
+       <>
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'red', fontSize: '50px' }} />
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'red', fontSize: '50px' }} spin />
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'red', fontSize: '50px' }} pulse />
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'red', fontSize: '50px' }} border />
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'red', fontSize: '50px' }} pull="left" />
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'blue', fontSize: '50px' }} flip="horizontal" />
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'red', fontSize: '50px' }} flip="vertical" />
+         <FontAwesomeIcon icon={faCheckSquare} style={{ color: 'red', fontSize: '50px' }} flip="both" />
+         <FontAwesomeIcon icon={faCoffee} size={'6x'} />
+         <FontAwesomeIcon icon={faCoffee} pull="left" />
+         <FontAwesomeIcon icon={faCoffee} pull="right" />
+       </>
+     )
+   }
+   ```
+
+3. 封装
+
+   1. 添加主题，像button一样有 theme type
+

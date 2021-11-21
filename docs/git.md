@@ -598,3 +598,18 @@ $ git cherry-pick f
 $ git cherry-pick feature
 ```
 
+### 21. 恢复远程仓库删除的代码
+
+先列出提交日志，找到删除那次提交的 commit
+
+```bash
+git log --diff-filter=D --summary
+```
+
+找到后
+
+```bash
+git checkout $commit~1 filename
+# 例如
+git checkout 3b63e41b68f2ea97d11c166c00cd22589639806e~1 yarn.lock
+```
