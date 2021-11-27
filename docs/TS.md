@@ -642,3 +642,25 @@ const clickHandle = () => {
 
    1. 添加主题，像button一样有 theme type
 
+4. 给 submenu 添加 icon
+
+   1. 添加 icon  设置样式，动画等。
+
+   ```scss
+    .arrow-icon {
+         transition: transform .25s ease-in-out;
+         margin-left: 3px;
+       }
+     &:hover {
+         .arrow-icon {
+           transform: rotate(180deg);
+        }
+     }
+   ```
+
+   2. RTG：`React Transition Group` 缩写
+
+      1. 原理是基于 CSS transition 属性的补间动画（开始、结束两个状态）
+
+         通常用于初始化（进场）渲染、组件添加、删除、转场（比如单页路由切换）
+
