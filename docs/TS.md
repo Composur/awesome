@@ -663,4 +663,12 @@ const clickHandle = () => {
       1. 原理是基于 CSS transition 属性的补间动画（开始、结束两个状态）
 
          通常用于初始化（进场）渲染、组件添加、删除、转场（比如单页路由切换）
-
+      
+   3. 添加 wrapper 属性，避免 transition 属性发生冲突，Transition 组件本身的和他的子组件自带的冲突，transition 是无法继承的。
+   
+      1. 其实就是添加一个空节点套一下，把 Transition 作用给外层元素。
+   
+      ```
+      ```
+   
+      

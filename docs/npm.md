@@ -81,6 +81,3 @@ yarn global list --depth=0
 # 全局移除
 yarn global remove vue-cli
 ```
-
-
-
