@@ -100,7 +100,7 @@ MDN的[CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CO
 
 `TCP` 连接有的时候会被浏览器和服务端维持一段时间。`TCP` 不需要重新建立，`SSL` 自然也会用之前的。
 
-**`总结：**
+**总结：**
 
 `HTTPS` 采用了非对称加密 + 对称加密 + `CA` + `hash` 算法 
 
@@ -156,7 +156,7 @@ connection:keep-alive;
 
    在 `HTTP2.0` 中原来的`Header+Body`的消息**打散**为数个小片的二进制"帧，用**Headers帧**存放头部字段，**Data帧**存放请求体数据，请求和响应多路复用，交错传输，请求完成后在另一端组装。
 
-   所以 `HTTP2.0` 很好的解决了浏览器限制同一个域名下的请求数量的问题，同时也接更容易实现全速传输，一次请求完成（html css js 下载到浏览器）。
+   所以 `HTTP2.0` 很好的解决了浏览器限制同一个域名下的请求数量的问题，同时也更容易实现全速传输，一次请求完成（html css js 下载到浏览器）。
 
 4. server 主动 push ，服务器推送
 

@@ -47,6 +47,10 @@ number = function (x: number, y: number): number {
 
 是指我们在定义函数、接口、类的时候不预先指定类型，而是在使用的时候在指定类型。
 
+用来描述两个值之间的对应关系，用一个相同类型来关联两个或者更多的值。
+
+
+
 **例一：不指定类型**
 
 ```typescript
@@ -118,16 +122,87 @@ function foo(arg: res1 |res2){
 ### type vs interface
 
 + interface 描述**数据结构**，用 type 描述**类型关系**。
-
 + type 还可以定义字符串字面量类型，`type x = 'a' | 'b' | 'c'` 那么使用该类型只能从这三个值中取，不在的就会报错。
-
 + 另外使用 type 比较多的地方就是联合类型，如函数返回类型是 `type x = string | object | void`，就不用一次次的写，复用性高。
++ type 无法添加新的属性，interface 可以
+
+### 字面量推断
+
+下面的写法会报异常。req.method` 被推断为 `string` ，而不是 `"GET"
+
+```tsx
+declare function handleRequest(url: string, method: "GET" | "POST"): void;
+
+const req = { url: "https://example.com", method: "GET" };
+handleRequest(req.url, req.method);
+// 报下面异常
+// Argument of type 'string' is not assignable to parameter of type '"GET" | "POST"'.
+```
+
+解决方案一：
+
+```tsx
+// Change 1:
+const req = { url: "https://example.com", method: "GET" as "GET" };
+// Change 2
+handleRequest(req.url, req.method as "GET");
+```
+
+解决方案二：使用 `as const` 把整个对象转为一个类型字面量：
+
+```tsx
+const req = { url: "https://example.com", method: "GET" } as const;
+handleRequest(req.url, req.method);
+```
+
+`as const` 效果跟 `const` 类似，但是对类型系统而言，它可以确保所有的属性都被赋予一个字面量类型，而不是一个更通用的类型比如 `string` 或者 `number` 。
+
+### ! 非空断言操作符
+
+`!` 表示这是一个有效的类型断言，表示它的值不可能是 `null` 或者 `undefined`
+
+```tsx
+function liveDangerously(x?: number | null) {
+  // No error
+  console.log(x!.toFixed());
+}
+```
+
+就像其他的类型断言，这也不会更改任何运行时的行为。重要的事情说一遍，只有当你明确的知道这个值不可能是 `null` 或者 `undefined` 时才使用 `!` 。
+
+### keyof 
+
+**限制属性名的范围**
+
+```typescript
+function prop(obj: object, key: string) {
+  return obj[key];
+}
+```
+
+元素隐式地拥有 any 类型，因为 string 类型不能被用于索引 {} 类型。要解决这个问题，你可以使用以下非常暴力的方案：
+
+```typescript
+function prop(obj: object, key: string) {
+  return (obj as any)[key];
+}
+```
+
+该函数用于获取某个对象中指定属性的属性值。因此我们期望用户输入的属性是对象上已存在的属性，使用泛型和泛型约束，使用 keyof 获取 T 类型的所有键
+
+```typescript
+function prop<T extends object, K extends keyof T>(obj: T, key: K) {
+  return obj[key];
+}
+```
+
+
 
 
 
 # React 实践
 
-> Hook 是能让我们在函数组件中钩入React特性的函数,通常以 use 开头
+> Hook 是能让我们在函数组件中钩入 React 特性的函数,通常以 use 开头
 
 ## 准备工作
 
