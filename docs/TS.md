@@ -22,6 +22,8 @@ let tom: Person = {
 
 ### 函数类型
 
+> 在 JavaScript 中，如果你调用一个函数的时候，传入了比需要更多的参数，额外的参数就会被忽略。TypeScript 也是同样的做法。不用去设置可选参数。
+
 一个函数有输入和输出，需要把输入和输出都考虑到。
 
 函数声明
@@ -194,6 +196,45 @@ function prop(obj: object, key: string) {
 function prop<T extends object, K extends keyof T>(obj: T, key: K) {
   return obj[key];
 }
+```
+
+
+
+### unknown
+
+> `unknown` 类型可以表示任何值。有点类似于 `any`，但是更安全，因为对 `unknown` 类型的值做任何事情都是不合法的：
+
+你可以描述一个函数可以接受传入任何值，但是在函数体内又不用到 `any` 类型的值
+
+```typescript
+function f1(a: any) {
+  a.b(); // OK
+}
+function f2(a: unknown) {
+  a.b();
+  // Object is of type 'unknown'.
+}
+```
+
+### typeof
+
+类型操作符
+
+搭配 `ReturnType<T>` ,传入一个函数类型，`ReturnType<T>`会返回该函数类型的返回值。
+
+```typescript
+type Predicate = (x:unknown)=>boolean
+
+# k 的类型就是 boolean
+type K = ReturnType<typeof Predicate>            
+```
+
+### 条件类型
+
+**用于描述输入类型和输出类型之间的关系**，写法类似 `js` 的三元运算符。
+
+```typescript
+SomeType extends OtherType ? TrueType : FalseType ;
 ```
 
 

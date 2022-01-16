@@ -13,7 +13,7 @@
 GET /home HTTP/1.1
 ```
 
-## GET 和 POST 的区别
+### GET 和 POST 的区别
 
 `GET` 和 `POST` 是 `HTTP` 协议中的两种发送请求的方法。 
 
@@ -49,6 +49,14 @@ MDN的[CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CO
 如何避免：
 
 可以使用第三方库 `axios` 等。避免触发上述条件。
+
+### HEAD
+
+HEAD 方法和 GET 方法一样，只是不返回报文的主题。用于确认 URI 的有效性及资源的更新日期等。
+
+### DELETE
+
+DELETE 方法按请求的 URI 删除指定的文件
 
 ## HTTPS
 

@@ -1,4 +1,4 @@
-### 1. unzip 压缩解压缩
+# unzip
 
 1. 把文件解压到当前目录下
 
@@ -31,13 +31,34 @@ unzip -l test.zip
 unzip -t test.zip
 ```
 
-### 2. 找出日志文件中访问量最大的 top10 IP 地址
+# cat
+
+找出日志文件中访问量最大的 top10 IP 地址
 
 ```shell
 cat access.log |awk '{print $1}'| sort | uniq -c | sort -rn | head -10
 ```
 
-### 3. 查看端口号占用情况
+压缩相邻的空白行
+
+```shell
+cat -s file
+```
+
+打印具体的第几行
+
+```shell
+# 例如第七行
+$ head -7 file |tail -1
+$ sed -n 7p file
+$ awk '7 == NR' file
+```
+
+
+
+# netstat
+
+.查看端口号占用情况
 
 ```
 netstat -ntpl | grep 80
