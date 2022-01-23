@@ -237,9 +237,31 @@ type K = ReturnType<typeof Predicate>
 SomeType extends OtherType ? TrueType : FalseType ;
 ```
 
+### 类
 
+#### 实现接口
 
+```typescript
+interface Checkable {
+  check(name:string)=>boolean
+}
 
+class NameChecker implements Checkable {
+  // s 的类型是 any
+  check(s) {
+    
+  }
+}
+```
+
+**注意：implements 语句不会影响类内部是如何检查或者类型推断**，`s` 的类型会是 `any`
+
+#### 类初始化的顺序
+
++ 基类字段初始化 （继承的那个类）
++ 基类构造函数运行
++ 派生类字段初始化 （自身）
++ 派生类构造函数运行
 
 # React 实践
 
