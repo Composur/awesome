@@ -127,7 +127,7 @@ git push origin --delete BranchName
 <!---->
 
     git push origin :old-name new-name
-
+    
     git push origin -u new-name
 
 ### 8.合并分支
@@ -182,7 +182,7 @@ $ git remote -v
 <!---->
 
     # 上面两步合为一步
-
+    
     $ git pull upstream  branch_name --rebase
 
 - 提交到代码（remote origin）
@@ -244,7 +244,7 @@ $ git remote -v
 
     git push origin master --force  #强制覆盖远程master分支  gitlab 默认master有写保护 需要先取消写保护
 
-## 11.git pull 和 git fetch 的区别
+### 11.git pull 和 git fetch 的区别
 
 - 来一张珍藏的图
   ![](./img/git_pull.jpg)
@@ -345,9 +345,9 @@ git config --global --unset https.proxy
 <!---->
 
     type(scope?): <subject>
-
+    
     <body>?
-
+    
     <foot>?
 
 type 只能小写并且不能为空，scope 只能小写，subject 简短清晰的描述这次提交并且不能为空。
@@ -412,7 +412,7 @@ git merge  feature-x
     Switched to branch 'master'
     Your branch is ahead of 'origin/master' by 6 commits.
       (use "git push" to publish your local commits)
-
+    
     $ git merge --no-ff -m "merged bug fix 101" issue-101
     Merge made by the 'recursive' strategy.
      readme.txt | 2 +-
@@ -424,9 +424,9 @@ git merge  feature-x
 
     $ git stash list
     stash@{0}: WIP on dev: f52c633 add merge
-
+    
     $ git stash apply
-
+    
     $ git stash apply stash@{0} 恢复指定的stash
 
 1.  关于 git stash

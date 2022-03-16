@@ -705,9 +705,9 @@ new Watcher(
 
 > `vue.js` 采用数据劫持结合发布者-订阅者模式的方式，通过`Object.defineProperty()`来劫持各个属性的`setter`，`getter`，在数据变动时发布消息给订阅者，触发相应的监听回调.
 
-​ `MVVM` 作为入口，整合了 `observer` 、 `compile` 、 `watcher` 。通过 `observer` 来监视 `model` 的变化，通过 `compile` 来编译指令模板。利用 `watcher` 来搭建 `observer` 、`compile`、之间的桥梁。
+ `MVVM` 作为入口，整合了 `observer` 、 `compile` 、 `watcher` 。通过 `observer` 来监视 `model` 的变化，通过 `compile` 来编译指令模板。利用 `watcher` 来搭建 `observer` 、`compile`、之间的桥梁。
 
-​ 这样就达到了：数据变化 → 视图更新。视图更新 → 数据变化 → 视图更新。
+ 这样就达到了：数据变化 → 视图更新。视图更新 → 数据变化 → 视图更新。
 
 ![](./img/WeChatcdec629d4babf2a5dc7b07850a351b72.png)
 
@@ -768,7 +768,7 @@ class Vue {
                 if (newValue !== value) {
                   // 调用监视者 去更新视图
                   value = newValue
-
+  
                 }
                  // 通知 Dep 让 Dep 在通知 watcher
                  dep.notify()
@@ -865,40 +865,9 @@ observe - dep - watcher - view
 
 # Vue 问题
 
-#### 1. 组件化
+### 1.data 必须是一个函数
 
-1.  构造
-
-    ```javascript
-    const component = Vue.extend({
-      templete: `<div></div>`,
-    })
-    ```
-
-    语法糖注册方式
-
-    ```javascript
-    Vue.component("my-component", {
-      templete: `<div></div>`,
-    })
-    ```
-
-2.  注册
-    \$ 全局注册
-
-    ```javascript
-    Vue.component("my-component", component)
-    ```
-
-    \$ 实例下注册的组件是局部组件
-
-3.  使用
-
-    - 在创建的实例中使用
-
-##### 1.1 `data` 必须是一个函数
-
-\*\*一个组件的 \*\*`data` 选项必须是一个函数，因此每个实例可以维护一份被返回对象的独立的拷贝：
+一个组件的 `data` 选项必须是一个函数，因此每个实例可以维护一份被返回对象的独立的拷贝，这样，可以避免多处调用之间的`数据污染`。
 
 ```js
 data: function () {
@@ -907,6 +876,12 @@ data: function () {
   }
 }
 ```
+
+###  2. Vue 修饰符
+
+![](/Users/edison/personal/awesome/docs/img/vue_modifier.jpeg)
+
+
 
 ##### 1.2 父子组件传参
 
@@ -1085,7 +1060,7 @@ requireAll(req)
         在初始化时: 利用Object.defineProperty()给data属性添加 setter 监视数据变化
         在初始化时: 每个组件实例都有相应的观察者 watcher 对象, 每个属性都关联上所有相关的watcher对象
         在更新数据后: 对应的setter调用, 通知所有相关的watcher, watcher内异步更新节点或者子组件
-
+    
     3). 一些细节
 
 > 数据上的一些方式是响应式的，通过数组的下标去更改数组的值做不到响应式（vue 没有通过这种方式监听）
@@ -1191,7 +1166,7 @@ vue 的生命周期: 创建 => 挂载 => 更新 => 销毁
       <div>obj.a: {{obj.a}}</div>
       <input type="text" v-model="obj.a">
     </div>
-
+  
     <script>
     var vm = new Vue({
       el: "#app",
@@ -1223,9 +1198,9 @@ vue 的生命周期: 创建 => 挂载 => 更新 => 销毁
               deep: true
             }
           }
-
+      
         </script>
-
+      
         ```
 
 - 监听对象单个属性
@@ -1244,7 +1219,7 @@ vue 的生命周期: 创建 => 挂载 => 更新 => 销毁
       console.log(newVal,oldVal);
     }
   },
-
+  
   ```
 
   ```js
@@ -1792,7 +1767,7 @@ const App = {
 
     ```js
     import { ref } from "vue"
-
+  
     const MyComponent = {
       setup(props) {
         const msg = ref("hello")
@@ -1815,17 +1790,17 @@ const App = {
 
     ```js
     import { ref, computed } from "vue"
-
+  
     const count = ref(0)
     const countPlusOne = computed(() => count.value + 1)
-
+  
     console.log(countPlusOne.value) // 1
     ```
 
         // 请注意：你不能直接修改 countPlusOne.vlaue 因为计算属性的返回值是只读的
         // 只有当依赖变化的时候它才会被重新计算
         count.value++ // 修改原始 ref 返回的包装对象，计算机属性会保持同步更新，
-
+      
         console.log(countPlusOne.value) // 2
         ```
 

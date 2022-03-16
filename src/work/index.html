@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker</title>
+</head>
+
+<body>
+
+</body>
+<script>
+  // 主线程
+  // /worker.js 位于当前服务的根路径
+  const worker = new Worker('/src/work/worker.js', { name: 'myWorker' });
+  // 向 Worker 线程发消息
+  worker.postMessage({ cmd: 'start', time: 1000 });
+  // 接受 Worker 线程发的消息
+  worker.onmessage = ({ data }) => {
+    console.log(data)
+    if (data.count > 3) {
+      worker.postMessage({ cmd: 'stop' });
+      console.log('关闭主线程')
+      worker.terminate()
+      return
+    }
+    worker.postMessage({ cmd: 'start', time: 1000 });
+  }
+
+
+</script>
+
+</html>

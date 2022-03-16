@@ -31,5 +31,20 @@
 
 + 修改子模块
 
-  + 
+  + 修改 `.gitmodules` 对应子库的配置
+  + 执行 `git submodule sync`
+  
++ 拉取子模块
+
+  + 全量拉取
+
+    ```sh
+    # 更新地址当前 .gitmodules 配置一致避免 ssh 和 http 混用导致拉取失败
+    git submodule sync 	
+    # 拉取
+    git submodule update --init --recursive
+    ```
+
+    
+
 
