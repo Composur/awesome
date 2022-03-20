@@ -1,8 +1,11 @@
 ---
-sidebar: auto
+[[toc]]
 ---
 
 # 前端
+
+## vue3.0 
+- [新特性](./vue3.md#新特性)
 
 ## HTTP 相关
 

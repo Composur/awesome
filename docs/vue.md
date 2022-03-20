@@ -1,8 +1,12 @@
----
 
-I sidebar: auto
-\---## Vue
+# Vue 的运行机制简述
 
+## 初始化
+
+这个阶段完成了全局方法（原型方法和静态方法）的定义：`state`、`component`、`lifecycle`、`dirctive` ...
+
+## 小问题
+```
 1.  Vue 实例的 data 属性，可以在哪些生命周期中获取到？`b c d`
     A. beforeCreate
     B. created
@@ -62,12 +66,8 @@ I sidebar: auto
     B. Vue 实例从创建到销毁的过程，就是生命周期
     C. created 表示完成数据观测、属性和方法的运算和初始化事件，此时 \$el 属性还未显示出来
     D. 页面首次加载过程中，会依次触发 beforeCreate，created，beforeMount，mounted，beforeUpdate，updated
+```
 
-# Vue 的运行机制简述
-
-## 初始化
-
-这个阶段完成了全局方法（原型方法和静态方法）的定义：`state`、`component`、`lifecycle`、`dirctive` ...
 
 ```js
 import { initMixin } from "./init"

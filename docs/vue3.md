@@ -1,4 +1,8 @@
-# setup
+---
+[[toc]]
+---
+
+# vue3新特性
 
 ## defineComponent
 
@@ -215,6 +219,7 @@ const post = await http(`/api/post/1`).then(res => res)
 
 - toRefs 接受一个对象作为参数，遍历对象上的属性逐个调用 toRef 将普通对象转为响应式对象，可以把多个普通属性转为响应式数据。使 `setup()` 函数返回的对象进行解构后不丢失响应性。
 
+
 # reactive
 
 返回对象的响应式副本，相对于 `ref`，它的局限性在于只适合对象、数组，建议只使用响应式 proxy，避免依赖原始对象。
@@ -237,6 +242,7 @@ const obj = reactive({ count: 0 })
     return { count, increment, ...count1 }
   }
 ```
+
 
 # watch
 
