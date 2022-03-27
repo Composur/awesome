@@ -1,7 +1,5 @@
 #### 简单说一说 vuex 使用及其理解？
 
-![img](https://mmbiz.qpic.cn/mmbiz_png/pfCCZhlbMQRYY0ypIkjeGZAEdajHALsicttzFicvxxTOX6Q34AELgZQAYHiboibMDLVwTmsLhBfuk1pA4AOtyG87rw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
-
 回答策略：
 
 1、首先给 vuex 下一个定义
