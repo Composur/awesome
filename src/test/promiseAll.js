@@ -56,9 +56,10 @@ const promiseAllRace = (array) => {
   })
 }
 
-promiseAll([Promise.resolve(1), Promise.resolve(2), p]).then(data => console.log(data)).catch(err => {
-  console.log(err)
-})
-promiseAllRace([p2, Promise.resolve(2), p]).then(data => console.log(data)).catch(err => {
-  console.log(err)
-})
+// promiseAll([Promise.resolve(1), Promise.resolve(2), p]).then(data => console.log(data)).catch(err => {
+//   console.log(err)
+// })
+// promiseAllRace([p2, Promise.resolve(2), p]).then(data => console.log(data)).catch(err => {
+//   console.log(err)
+// })
+
