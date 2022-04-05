@@ -1,5 +1,6 @@
 const nums = [2, 7, 11, 15]
 
+// 用字典实现
 const findIndex = target => {
   const map = new Map()
   for (let i = 0; i < nums.length; i++) {
