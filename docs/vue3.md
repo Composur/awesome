@@ -556,6 +556,8 @@ export default defineComponent({
 
 子传父，父组件@update
 
+谁派发谁监听
+
 ```tsx
 export default defineComponent({
   emits: [
