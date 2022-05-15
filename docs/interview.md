@@ -79,6 +79,17 @@ sidebar: auto
 
 ## 编程题汇总
 
+### typeof vs instanceof
+
+二者都可以用来判断数据类型
+
++ typeof 返回的是一个字符串，instanceof 返回的是一个布尔值
++ typeof 可以判断除 null 外的基础类型，另外无法准确判断除 function 外的引用类型
++ instanceof 可以准确判断引用类型，但是无法判断基础类型
++ `instanceof` 运算符用于检测构造函数的 `prototype` 属性是否出现在某个实例对象的原型链上。 
+
+
+
 实现Promise
 
 实现xss-filter

@@ -968,6 +968,25 @@ Promise {<resolved>: undefined}
 
 ### 8. HTTP 服务
 
+**为什么开启 http 服务后链接不会断开？**
+
+1. 监听
+2. uv_tcp_bind
+3. 申请一个 socketfd
+4. 新建一个IO观察者和IP绑定地址端口
+5. uv_tcp_listen把IO观察者注册到事件循环
+6. Epoll 监听到链接事件到来
+7. 执行 libuv 的accept
+8. 执行nodejs的onconnection回调
+9. 新建一个结构表示client,把链接对应的fd生成一个新的io观察者注册到事件循环
+10. 等待http数据到来
+
+
+
+
+
+
+
 + 解析进来的 HTTP 请求报文
 + 返回对应的 HTTP 响应报文
 
