@@ -606,3 +606,17 @@ git checkout $commit~1 filename
 # 例如
 git checkout 3b63e41b68f2ea97d11c166c00cd22589639806e~1 yarn.lock
 ```
+
+
+
+
+
+### 22. [git 大小写敏感问题的解决方案](https://segmentfault.com/a/1190000038507486)
+
+例如： 把 a 改成 A
+
+```shell
+$ git mv dir DirTemp
+$ git mv DirTemp Dir
+```
+
