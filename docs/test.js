@@ -1,8 +1,8 @@
 // 算法题：
 // f1为纯函数，没有任何异步逻辑
-const f2 = cache(f1);
-f2('abc', 123, { b: 3 });    // 5， 耗时100s
-f2('abc', 123, { b: 3 });    // 5， 耗时0s
+// const f2 = cache(f1);
+// f2('abc', 123, { b: 3 });    // 5， 耗时100s
+// f2('abc', 123, { b: 3 });    // 5， 耗时0s
 
 /**
 * 发布订阅模式
@@ -12,11 +12,82 @@ f2('abc', 123, { b: 3 });    // 5， 耗时0s
 * 1.先到先得
 * 2.可以一次完成一份餐，也可以一次完成多份相同餐
 */
+class CustomEvent {
+  constructor() {
+    this.clientList = []
+  }
 
-// 实现sumFn(1)(2) == 3
+  // 订阅通知
+  addListener(type, fn) {
+    if (!this.clientList[type]) {
+      this.clientList[type] = []
+    }
+    this.clientList[type].push(fn)
+  }
 
-// 实现new Fun('name').eat('food1').sleep(1000).eat('food2').sleepFirst(3000).sleepFirst(1000)
-// sleepFirst最先执行，延迟对应的时间。其余的依次执行
+  // 取消订阅
+  removeListener(type) {
+    if (!type) {
+      this.clientList = {}
+    }
+    this.clientList[type] = []
+  }
+  // 发送通知
+  trigger(types, ...args) {
+    types.forEach(type => {
+      const fns = this.clientList[type]
+      if (!fns || fns.length < 0) {
+        return
+      }
+      const fn = fns.shift()
+      fn.apply(this, args)
+    })
+  }
+}
+
+// 调用
+const Event = new CustomEvent()
+Event.addListener('A', () => {
+  console.log('我订到了一份A餐')
+})
+Event.addListener('A', () => {
+  console.log('我订到了一份A餐')
+})
+Event.addListener('S', () => {
+  console.log('我订到了一份S 餐')
+})
+
+Event.trigger(['A', 'A', 'S'])
+
+/**
+ * 实现sumFn(1)(2) == 3
+ */
+
+
+function sumFn(...rest) {
+
+  // 参数传递的角度
+  const fn = (...args) => {
+
+    return sumFn(...rest.concat(args));
+  }
+
+  fn.valueOf = () => rest.reduce((a, b) => a + b);
+
+  return fn;
+}
+
+console.log(sumFn(1)(2).valueOf());
+console.log(sumFn(1)(2)(3).valueOf());
+
+/**
+ * 实现new Fun('name').eat('food1').sleep(1000).eat('food2').sleepFirst(3000).sleepFirst(1000)
+ * sleepFirst最先执行，延迟对应的时间。其余的依次执行
+ */
+
+
+// 
+// 
 
 // 二叉树的广度优先遍历
 
@@ -60,9 +131,19 @@ const obj = {
 // arr3.flat(2);
 // [1, 2, 3, 4, 5, 6]
 // 使用 Infinity，可展开任意深度的嵌套数组
-// var arr4 = [1, 2, [3, 4, [5, 6, [7, 8, [9, 10]]]]];
+var arr4 = [1, 2, [3, 4, [5, 6, [7, 8, [9, 10]]]]];
 // arr4.flat(Infinity);
 // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+const flat = (arr, size) => {
+  if (size > 0) {
+    return arr.reduce((pre, cur) => pre.concat(Array.isArray(cur) ? flat(cur, size - 1) : cur), [])
+  } else {
+    return arr.slice()
+  }
+}
+console.log(flat(arr4, 1))
 
 // 加起来和为目标值的组合
 // 给出一组候选数C和一个目标数T，找出候选数中起来和等于T的所有组合。

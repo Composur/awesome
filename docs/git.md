@@ -620,3 +620,4 @@ $ git mv dir DirTemp
 $ git mv DirTemp Dir
 ```
 
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=123456

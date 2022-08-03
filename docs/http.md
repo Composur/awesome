@@ -50,6 +50,29 @@ MDN的[CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CO
 
 可以使用第三方库 `axios` 等。避免触发上述条件。
 
+**application/x-www-form-urlencoded 和 multipart/form-data 区别**
+
++ `x-www-form-urlencoded`，表单默认的 Content-type 类型，支持 ASCII-text 文本内容
+
+  转化前
+
+  ```http
+  param1:website
+  param2:https://www.google.com
+  ```
+
+  转化后
+
+  ```http
+  param1=website&param2=https%3A%2F%2Fwww.google.com
+  ```
+
+  
+
++ `multipart/form-data`，允许提交表单包含： files，non-ASCII-text，Binary(二进制) 类型数据
+
+
+
 ### HEAD
 
 HEAD 方法和 GET 方法一样，只是不返回报文的主题。用于确认 URI 的有效性及资源的更新日期等。
@@ -398,6 +421,10 @@ Cache-Control: max-age=315360000
 
 强缓存不发请求到服务器，协商缓存会发请求到服务器。
 
+#### 为什么Expires被淘汰了?
+
+它设置的是到期时间，并且要是GMT格式的时间，最致命的是它的到期时间是依据系统时间来的，如果系统时间错误超过了`Expires`的到期时间，那么就会请求不到资源。
+
 
 
 ## Cookie
@@ -547,5 +574,4 @@ Cache-Control: max-age=315360000
   ```js
   axios.get('http://server.com', {withCredentials: true})
   ```
-
 
