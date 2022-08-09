@@ -1,20 +1,41 @@
-const p = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    return resolve(3)
-  }, 2000);
+console.log(1)
+new Promise((resolve, reject) => {
+  // 同步执行
+  console.log('执行resolve')
+  reject(2)
+}).then(value => console.log(value),
+  err => console.log(err))
+  .then(v => console.log(v),
+    err => console.log(err))
+console.log(3)
+
+
+new Promise((resolve, reject) => {
+  reject('err')
 })
-const p1 = Promise.resolve('p1')
-const p2 = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    resolve('p2 延时一秒')
-  }, 1000)
+  .then(res => { }, reason => { throw reason })
+  .then(res => { }, reason => reason)
+  .catch(err => {
+    console.log(err)
+  })
+
+
+cacheList.forEach(listItem => {
+  caches.forEach(cacheItem => {
+    if (cacheItem.id === listItem.id) {
+      // 找到要更新的对象
+    }
+  })
 })
-const p3 = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    resolve('p3 延时两秒')
-  }, 2000)
+
+const cachesMap = caches.map(item => {
+  return { id: item }
 })
-/**
+cacheList.forEach(item => {
+  // 找到要更新的对象
+  cachesMap[item.id]
+})
+/** 
  * @param {Array} array Promise对象 集合
  * @returns {Promise}
  */

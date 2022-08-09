@@ -2,6 +2,8 @@
 
 # Promise
 
+## 基本概念
+
 Promise 是一个类，在执行这个类的时候会传入一个执行器，这个执行器会立即执行。
 
 Promise 会有三种状态
@@ -19,7 +21,28 @@ then 方法内部做的事情就是状态判断
 - 如果状态是成功，调用成功回调函数
 - 如果状态是失败，调用失败回调函数
 
-## Promise A+ 的简单实现
+## 异常捕获
+
+当进行 `then` 链式调用的时候，可以在最后进行 `catch` 指定失败的回调。
+
+前面的任何异常处理问题都会传到最后的异常捕获，前提是在层层透传的时候没有进行处理。
+
+```js
+new Promise((resolve, reject) => {
+  reject('err')
+})
+  .then(res => { }, reason => { throw reason })
+  .then(res => { }, reason => reason) // 这里处理了异常就不会往下了
+  .catch(err => {
+    console.log(err)
+  })
+```
+
+## 中断链式调用
+
+返回一个`pendding`状态的 `Promise`.
+
+# Promise A+ 的简单实现
 
 ```js
 // MyPromise.js
