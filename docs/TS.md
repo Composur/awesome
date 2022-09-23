@@ -1,5 +1,45 @@
 # 基本概念
 
+## 类型
+
++ Ts 的类型 = JS 的类型 + `void` +` enum` +`never` + `unknown`+`any` + `type`+ `interface`
+  + type 和 interface 属于自定义类型
++ js 中的数据类型是具体的某个值的类型，ts 中的类型指的是集合。
+
+### 如何描述 Object 类型
+
+因为 object 很不精确所以一般用下面的方式描述 object 类型
+
++ 用 class 或 constructor
++ 用 type 或 interface
+
+```ts
+// 索引签名的模式
+type A = { [k: string]: number }
+
+// Record 泛型模式
+// 二者等价
+type A2 = Record<string, number>
+```
+
+### 函数对象
+
+由于 `Function` 太不精确了，它涵盖的场景比较多例如下面的写法：
+
+```ts
+const fn: Function = () => { return 'xxx' }
+```
+
+上面的写法基本没啥用，类型没有做限制。
+
+所以 TS 开发一般使用 `()=>{}` 来描述函数。
+
+```ts
+const foo: () => {} = () => { return 'xxx' }
+```
+
+
+
 ### **interface**（接口）
 
 + 对对象的形状进行描述

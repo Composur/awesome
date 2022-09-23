@@ -65,6 +65,12 @@ cd 你的安装路径
              root  静态文件存放路径;
              index index.html;
          }
+
+         # 二级目录
+         # 非精确匹配，并且不区分大小写，比如127.0.0.1/static/js.
+         location ^~ /static/ {
+          alias /路径
+        }
      }
 
 ```

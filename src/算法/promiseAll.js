@@ -10,24 +10,6 @@ new Promise((resolve, reject) => {
 console.log(3)
 
 
-new Promise((resolve, reject) => {
-  reject('err')
-})
-  .then(res => { }, reason => { throw reason })
-  .then(res => { }, reason => reason)
-  .catch(err => {
-    console.log(err)
-  })
-
-
-cacheList.forEach(listItem => {
-  caches.forEach(cacheItem => {
-    if (cacheItem.id === listItem.id) {
-      // 找到要更新的对象
-    }
-  })
-})
-
 const cachesMap = caches.map(item => {
   return { id: item }
 })

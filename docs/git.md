@@ -396,6 +396,8 @@ git merge  feature-x
 
     $ git stash
     Saved working directory and index state WIP on dev: f52c633 add merge
+    
+    $ git stash save '暂存说明'
 
 1.  确定 bug 在哪个分支上，checkout 到对应的分支后新建 bug 分支
 
@@ -427,7 +429,9 @@ git merge  feature-x
     
     $ git stash apply
     
-    $ git stash apply stash@{0} 恢复指定的stash
+    # apply 不会删除，pop 会删除
+    $ git stash apply stash@{0} 恢复指定的 stash 
+    $ git stash pop --index 恢复最新的暂存区
 
 1.  关于 git stash
 
@@ -616,8 +620,9 @@ git checkout 3b63e41b68f2ea97d11c166c00cd22589639806e~1 yarn.lock
 例如： 把 a 改成 A
 
 ```shell
-$ git mv dir DirTemp
-$ git mv DirTemp Dir
+$ git mv a DirTemp
+$ git mv DirTemp A
 ```
 
 docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=123456
+
