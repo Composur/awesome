@@ -54,8 +54,6 @@ $ sed -n 7p file
 $ awk '7 == NR' file
 ```
 
-
-
 # netstat
 
 .查看端口号占用情况
@@ -63,3 +61,13 @@ $ awk '7 == NR' file
 ```
 netstat -ntpl | grep 80
 ```
+
+# du
+
+
+
+```sh
+$ du -d 1 -h
+```
+
+![image-20221001113825127](./img/image-20221001113825127.png)

@@ -386,78 +386,79 @@ git merge  feature-x
 
     git branch -d feature-x
 
-#### bug 分支流程
+#### bug 分支流程 （stash）
 
 **git stash 不会把新增的文件暂存，如果想 stash 后切换分支，你需要先 git add xxx 后 git stash**
 
 1.  暂存当前 dev 分支（不提交到 git 服务器）
 
-<!---->
+```bash
+$ git stash
+Saved working directory and index state WIP on dev: f52c633 add merge
 
-    $ git stash
-    Saved working directory and index state WIP on dev: f52c633 add merge
-    
-    $ git stash save '暂存说明'
+# 或暂存的时候添加说明
+$ git stash save '暂存说明'
+```
 
-1.  确定 bug 在哪个分支上，checkout 到对应的分支后新建 bug 分支
+2. 确定 bug 在哪个分支上，checkout 到对应的分支后新建 bug 分支
 
-<!---->
+```sh
+$ git checkout -b issue-101
+Switched to a new branch 'issue-101'
+```
 
-    $ git checkout -b issue-101
-    Switched to a new branch 'issue-101'
+3. 修改完成后切换到对应的分支如 master,然后进行 merge
 
-1.  修改完成后切换到对应的分支如 master,然后进行 merge
+```bash
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use "git push" to publish your local commits)
 
-<!---->
+$ git merge --no-ff -m "merged bug fix 101" issue-101
+Merge made by the 'recursive' strategy.
+ readme.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
 
-    $ git checkout master
-    Switched to branch 'master'
-    Your branch is ahead of 'origin/master' by 6 commits.
-      (use "git push" to publish your local commits)
-    
-    $ git merge --no-ff -m "merged bug fix 101" issue-101
-    Merge made by the 'recursive' strategy.
-     readme.txt | 2 +-
-     1 file changed, 1 insertion(+), 1 deletion(-)
+4. 继续切换到 dev 进行开发，解冻刚才的暂存
 
-1.  继续切换到 dev 进行开发，解冻刚才的暂存
+```sh
+$ git stash list
+stash@{0}: WIP on dev: f52c633 add merge
 
-<!---->
+$ git stash apply
 
-    $ git stash list
-    stash@{0}: WIP on dev: f52c633 add merge
-    
-    $ git stash apply
-    
-    # apply 不会删除，pop 会删除
-    $ git stash apply stash@{0} 恢复指定的 stash 
-    $ git stash pop --index 恢复最新的暂存区
+# apply 不会删除，pop 会删除
+$ git stash apply stash@{0} 恢复指定的 stash 
+$ git stash pop --index 恢复最新的暂存区
+```
 
-1.  关于 git stash
+**关于 git stash**
 
-    上述 4 恢复字后 stash 暂存区并不会自动删除，就是你提交暂存后也不会消失。`git stash list` 查暂存看依旧存在,可用`git stash drop`来删除；会删除全部暂存；另一种方式是用`git stash pop`，恢复的同时把 stash 内容也删了
+上述 4 恢复字后 stash 暂存区并不会自动删除，就是你提交暂存后也不会消失。`git stash list` 查暂存看依旧存在,可用`git stash drop`来删除，它会删除全部暂存；另一种方式是用`git stash pop`，恢复的同时把 stash 内容也删了
 
-<!---->
+```shell
+$ git stash pop
+Dropped refs/stash@{0} (98e7191bbb73bd9e6214f79ff2b528d95b6477bd)
+```
 
-    git stash pop
-    Dropped refs/stash@{0} (98e7191bbb73bd9e6214f79ff2b528d95b6477bd)
+**注意**，此时我们只是修改了 mater 上的分支，当前的 dev 分支依然存在这个问题同样的 bug，要在 dev 上修复，我们只需要把第`3`步的`merged bug fix 101`commit 头部信息 复制到`dev`分支就行；我们只是需要复制这个修改而不管其它的
 
-1.  注意，此时我们只是修改了 mater 上的分支，当前的 dev 分支依然存在这个问题同样的 bug，要在 dev 上修复，我们只需要把第`3`步的`merged bug fix 101`commit 头部信息 复制到`dev`分支就行；我们只是需要复制这个修改而不管其它的
-
-<!---->
-
-    $ git branch
-    * dev
-      master
-    $ git cherry-pick commit编码（例如：a264173）
-    [master 1d4b803] fix bug 101
-     1 file changed, 1 insertion(+), 1 deletion(-)
+```sh
+$ git branch
+* dev
+  master
+$ git cherry-pick commit编码（例如：a264173）
+[master 1d4b803] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
 
 1.  删除 stash
 
 ```sh
 # 清空所有 stash
-git stash clear
+$ git stash clear
 ```
 
 ### 15. git 移除远程文件夹
