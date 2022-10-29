@@ -43,7 +43,7 @@ import { stat, exists, readFile } from 'fs';  //
 
 1. 写法
 
-    ```
+    ```js
     export const name='haha'
 
     //也可以
@@ -59,7 +59,7 @@ import { stat, exists, readFile } from 'fs';  //
 
 2. export 输出的变量是有名字的，可以使用as替换
 
-    ```
+    ```js
     function fn1(){}
 
     export {fn1 as fn2}
@@ -239,7 +239,7 @@ undefined // 拿不到 exports 的引用
         foo: 'hello',
         bar: 'world'
     };
-
+    
     // 等同于
     export default {
         foo: 'hello',

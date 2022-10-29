@@ -50,7 +50,26 @@
 
 # 启动 docker
 
+1. 升级 docker-compose 要安装其他版本的 Compose，请替换 1.29.1。
 
+```bash
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
 
+2. 将可执行权限应用于二进制文件：
 
+```sh
+$ sudo chmod +x /usr/local/bin/docker-compose
+```
 
+3. 创建软链：
+
+```sh
+$ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+```
+
+4. 测试是否安装成功：
+
+```sh
+$ docker-compose --version
+```

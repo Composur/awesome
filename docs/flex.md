@@ -1,12 +1,22 @@
-## flex:0 flex:1 flex:none flex:auto应该场景
+# 注意事项
+
++ **FLex布局中，子项设置width是没有直接效果的**
+  + 当设置 width 的时候，起作用的是 flex-basis 的作用
+
+# 应用场景
 
 ## 基本概念
 
 `flex`属性是`flex-grow`，`flex-shrink`和`flex-basis`这3个CSS属性的缩写，如果不清楚，可以参见这篇口碑热文“[CSS flex属性深入理解](https://www.zhangxinxu.com/wordpress/2019/12/css-flex-deep/)”。
 
-`getComputedStyle(document.body).flex` 的值是 `'0 1 auto'`
+他们都是为了分配空间。
+
++ Flex-grow 空间有剩余的时候如何分配
++ Flex-shrink 空间不足的时候如何分配
++ Flex-basis 固定分配
 
 ```js
+`getComputedStyle(document.body).flex` 的值是 `'0 1 auto'`
 console.log(getComputedStyle(document.body).flexGrow);
 console.log(getComputedStyle(document.body).flexShrink);
 console.log(getComputedStyle(document.body).flexBasis);
@@ -27,7 +37,7 @@ console.log(getComputedStyle(document.body).flexBasis);
 
 #### 1. flex:initial基本表现和适用场景
 
-> flex容器有剩余空间时尺寸不会增长（flex-grow:0），flex容器尺寸不足时尺寸会收缩变小（flex-shrink:1），尺寸自适应于内容（flex-basis:auto）（行为类似fit-content）。
+> flex容器有剩余空间时尺寸不会增长（flex-grow:0），**flex容器尺寸不足时尺寸会收缩变小（flex-shrink:1），尺寸自适应于内容（flex-basis:auto）**（行为类似fit-content）。
 
 item 比较少的时候剩余的空间会保留
 
