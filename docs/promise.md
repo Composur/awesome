@@ -252,5 +252,16 @@ function resolvePromise(x, resolve, reject) {
 
 注意：这只是同步的情况，不支持异步，
 
+# async、await 异常捕获
 
++ await-to-js
 
++ 全局捕获
+
+  ```js
+  window.addEventListener("unhandledrejection", event => {
+    console.warn(`UNHANDLED PROMISE REJECTION: ${event.reason}`);
+  });
+  ```
+
+  

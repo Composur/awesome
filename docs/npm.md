@@ -16,6 +16,22 @@ npm config set registry http://ip:port/path
 registry = registry.cnpmjs.org
 ```
 
+## 执行脚本
+
++ 串行，用 `&&` 符号按顺序把命令串联起来。
+
+  ```sh
+  npm run lint:js && npm run lint:jsx 
+  ```
+
++ 并行，用一个 `&` 连接多个命令。
+
+  ```sh
+  npm run lint:js & npm run lint:jsx
+  ```
+
+  
+
 ## yarn
 
 设置镜像
