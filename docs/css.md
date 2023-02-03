@@ -1,4 +1,52 @@
-### 1. flex 布局
+# 垂直居中
+
+最快的水平垂直居中
+
+```css
+.box {
+  display: grid;
+  place-content: center;
+}
+```
+
+巧用自动 margin，在flex上下文下，设置 margin：auto； 即可实现水平垂直居中
+
+```less
+.parent {
+  display: flex;
+  .child {
+    margin: auto;
+  }
+}
+```
+
+实现底部固定，无论容器是否撑开。
+
+```less
+.parent {
+  display: flex;
+  height: 100vh;
+  .footer {
+    margin-top: auto;
+  }
+}
+```
+
+ [Shape-outside](https://developer.mozilla.org/en-US/docs/Web/CSS/shape-outside) 处理非矩形的四边形，适合图文混排。
+
+
+
+# 
+
+
+
+## 
+
+
+
+
+
+# flex 布局
 
 **1.1 要说出什么是 flex 布局？**
 
