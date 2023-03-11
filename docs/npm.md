@@ -1,4 +1,4 @@
-# npm、yarn
+# npm、yarn、pnpm
 
 ## 设置镜像
 
@@ -196,4 +196,10 @@ yarn global remove vue-cli
 ```
 
 
+
+## pnpm
+
+pnpm i 安装失败的话，如果是因为一些远程的脚本可以屏蔽掉
+
+使用 pnpm i --ignore-scripts
 
