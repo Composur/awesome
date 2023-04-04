@@ -96,6 +96,23 @@ $ npm info vite
 $ npm list webpack
 ```
 
+本地项目使用本地开发的package
+
+```bash
+# package 目录下
+$ npm link
+# 查看是否成功
+$ npm -g ls
+```
+
+项目引用
+
+```js
+import xxx from 'xxxx'
+```
+
+
+
 升级版本
 
 ```bash
