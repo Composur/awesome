@@ -107,6 +107,8 @@ $ npm -g ls
 
 项目引用
 
+先在要使用的项目执行 `npm link xxx（包名）`
+
 ```js
 import xxx from 'xxxx'
 ```
