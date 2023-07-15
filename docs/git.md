@@ -2,27 +2,19 @@
 
 - 清空现有的 key
 
-<!---->
-
     rm -rf ~/.ssh/*
 
 - 运行
 
-<!---->
-
     ssh-keygen -t rsa -b 4096 -C "你的邮箱"
 
 - 执行
-
-<!---->
 
     cat ~/.ssh/id_rsa.pub
 
 - 把得到的公钥放到 GitHub 上
 
 - 执行
-
-<!---->
 
     ssh -T git@github.com
 
@@ -39,8 +31,6 @@ git config --global core.editor "vim"
 
 - 增加 origin
 
-<!---->
-
      git remote add origin  https://github.com/Composur/vue-admin.git
 
 ### 2.git clone branch
@@ -55,7 +45,15 @@ git config --global core.editor "vim"
 
 ### 3.git 放弃本地修改
 
-    git checkout . #本地所有修改的。没有的提交的，都返回到原来的状态
+```bash
+# 本地所有修改的。没有的提交的，都返回到原来的状态
+$ git checkout .
+
+# 如果这个时候已经执行过了 commit 还没有进行 push，这样可以保留修改的内容
+$ git reset --soft HEAD^ 
+```
+
+
 
 ### 4.git 拉取远程分支到本地
 
@@ -63,33 +61,26 @@ git config --global core.editor "vim"
 
 - 把远程分支拉到本地
 
-<!---->
-
-    git fetch origin dev（dev为远程仓库的分支名）
+```bash
+# dev为远程仓库的分支名
+$ git fetch origin dev
+```
 
 - 在本地创建分支 dev 并切换到该分支
-
-<!---->
 
     git checkout -b dev(本地分支名称) origin/dev(远程分支名称)
 
 - 把某个分支上的内容都拉取到本地
 
-<!---->
-
     git pull origin dev(远程分支名称)
 
 - 建立本地分支和远程分支的关联，使用
-
-<!---->
 
     git branch --set-upstream branch-name origin/branch-name
 
 ### 5.git 删除本地/远程分支
 
 - 删除本地
-
-<!---->
 
     git branch -d BranchName
 
@@ -112,19 +103,13 @@ git push origin --delete BranchName
 
 - 当前分支修改
 
-<!---->
-
     git branch -m new-name
 
 - 其它分支修改
 
-<!---->
-
     git branch -m old-name new-name
 
 - 重命名本地和远程分支
-
-<!---->
 
     git push origin :old-name new-name
     
@@ -146,8 +131,6 @@ git push origin master
 
 - 查看远程
 
-<!---->
-
     git remote -v
     > origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)
     > origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)
@@ -166,8 +149,6 @@ $ git remote -v
 
 - 更新
 
-<!---->
-
     $ git fetch upstream branch_name
     > remote: Counting objects: 75, done.
     > remote: Compressing objects: 100% (53/53), done.
@@ -179,8 +160,6 @@ $ git remote -v
 
     $ git rebase upstream branch_name
 
-<!---->
-
     # 上面两步合为一步
     
     $ git pull upstream  branch_name --rebase
@@ -189,24 +168,16 @@ $ git remote -v
 
   - 初次 push
 
-  <!---->
-
       git push --set-upstream origin branch_name
 
   - 非初次 push
 
-  <!---->
-
       git push
-
-<!---->
 
     $ git checkout master
     > Switched to branc 'master'
 
 - 本地合并到 upstream/master
-
-<!---->
 
     $ git merge upstream/master
     > Updating a422352..5fdff0f
@@ -218,8 +189,6 @@ $ git remote -v
     >  create mode 100644 README.md
 
 - 更新自己的 repo
-
-<!---->
 
     git push origin master
 
@@ -679,5 +648,4 @@ docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=123456
   + 需要在 `.gitmodules` 中删除依赖的子库
   + 然后删除子库缓存`git rm --cached xxx` xxx 是子库的名称，有路径需要加上路由
   + 然后再物理删除子库的文件夹
-
 

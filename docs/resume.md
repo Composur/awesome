@@ -44,6 +44,8 @@
 
   移动端适配，rem 和 vw 方案
 
+  jsBridge 封装 https://github.com/mcuking/blog/issues/39
+
 ### 低代码（Low Code）设计
 
 - 动态表单可动态校验（根据 JSON 信息动态渲染表单项）
