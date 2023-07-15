@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    .header {
+      position: sticky;
+      top: 0;
+      background-color: #f1f1f1;
+    }
+
+    .table-container {
+      max-height: 600px;
+      overflow-y: scroll;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    article {
+      max-width: 600px;
+      margin: 1em auto;
+    }
+
+    article h4,
+    article footer {
+      position: -webkit-sticky;
+      /* for Safari */
+      position: sticky;
+    }
+
+    article h4 {
+      margin: 2em 0 0;
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      top: 0;
+      z-index: 1;
+    }
+
+    article content {
+      display: block;
+      background-color: #ffffe0;
+      position: relative;
+      padding: 1px 10px;
+    }
+
+    article footer {
+      background-color: #f0f3f9;
+      padding: 10px;
+      bottom: 50vh;
+      z-index: -1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="table-container">
+    <table>
+      <thead class="header">
+        <tr>
+          <th>表头1</th>
+          <th>表头2</th>
+          <th>表头3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>行1, 列1</td>
+          <td>行1, 列2</td>
+          <td>行1, 列3</td>
+        </tr>
+        <tr>
+          <td>行2, 列1</td>
+          <td>行2, 列2</td>
+          <td>行2, 列3</td>
+        </tr>
+        <tr>
+          <td>行3, 列1</td>
+          <td>行3, 列2</td>
+          <td>行3, 列3</td>
+        </tr>
+        <!-- 表格内容省略 -->
+        <tr>
+          <td>行50, 列1</td>
+          <td>行50, 列2</td>
+          <td>行50, 列3</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead class="header">
+        <tr>
+          <th>表头1</th>
+          <th>表头2</th>
+          <th>表头3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>行1, 列1</td>
+          <td>行1, 列2</td>
+          <td>行1, 列3</td>
+        </tr>
+        <tr>
+          <td>行2, 列1</td>
+          <td>行2, 列2</td>
+          <td>行2, 列3</td>
+        </tr>
+        <tr>
+          <td>行3, 列1</td>
+          <td>行3, 列2</td>
+          <td>行3, 列3</td>
+        </tr>
+        <!-- 表格内容省略 -->
+        <tr>
+          <td>行50, 列1</td>
+          <td>行50, 列2</td>
+          <td>行50, 列3</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead class="header">
+        <tr>
+          <th>表头1</th>
+          <th>表头2</th>
+          <th>表头3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>行1, 列1</td>
+          <td>行1, 列2</td>
+          <td>行1, 列3</td>
+        </tr>
+        <tr>
+          <td>行2, 列1</td>
+          <td>行2, 列2</td>
+          <td>行2, 列3</td>
+        </tr>
+        <tr>
+          <td>行3, 列1</td>
+          <td>行3, 列2</td>
+          <td>行3, 列3</td>
+        </tr>
+        <!-- 表格内容省略 -->
+        <tr>
+          <td>行50, 列1</td>
+          <td>行50, 列2</td>
+          <td>行50, 列3</td>
+        </tr>
+      </tbody>
+    </table>
+    <article>
+      <section>
+        <h4>网曝王宝强殴打马蓉</h4>
+        <content>
+          <p>12月2日，有网友爆料称...
+            须指定 top, right, bottom 或 left 四个阈值其中之一（且达到设定的阈值），才可使粘性定位生效。否则其行为与相对定位相同；
+            并且 top 和 bottom 同时设置时，top 生效的优先级高，left 和 right 同时设置时，left 的优先级高
+            设定为 position: sticky 的元素的任意父节点的 overflow 属性必须是 visible，否则 position:sticky 不会生效；在满足上述情况下，设定了 position: sticky
+            的元素的父容器的高度必须大于当前元素，否则也会失效。（当然，此时，sticky 吸附的基准元素就会变成父元素）
+            如果 position: sticky 元素的任意父节点定位设置为 position: overflow，则父容器无法进行滚动，所以 position:sticky 元素也不会有滚动然后固定的情况
+            在满足上述情况下，设定了 position: sticky 的元素的父容器的高度必须大于当前元素，否则也会失效。（当然，此时，sticky 吸附的基准元素就会变成父元素）
+          </p>
+        </content>
+        <footer>网友评论：在满足上述情况下，设定了 position: sticky 的元素的父容器的高度必须大于当前元素，否则也会失效。（当然，此时，sticky 吸附的基准元素就会变成父元素）</footer>
+      </section>
+      <section>
+        <h4>知情人爆料称马蓉闯入王宝强家拿剪刀对峙</h4>
+        <content>
+          <p>...
+            须指定 top, right, bottom 或 left 四个阈值其中之一（且达到设定的阈值），才可使粘性定位生效。否则其行为与相对定位相同；
+            并且 top 和 bottom 同时设置时，top 生效的优先级高，left 和 right 同时设置时，left 的优先级高
+            设定为 position: sticky 的元素的任意父节点的 overflow 属性必须是 visible，否则 position:sticky 不会生效；在满足上述情况下，设定了 position: sticky
+            的元素的父容器的高度必须大于当前元素，否则也会失效。（当然，此时，sticky 吸附的基准元素就会变成父元素）
+            如果 position: sticky 元素的任意父节点定位设置为 position: overflow，则父容器无法进行滚动，所以 position:sticky 元素也不会有滚动然后固定的情况
+            在满足上述情况下，设定了 position: sticky 的元素的父容器的高度必须大于当前元素，否则也会失效。（当然，此时，sticky 吸附的基准元素就会变成父元素）
+          </p>
+        </content>
+        <footer>网友评论：在满足上述情况下，设定了 position: sticky 的元素的父容器的高度必须大于当前元素，否则也会失效。（当然，此时，sticky 吸附的基准元素就会变成父元素）</footer>
+      </section>
+      ...
+    </article>
+  </div>
+</body>
+
+</html>
