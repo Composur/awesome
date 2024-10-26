@@ -159,7 +159,7 @@ $ git remote -v
 
 
     $ git rebase upstream branch_name
-
+    
     # 上面两步合为一步
     
     $ git pull upstream  branch_name --rebase
@@ -175,6 +175,7 @@ $ git remote -v
       git push
 
     $ git checkout master
+    
     > Switched to branc 'master'
 
 - 本地合并到 upstream/master
@@ -648,4 +649,13 @@ docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=123456
   + 需要在 `.gitmodules` 中删除依赖的子库
   + 然后删除子库缓存`git rm --cached xxx` xxx 是子库的名称，有路径需要加上路由
   + 然后再物理删除子库的文件夹
+
+### git 撤销历史提交
+
+```sh
+# 撤回中间版本，查找要撤回历史提交那次的 commit id
+$ git revert -n 
+# 撤回到当成一次提交 push
+$ git commit -m 
+```
 
