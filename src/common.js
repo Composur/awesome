@@ -118,8 +118,61 @@ const whale = {
    * @example Number.EPSILON 属性表示 1 与Number可表示的大于 1 的最小的浮点数之间的差值
    * @example 
    */
-  epsEqu:function (x,y) {  
+  epsEqu: function (x, y) {
     return Math.abs(x - y) < Number.EPSILON;
+  },
+  /**
+   * @description 复制文本到剪贴板（优先使用异步 API，回退至 execCommand）
+   * @param {string} text 要复制的文本
+   * @returns {Promise<boolean>} 复制是否成功
+   */
+  copyToClipboard: function (text) {
+    // 优先使用现代异步 API（需安全上下文 https 或 localhost）
+    if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      return navigator.clipboard.writeText(String(text)).then(function () {
+        return true;
+      }).catch(function () {
+        // 异步 API 失败时尝试回退
+        return fallbackCopy(String(text));
+      });
+    }
+
+    // 回退方案：使用隐藏 textarea + execCommand('copy')
+    return Promise.resolve(fallbackCopy(String(text)));
+
+    function fallbackCopy(value) {
+      try {
+        var textarea = document.createElement('textarea');
+        textarea.value = value;
+        // 避免滚动到页面底部
+        textarea.style.position = 'fixed';
+        textarea.style.top = '0';
+        textarea.style.left = '0';
+        textarea.style.width = '1px';
+        textarea.style.height = '1px';
+        textarea.style.padding = '0';
+        textarea.style.border = 'none';
+        textarea.style.outline = 'none';
+        textarea.style.boxShadow = 'none';
+        textarea.style.background = 'transparent';
+
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        var successful = false;
+        try {
+          successful = document.execCommand('copy');
+        } catch (err) {
+          successful = false;
+        }
+
+        document.body.removeChild(textarea);
+        return successful;
+      } catch (e) {
+        return false;
+      }
+    }
   },
 
 }
