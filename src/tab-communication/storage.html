@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>storage 事件 标签页通信示例</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; }
+    h1 { margin-bottom: 8px; }
+    fieldset { border: 1px solid #ddd; padding: 12px; margin: 12px 0; }
+    legend { padding: 0 6px; }
+    input, button { font-size: 14px; }
+    #log { height: 240px; border: 1px solid #ddd; padding: 8px; overflow: auto; background: #f9f9f9; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>方案 3：storage 事件</h1>
+  <p>打开多个同源标签页访问本页面，在任意标签页发送消息，其他标签页会通过 <code>storage</code> 事件收到。</p>
+
+  <fieldset>
+    <legend>发送消息</legend>
+    <input id="msg" value="hi via storage" style="width:100%;box-sizing:border-box;" />
+    <button id="send" style="margin-top:8px;">发送</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>消息日志</legend>
+    <div id="log" aria-live="polite"></div>
+  </fieldset>
+
+  <script>
+    const key = 'tab_msg';
+    const logEl = document.getElementById('log');
+    const log = (txt) => {
+      const line = document.createElement('div');
+      line.textContent = txt;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    document.getElementById('send').onclick = () => {
+      const text = document.getElementById('msg').value;
+      const payload = { text, t: Date.now(), from: location.pathname };
+      // 带时间戳，避免同内容不触发变更
+      localStorage.setItem(key, JSON.stringify(payload));
+      log(`发送: ${JSON.stringify(payload)}`);
+    };
+
+    window.addEventListener('storage', (e) => {
+      if (e.key !== key || !e.newValue) return;
+      const data = JSON.parse(e.newValue);
+      const now = Date.now();
+      // 简单防抖：忽略 100ms 内的重复
+      if (window._last && now - window._last < 100) return;
+      window._last = now;
+      log(`收到: ${data.text} @ ${new Date(data.t).toLocaleTimeString()}`);
+    });
+
+    window.addEventListener('beforeunload', () => localStorage.removeItem(key));
+  </script>
+</body>
+</html>
+

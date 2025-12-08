@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>BroadcastChannel 标签页通信示例</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 760px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    fieldset {
+      border: 1px solid #ddd;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    legend {
+      padding: 0 6px;
+    }
+
+    input,
+    button {
+      font-size: 14px;
+    }
+
+    #log {
+      height: 240px;
+      border: 1px solid #ddd;
+      padding: 8px;
+      overflow: auto;
+      background: #f9f9f9;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>方案 2：BroadcastChannel</h1>
+  <p>打开多个同源标签页访问本页面，输入内容并点击发送即可互相收到消息。</p>
+
+  <fieldset>
+    <legend>发送消息</legend>
+    <input id="msg" value="hi from BroadcastChannel" style="width:100%;box-sizing:border-box;" />
+    <button id="send" style="margin-top:8px;">发送</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>消息日志</legend>
+    <div id="log" aria-live="polite"></div>
+  </fieldset>
+
+  <script>
+    const channel = new BroadcastChannel('demo_channel');
+    const logEl = document.getElementById('log');
+    const log = (txt) => {
+      const line = document.createElement('div');
+      line.textContent = txt;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    channel.onmessage = (e) => log(`收到: ${JSON.stringify(e.data)}`);
+
+    document.getElementById('send').onclick = () => {
+      const text = document.getElementById('msg').value;
+      const payload = { from: location.pathname, text, t: Date.now() };
+      channel.postMessage(payload);
+      log(`发送: ${JSON.stringify(payload)}`);
+    };
+
+    window.addEventListener('beforeunload', () => channel.close());
+  </script>
+</body>
+
+</html>

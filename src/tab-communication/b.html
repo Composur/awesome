@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>同源标签页通信示例 - B</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; }
+    h1 { margin-bottom: 8px; }
+    fieldset { border: 1px solid #ddd; padding: 12px; margin: 12px 0; }
+    legend { padding: 0 6px; }
+    input, button { font-size: 14px; }
+    #log { height: 220px; border: 1px solid #ddd; padding: 8px; overflow: auto; background: #f9f9f9; white-space: pre-wrap; }
+    .tag { display: inline-block; padding: 0 6px; border-radius: 3px; margin-right: 6px; color: #fff; font-size: 12px; }
+    .in { background: #4caf50; }
+    .out { background: #2196f3; }
+    .info { background: #9e9e9e; }
+    .warn { background: #ff9800; }
+  </style>
+</head>
+<body>
+  <h1>B 页面</h1>
+  <p>接收 A 的消息并回发，同样基于 <code>postMessage</code>。</p>
+
+  <fieldset>
+    <legend>发送给 A</legend>
+    <label for="messageToA">消息内容</label>
+    <input id="messageToA" type="text" value="你好，我是 B" style="width:100%;box-sizing:border-box;" />
+    <button id="sendToA" style="margin-top:8px;">发送</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>消息日志</legend>
+    <div id="log" aria-live="polite"></div>
+  </fieldset>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const appendLog = (text, tagClass) => {
+      const entry = document.createElement('div');
+      const tag = document.createElement('span');
+      tag.className = `tag ${tagClass}`;
+      tag.textContent = tagClass.toUpperCase();
+      entry.appendChild(tag);
+      entry.appendChild(document.createTextNode(text));
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    const sendToA = () => {
+      if (!window.opener || window.opener.closed) {
+        appendLog('A 页面未找到或已关闭', 'warn');
+        return;
+      }
+      const msg = document.getElementById('messageToA').value || '来自 B 的问候';
+      window.opener.postMessage({ from: 'B', msg }, location.origin);
+      appendLog(`向 A 发送: ${msg}`, 'out');
+    };
+
+    document.getElementById('sendToA').addEventListener('click', sendToA);
+
+    window.addEventListener('message', (event) => {
+      if (event.origin !== location.origin) return;
+      const data = event.data || {};
+      const content = data.msg || data.reply || JSON.stringify(data);
+      appendLog(`收到来自 ${data.from || '未知'} 的消息: ${content}`, 'in');
+    });
+
+    // 自动 ping 一次，方便确认通信链路
+    setTimeout(() => sendToA(), 800);
+  </script>
+</body>
+</html>
+
