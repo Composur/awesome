@@ -18,6 +18,7 @@
   "scripts": {
     "dev": "vuepress dev docs --no-cache",
     "build": "vuepress build docs",
+    "preview": "vuepress build docs && npx http-server dist",
     "deploy": "gh-pages -d dist",
     "deploy:build": "yarn build && gh-pages -d dist"
   }
