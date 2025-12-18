@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>录音上传示例</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin: 20px 0;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+
+    .log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .log-item {
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .log-success {
+      color: #28a745;
+    }
+
+    .log-error {
+      color: #dc3545;
+    }
+
+    .log-info {
+      color: #007bff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div>
+    <button id="startBtn" type="button">开始录音</button>
+    <button id="stopBtn" type="button" disabled>停止录音</button>
+    <button id="abortBtn" type="button" disabled>中止上传</button>
+
+  </div>
+
+  <div class="status">
+    <div>录音状态: <span id="recordStatus">未开始</span></div>
+    <div>上传状态: <span id="uploadStatus">idle</span></div>
+    <div>录音时长: <span id="duration">0</span>s</div>
+  </div>
+
+  <div class="log" id="logContainer"></div>
+
+  <script type="module">
+    import { createRecorderUploader } from './createRecorderUploader.js'
+
+    const startBtn = document.getElementById('startBtn')
+    const stopBtn = document.getElementById('stopBtn')
+    const abortBtn = document.getElementById('abortBtn')
+    const recordStatus = document.getElementById('recordStatus')
+    const uploadStatus = document.getElementById('uploadStatus')
+    const durationEl = document.getElementById('duration')
+    const logContainer = document.getElementById('logContainer')
+
+    let mediaRecorder = null
+    let uploader = null
+    let startTime = 0
+    let durationTimer = null
+
+    let sessionId = null
+    let chunkIndex = 0
+
+    function log(message, type = 'info') {
+      const item = document.createElement('div')
+      item.className = `log-item log-${type}`
+      item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+      logContainer.appendChild(item)
+      logContainer.scrollTop = logContainer.scrollHeight
+    }
+
+    /** ================= 上传单个 chunk ================= */
+    async function uploadChunk(blob) {
+      const formData = new FormData()
+      formData.append('sessionId', sessionId)
+      formData.append('chunkIndex', chunkIndex++)
+      formData.append('chunk', blob)
+
+      const response = await fetch('http://localhost:3000/upload/chunk', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error(`chunk 上传失败: ${response.status}`)
+      }
+
+      return response.json()
+    }
+
+    /** ================= 创建 uploader ================= */
+    function createUploader() {
+      return createRecorderUploader({
+        chunkSize: 2 * 1024 * 1024,
+        maxRetry: 3,
+        maxQueueSize: 10,
+        upload: uploadChunk,
+        hooks: {
+          onChunk: (blob) => {
+            log(`切片生成: ${(blob.size / 1024).toFixed(2)} KB`)
+          },
+          onUploadSuccess: (blob) => {
+            log(`上传成功: ${(blob.size / 1024).toFixed(2)} KB`, 'success')
+            uploadStatus.textContent = uploader.getState()
+          },
+          onUploadRetry: ({ error, retry }) => {
+            log(`上传重试(${retry}): ${error.message}`, 'error')
+          },
+          onError: (error) => {
+            log(`致命错误: ${error.message}`, 'error')
+            uploadStatus.textContent = uploader.getState()
+          },
+          onAbort: (reason) => {
+            log(`上传中止: ${reason}`, 'error')
+            uploadStatus.textContent = uploader.getState()
+          },
+        },
+      })
+    }
+
+    /** ================= 开始录音 ================= */
+    startBtn.addEventListener('click', async (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      try {
+        sessionId = `session-${crypto.randomUUID()}`
+        chunkIndex = 0
+        uploader = createUploader()
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            uploader.push(e.data)
+          }
+        }
+
+        mediaRecorder.start(1000)
+
+        startTime = Date.now()
+        durationTimer = setInterval(() => {
+          durationEl.textContent = Math.floor((Date.now() - startTime) / 1000)
+        }, 1000)
+
+        recordStatus.textContent = '录音中'
+        uploadStatus.textContent = 'idle'
+
+        startBtn.disabled = true
+        stopBtn.disabled = false
+        abortBtn.disabled = false
+
+        log(`开始录音，sessionId=${sessionId}`, 'success')
+      } catch (err) {
+        log(`录音失败: ${err.message}`, 'error')
+      }
+    })
+
+    /** ================= 停止并 flush ================= */
+    stopBtn.addEventListener('click', async (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!mediaRecorder) return
+
+      mediaRecorder.stop()
+      mediaRecorder.stream.getTracks().forEach(t => t.stop())
+      clearInterval(durationTimer)
+
+      recordStatus.textContent = '已停止'
+
+      try {
+        await uploader.flush()
+
+        const res = await fetch('http://localhost:3000/upload/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        })
+
+        const result = await res.json()
+
+        log(
+          `合并完成: ${result.file}，切片数=${result.chunkCount}`,
+          'success'
+        )
+      } catch (err) {
+        log(`上传失败: ${err.message}`, 'error')
+      }
+
+      startBtn.disabled = false
+      stopBtn.disabled = true
+      abortBtn.disabled = true
+    })
+
+    /** ================= 中止 ================= */
+    abortBtn.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (mediaRecorder) {
+        mediaRecorder.stop()
+        mediaRecorder.stream.getTracks().forEach(t => t.stop())
+      }
+      clearInterval(durationTimer)
+
+      uploader.abort('用户中止')
+
+      recordStatus.textContent = '已中止'
+      startBtn.disabled = false
+      stopBtn.disabled = true
+      abortBtn.disabled = true
+    })
+
+    setInterval(() => {
+      if (uploader) {
+        uploadStatus.textContent = uploader.getState()
+      }
+    }, 500)
+  </script>
+</body>
+
+</html>
