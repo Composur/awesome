@@ -18,7 +18,7 @@ export function createRecorderUploader(options) {
   let uploadQueue = []
   let uploading = false
 
-  let state = 'idle' // idle | uploading | stopped | error | aborted
+  let state = 'idle' // idle | uploading | flushing | stopped | error | aborted
   let fatalError = null
 
   const callHook = (name, payload) => {
@@ -35,7 +35,11 @@ export function createRecorderUploader(options) {
 
   /** ---------- 数据入口 ---------- */
   function push(blob) {
-    ensureUsable()
+    // 允许在 flushing 状态下继续接收数据
+    if (state === 'error') throw fatalError
+    if (state === 'aborted') throw new Error('recorder aborted')
+    if (state === 'stopped') throw new Error('recorder already stopped')
+
     if (!blob || blob.size === 0) return
 
     bufferBlobs.push(blob)
@@ -77,7 +81,11 @@ export function createRecorderUploader(options) {
   async function processQueue() {
     if (uploading || fatalError) return
     uploading = true
-    state = 'uploading'
+
+    // 只有在非 flushing 状态时才更新为 uploading
+    if (state !== 'flushing') {
+      state = 'uploading'
+    }
 
     try {
       while (uploadQueue.length > 0) {
@@ -100,7 +108,10 @@ export function createRecorderUploader(options) {
         }
       }
 
-      if (state === 'uploading') {
+      // flush 完成后设置为 stopped
+      if (state === 'flushing') {
+        state = 'stopped'
+      } else if (state === 'uploading') {
         state = 'idle'
       }
     } catch (err) {
@@ -113,10 +124,24 @@ export function createRecorderUploader(options) {
 
   /** ---------- flush / abort ---------- */
   async function flush() {
-    ensureUsable()
-    state = 'stopped'
+    // 检查当前状态
+    if (state === 'error') throw fatalError
+    if (state === 'aborted') throw new Error('recorder aborted')
+    if (state === 'stopped') throw new Error('recorder already stopped')
+
+    // 标记为 flushing 状态,但仍允许接收数据
+    state = 'flushing'
+
+    // 刷新缓冲区
     flushBuffer(true)
+
+    // 等待所有上传完成
     await processQueue()
+
+    // 确保状态已更新为 stopped
+    if (state === 'flushing') {
+      state = 'stopped'
+    }
   }
 
   function abort(reason = 'aborted by user') {
@@ -141,11 +166,23 @@ export function createRecorderUploader(options) {
     return state
   }
 
+  function getStateInfo() {
+    return {
+      state,
+      queueLength: uploadQueue.length,
+      bufferSize,
+      bufferBlobsCount: bufferBlobs.length,
+      hasFatalError: !!fatalError,
+      uploading
+    }
+  }
+
   return {
     push,
     flush,
     abort,
     getState,
+    getStateInfo,
   }
 }
 

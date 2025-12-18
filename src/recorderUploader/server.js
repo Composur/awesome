@@ -3,15 +3,16 @@ const fs = require('fs')
 const path = require('path')
 const { IncomingForm } = require('formidable')
 const { pipeline } = require('stream/promises')
-const { URL } = require('url')
 
 const PORT = 3000
 const UPLOAD_ROOT = path.join(__dirname, 'uploads')
 
 fs.mkdirSync(UPLOAD_ROOT, { recursive: true })
 
-/** 合并锁（防止并发 complete） */
 const mergingSessions = new Set()
+
+// 全局上传锁 - 简单粗暴但有效
+let uploadLock = Promise.resolve()
 
 function send(res, code, data) {
   res.writeHead(code, { 'Content-Type': 'application/json' })
@@ -20,143 +21,206 @@ function send(res, code, data) {
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 }
 
 const server = http.createServer(async (req, res) => {
   cors(res)
 
+  console.log(`\n${req.method} ${req.url}`)
+
   if (req.method === 'OPTIONS') {
     res.writeHead(200)
     return res.end()
   }
-  const parsedUrl = new URL(req.url, 'http://localhost')
 
+  const url = req.url || ''
 
   /* ================= 上传 chunk ================= */
-  if (parsedUrl.pathname === '/upload/chunk' && req.method === 'POST') {
-    const form = new IncomingForm({
-      multiples: false,
-      maxFileSize: 20 * 1024 * 1024,
+  if (url === '/upload/chunk' && req.method === 'POST') {
+    // ⭐ 关键: 立即获取锁,在解析前就阻塞
+    const currentLock = uploadLock
+    let releaseLock
+    uploadLock = new Promise(resolve => {
+      releaseLock = resolve
     })
 
-    form.parse(req, (err, fields, files) => {
-      if (err) {
-        console.error(err)
-        return send(res, 500, { error: err.message })
-      }
+    try {
+      // 等待前一个上传完成
+      await currentLock
 
-      const sessionId = fields.sessionId?.[0]
-      const chunkIndex = fields.chunkIndex?.[0]
-      const file = files.chunk?.[0]
-
-      if (!sessionId || chunkIndex === undefined || !file) {
-        return send(res, 400, { error: 'sessionId, chunkIndex, chunk required' })
-      }
-
-      const sessionDir = path.join(UPLOAD_ROOT, sessionId)
-      fs.mkdirSync(sessionDir, { recursive: true })
-
-      const filename = `chunk-${String(chunkIndex).padStart(6, '0')}`
-      const targetPath = path.join(sessionDir, filename)
-
-      // 幂等：已存在直接成功
-      if (fs.existsSync(targetPath)) {
-        fs.unlinkSync(file.filepath)
-        return send(res, 200, { success: true, duplicated: true })
-      }
-
-      fs.renameSync(file.filepath, targetPath)
-
-      send(res, 200, {
-        success: true,
-        sessionId,
-        chunkIndex,
+      // 现在开始解析
+      const form = new IncomingForm({
+        multiples: false,
+        maxFileSize: 20 * 1024 * 1024,
       })
-    })
+
+      const result = await new Promise((resolve, reject) => {
+        form.parse(req, (err, fields, files) => {
+          if (err) {
+            console.error('❌ Parse error:', err)
+            reject(err)
+            return
+          }
+
+          const sessionId = fields.sessionId?.[0]
+          const chunkIndex = fields.chunkIndex?.[0]
+          const file = files.chunk?.[0]
+
+          if (!sessionId || chunkIndex === undefined || !file) {
+            reject(new Error('Missing fields'))
+            return
+          }
+
+          const sessionDir = path.join(UPLOAD_ROOT, sessionId)
+          fs.mkdirSync(sessionDir, { recursive: true })
+
+          const filename = `chunk-${String(chunkIndex).padStart(6, '0')}`
+          const targetPath = path.join(sessionDir, filename)
+
+          if (fs.existsSync(targetPath)) {
+            fs.unlinkSync(file.filepath)
+            console.log(`✓ Chunk ${chunkIndex} (dup)`)
+            resolve({ success: true, duplicated: true })
+            return
+          }
+
+          fs.renameSync(file.filepath, targetPath)
+          console.log(`✓ Chunk ${chunkIndex}: ${(file.size / 1024).toFixed(2)} KB`)
+
+          resolve({
+            success: true,
+            sessionId,
+            chunkIndex,
+            size: file.size,
+          })
+        })
+      })
+
+      send(res, 200, result)
+    } catch (err) {
+      send(res, 500, { error: err.message })
+    } finally {
+      // 释放锁
+      releaseLock()
+    }
+
     return
   }
 
   /* ================= 完成并合并 ================= */
-  if (parsedUrl.pathname === '/upload/complete' && req.method === 'POST') {
+  if (url === '/upload/complete' && req.method === 'POST') {
     let body = ''
-    req.on('data', c => (body += c))
+
+    req.on('data', chunk => {
+      body += chunk.toString()
+    })
+
     req.on('end', async () => {
       try {
         const { sessionId } = JSON.parse(body)
+        console.log(`\n📦 Complete: ${sessionId}`)
+
         if (!sessionId) {
           return send(res, 400, { error: 'sessionId required' })
         }
 
+        // ⭐ 等待所有 chunk 上传完成
+        console.log(`⏳ 等待上传队列...`)
+        await uploadLock
+        console.log(`✓ 上传队列已清空`)
+
+        if (mergingSessions.has(sessionId)) {
+          return send(res, 409, { error: 'merge in progress' })
+        }
+
         const sessionDir = path.join(UPLOAD_ROOT, sessionId)
-        const outputFile = path.join(sessionDir, 'merged.webm')
 
         if (!fs.existsSync(sessionDir)) {
+          console.log(`❌ 目录不存在`)
           return send(res, 404, { error: 'session not found' })
         }
 
-        // 幂等：已合并
+        const outputFile = path.join(sessionDir, 'merged.webm')
+
         if (fs.existsSync(outputFile)) {
+          const stats = fs.statSync(outputFile)
           return send(res, 200, {
             success: true,
             alreadyMerged: true,
             file: 'merged.webm',
+            size: stats.size,
           })
-        }
-
-        // 并发锁
-        if (mergingSessions.has(sessionId)) {
-          return send(res, 409, { error: 'merging in progress' })
         }
 
         mergingSessions.add(sessionId)
 
-        const chunkFiles = fs
-          .readdirSync(sessionDir)
-          .filter(f => f.startsWith('chunk-'))
-          .sort()
+        try {
+          const files = fs.readdirSync(sessionDir)
+            .filter(f => f.startsWith('chunk-'))
+            .sort()
 
-        if (chunkFiles.length === 0) {
+          console.log(`🔄 合并 ${files.length} 个切片`)
+
+          if (files.length === 0) {
+            throw new Error('No chunks')
+          }
+
+          const writeStream = fs.createWriteStream(outputFile)
+
+          for (const file of files) {
+            const chunkPath = path.join(sessionDir, file)
+            const readStream = fs.createReadStream(chunkPath)
+            await pipeline(readStream, writeStream, { end: false })
+          }
+
+          writeStream.end()
+
+          await new Promise((resolve, reject) => {
+            writeStream.on('finish', resolve)
+            writeStream.on('error', reject)
+          })
+
+          const stats = fs.statSync(outputFile)
+          console.log(`✅ ${(stats.size / 1024 / 1024).toFixed(2)} MB\n`)
+
+          send(res, 200, {
+            success: true,
+            file: 'merged.webm',
+            chunkCount: files.length,
+            size: stats.size,
+          })
+        } finally {
           mergingSessions.delete(sessionId)
-          return send(res, 400, { error: 'no chunks found' })
         }
-
-        const writeStream = fs.createWriteStream(outputFile)
-
-        for (const file of chunkFiles) {
-          const filePath = path.join(sessionDir, file)
-          await pipeline(
-            fs.createReadStream(filePath),
-            writeStream,
-            { end: false }
-          )
-        }
-
-        writeStream.end()
-        await new Promise(r => writeStream.on('finish', r))
-
-        // 合并完成后清理 chunk
-        for (const file of chunkFiles) {
-          fs.unlinkSync(path.join(sessionDir, file))
-        }
-
-        mergingSessions.delete(sessionId)
-
-        const { size } = fs.statSync(outputFile)
-
-        send(res, 200, {
-          success: true,
-          sessionId,
-          file: 'merged.webm',
-          size,
-          chunkCount: chunkFiles.length,
-        })
       } catch (err) {
-        console.error(err)
+        console.error('❌', err.message)
         send(res, 500, { error: err.message })
       }
     })
+    return
+  }
+
+  /* ================= 下载 ================= */
+  if (url.startsWith('/download/') && req.method === 'GET') {
+    const sessionId = url.split('/').pop()
+    const filePath = path.join(UPLOAD_ROOT, sessionId, 'merged.webm')
+
+    if (!fs.existsSync(filePath)) {
+      res.writeHead(404)
+      return res.end('File not found')
+    }
+
+    const stats = fs.statSync(filePath)
+    res.writeHead(200, {
+      'Content-Type': 'audio/webm',
+      'Content-Length': stats.size,
+      'Content-Disposition': `attachment; filename="recording-${sessionId}.webm"`,
+    })
+
+    const readStream = fs.createReadStream(filePath)
+    readStream.pipe(res)
     return
   }
 
@@ -165,6 +229,13 @@ const server = http.createServer(async (req, res) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`✅ Upload server running at http://localhost:${PORT}`)
-  console.log(`📁 Upload root: ${UPLOAD_ROOT}`)
+  console.log(`\n${'='.repeat(50)}`)
+  console.log(`✅ Server: http://localhost:${PORT}`)
+  console.log(`📁 Uploads: ${UPLOAD_ROOT}`)
+  console.log(`${'='.repeat(50)}\n`)
+})
+
+process.on('SIGINT', () => {
+  console.log('\n👋 Bye')
+  server.close(() => process.exit(0))
 })
