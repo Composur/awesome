@@ -201,304 +201,248 @@
   <script type="module">
     import { createRecorderUploader } from './createRecorderUploader.js'
 
-    const startBtn = document.getElementById('startBtn')
-    const stopBtn = document.getElementById('stopBtn')
-    const abortBtn = document.getElementById('abortBtn')
-    const recordStatus = document.getElementById('recordStatus')
-    const uploadStatus = document.getElementById('uploadStatus')
-    const durationEl = document.getElementById('duration')
-    const sessionIdDisplay = document.getElementById('sessionIdDisplay')
-    const logContainer = document.getElementById('logContainer')
+    /*************************************************
+     * 1. 常量 & DOM
+     *************************************************/
+    const API_BASE = 'http://localhost:3000'
 
-    let mediaRecorder = null
-    let uploader = null
-    let startTime = 0
-    let durationTimer = null
-
-    let sessionId = null
-    let chunkIndex = 0
-
-    function log(message, type = 'info') {
-      const item = document.createElement('div')
-      item.className = `log-item log-${type}`
-      item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
-      logContainer.appendChild(item)
-      logContainer.scrollTop = logContainer.scrollHeight
+    const dom = {
+      startBtn: document.getElementById('startBtn'),
+      stopBtn: document.getElementById('stopBtn'),
+      abortBtn: document.getElementById('abortBtn'),
+      recordStatus: document.getElementById('recordStatus'),
+      uploadStatus: document.getElementById('uploadStatus'),
+      duration: document.getElementById('duration'),
+      sessionId: document.getElementById('sessionIdDisplay'),
+      log: document.getElementById('logContainer'),
     }
 
-    async function uploadChunk(blob) {
-      const formData = new FormData()
-      formData.append('sessionId', sessionId)
-      formData.append('chunkIndex', chunkIndex++)
-      formData.append('chunk', blob)
+    /*************************************************
+     * 2. 全局状态
+     *************************************************/
+    const state = {
+      mediaRecorder: null,
+      uploader: null,
+      sessionId: null,
+      chunkIndex: 0,
+      startTime: 0,
+      timer: null,
+    }
 
-      const response = await fetch('http://localhost:3000/upload/chunk', {
+    /*************************************************
+     * 3. 工具函数
+     *************************************************/
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+
+    function log(message, type = 'info') {
+      const el = document.createElement('div')
+      el.className = `log-item log-${type}`
+      el.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+      dom.log.appendChild(el)
+      dom.log.scrollTop = dom.log.scrollHeight
+    }
+
+    function updateButtons({ start, stop, abort }) {
+      dom.startBtn.disabled = !start
+      dom.stopBtn.disabled = !stop
+      dom.abortBtn.disabled = !abort
+    }
+
+    /*************************************************
+     * 4. 上传相关
+     *************************************************/
+    async function uploadChunk(blob) {
+      const fd = new FormData()
+      fd.append('sessionId', state.sessionId)
+      fd.append('chunkIndex', state.chunkIndex++)
+      fd.append('chunk', blob)
+
+      const res = await fetch(`${API_BASE}/upload/chunk`, {
         method: 'POST',
-        body: formData,
+        body: fd,
       })
 
-      if (!response.ok) {
-        throw new Error(`chunk 上传失败: ${response.status}`)
-      }
-
-      return response.json()
+      if (!res.ok) throw new Error(`chunk 上传失败: ${res.status}`)
+      return res.json()
     }
 
     function createUploader() {
       return createRecorderUploader({
-        // chunkSize: 2 * 1024 * 1024,
         chunkSize: 0.2 * 1024 * 1024,
         maxRetry: 3,
         maxQueueSize: 10,
         upload: uploadChunk,
         hooks: {
-          onChunk: (blob) => {
-            log(`切片生成: ${(blob.size / 1024).toFixed(2)} KB`)
-          },
-          onUploadSuccess: (blob) => {
-            log(`上传成功: ${(blob.size / 1024).toFixed(2)} KB`, 'success')
-          },
-          onUploadRetry: ({ error, retry }) => {
-            log(`上传重试(${retry}): ${error.message}`, 'error')
-          },
-          onError: (error) => {
-            log(`致命错误: ${error.message}`, 'error')
-          },
-          onAbort: (reason) => {
-            log(`上传中止: ${reason}`, 'error')
-          },
+          onChunk: b => log(`切片生成 ${(b.size / 1024).toFixed(2)} KB`),
+          onUploadSuccess: b => log(`上传成功 ${(b.size / 1024).toFixed(2)} KB`, 'success'),
+          onUploadRetry: e => log(`重试 ${e.retry}: ${e.error.message}`, 'error'),
+          onAbort: r => log(`上传中止: ${r}`, 'error'),
+          onError: e => log(`致命错误: ${e.message}`, 'error'),
         },
       })
     }
 
-    // 开始录音 - 使用箭头函数防止 this 绑定问题
-    startBtn.onclick = async function (event) {
-      // 阻止任何默认行为
-      if (event) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
+    /*************************************************
+     * 5. 录音流程
+     *************************************************/
+    async function startRecording() {
+      state.sessionId = `session-${crypto.randomUUID()}`
+      state.chunkIndex = 0
+      state.uploader = createUploader()
 
-      try {
-        sessionId = `session-${crypto.randomUUID()}`
-        chunkIndex = 0
-        uploader = createUploader()
+      dom.sessionId.textContent = state.sessionId
 
-        sessionIdDisplay.textContent = sessionId
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      state.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
 
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
-
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data && e.data.size > 0) {
-            log(`MediaRecorder data: ${(e.data.size / 1024).toFixed(2)} KB`)
-            uploader.push(e.data)
-          }
+      state.mediaRecorder.ondataavailable = e => {
+        if (e.data?.size) {
+          log(`录音数据 ${(e.data.size / 1024).toFixed(2)} KB`)
+          state.uploader.push(e.data)
         }
-
-        mediaRecorder.start(1000)
-
-        startTime = Date.now()
-        durationTimer = setInterval(() => {
-          durationEl.textContent = Math.floor((Date.now() - startTime) / 1000)
-        }, 1000)
-
-        recordStatus.textContent = '录音中'
-        uploadStatus.textContent = 'idle'
-
-        startBtn.disabled = true
-        stopBtn.disabled = false
-        abortBtn.disabled = false
-
-        log(`开始录音,sessionId=${sessionId}`, 'success')
-      } catch (err) {
-        log(`录音失败: ${err.message}`, 'error')
       }
 
-      // 明确返回 false 防止任何表单提交
-      return false
+      state.mediaRecorder.start(1000)
+
+      state.startTime = Date.now()
+      state.timer = setInterval(() => {
+        dom.duration.textContent = Math.floor((Date.now() - state.startTime) / 1000)
+      }, 1000)
+
+      dom.recordStatus.textContent = '录音中'
+      updateButtons({ start: false, stop: true, abort: true })
+      log(`开始录音 ${state.sessionId}`, 'success')
     }
 
-    // 停止录音
-    stopBtn.onclick = async function (event) {
-      if (event) {
-        event.preventDefault()
-        event.stopPropagation()
+    async function stopRecording() {
+      log('正在停止录音...', 'info')
+
+      await new Promise(resolve => {
+        state.mediaRecorder.onstop = resolve
+        state.mediaRecorder.stop()
+      })
+
+      state.mediaRecorder.stream.getTracks().forEach(t => t.stop())
+      clearInterval(state.timer)
+      dom.recordStatus.textContent = '已停止'
+
+      log('等待所有切片上传完成...', 'info')
+      await state.uploader.flush()
+
+      log('请求服务器合并文件...', 'info')
+      const res = await fetch(`${API_BASE}/upload/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: state.sessionId }),
+      })
+
+      if (!res.ok) throw new Error(await res.text())
+
+      const result = await res.json()
+      log(`合并完成: ${result.file}`, 'success')
+      log(`下载地址: ${API_BASE}/download/${state.sessionId}`, 'success')
+    }
+
+    async function abortAll() {
+      if (state.mediaRecorder?.state !== 'inactive') {
+        state.mediaRecorder.stop()
+        state.mediaRecorder.stream.getTracks().forEach(t => t.stop())
       }
 
-      if (!mediaRecorder) return false
+      state.uploader?.abort('用户中止')
+      clearInterval(state.timer)
 
-      try {
-        // 步骤1: 停止录音并等待最后的数据
-        log('正在停止录音...', 'info')
+      dom.recordStatus.textContent = '已中止'
+      log('录音与上传已中止', 'info')
+    }
 
-        await new Promise((resolve) => {
-          const handleData = (e) => {
-            if (e.data && e.data.size > 0) {
-              log(`接收最后的数据: ${(e.data.size / 1024).toFixed(2)} KB`, 'info')
-              uploader.push(e.data)
-            }
-          }
+    /*************************************************
+     * 6. active 恢复检测（你指出遗漏的核心）
+     *************************************************/
+    async function pollUntilMerged(sessionId) {
+      log('检测到未完成录音，轮询服务器中...', 'info')
 
-          const handleStop = () => {
-            log('MediaRecorder 已停止', 'info')
-            mediaRecorder.removeEventListener('dataavailable', handleData)
-            mediaRecorder.removeEventListener('stop', handleStop)
-            setTimeout(resolve, 100)
-          }
+      while (true) {
+        await sleep(2000)
 
-          mediaRecorder.addEventListener('dataavailable', handleData)
-          mediaRecorder.addEventListener('stop', handleStop)
-          mediaRecorder.stop()
-        })
+        const res = await fetch(`${API_BASE}/recording/active`)
+        if (!res.ok) return
 
-        // 步骤2: 停止音频轨道
-        mediaRecorder.stream.getTracks().forEach(t => t.stop())
-        clearInterval(durationTimer)
+        const sessions = await res.json()
+        const current = sessions.find(s => s.sessionId === sessionId)
 
-        recordStatus.textContent = '已停止'
-
-        // 步骤3: 等待所有数据上传完成
-        log('正在等待所有数据上传完成...', 'info')
-        await uploader.flush()
-
-        // 步骤4: 检查上传器状态
-        const stateInfo = uploader.getStateInfo()
-        log(`上传器状态: ${JSON.stringify(stateInfo)}`, 'info')
-        // 步骤4.5: 额外等待确保服务器端完全处理完毕
-        log('等待服务器处理...', 'info')
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        // 步骤5: 通知服务器合并文件
-        log('正在请求服务器合并文件...', 'info')
-        const res = await fetch('http://localhost:3000/upload/complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
-        })
-
-        if (!res.ok) {
-          const errorText = await res.text()
-          throw new Error(`Complete request failed with status ${res.status}: ${errorText}`)
+        if (!current) {
+          log('session 已完成合并', 'success')
+          log(`下载地址: ${API_BASE}/download/${sessionId}`, 'success')
+          break
         }
-
-        const result = await res.json()
-
-        log(
-          `✅ 合并完成: ${result.file}, 切片数=${result.chunkCount}, 大小=${(result.size / 1024 / 1024).toFixed(2)} MB`,
-          'success'
-        )
-        log(`下载地址: http://localhost:3000/download/${sessionId}`, 'success')
-
-      } catch (err) {
-        log(`❌ 上传失败: ${err.message}`, 'error')
-        console.error('Upload error details:', err)
-      } finally {
-        startBtn.disabled = false
-        stopBtn.disabled = true
-        abortBtn.disabled = true
-      }
-
-      return false
-    }
-
-    // 中止
-    abortBtn.onclick = async function (event) {
-      if (event) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
-
-      try {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-          await new Promise((resolve) => {
-            mediaRecorder.onstop = resolve
-            mediaRecorder.stop()
-          })
-          mediaRecorder.stream.getTracks().forEach(t => t.stop())
-        }
-
-        clearInterval(durationTimer)
-
-        if (uploader) {
-          uploader.abort('用户中止')
-        }
-
-        recordStatus.textContent = '已中止'
-        log('录音和上传已中止', 'info')
-
-      } catch (err) {
-        log(`中止时出错: ${err.message}`, 'error')
-      } finally {
-        startBtn.disabled = false
-        stopBtn.disabled = true
-        abortBtn.disabled = true
-      }
-
-      return false
-    }
-
-    // 定时更新状态
-    setInterval(() => {
-      if (uploader) {
-        const state = uploader.getState()
-        const stateInfo = uploader.getStateInfo()
-        uploadStatus.textContent = `${state} (队列:${stateInfo.queueLength}, 缓冲:${(stateInfo.bufferSize / 1024).toFixed(0)}KB)`
-      }
-    }, 500)
-
-    // 阻止整个页面的表单提交
-    document.addEventListener('submit', (e) => {
-      e.preventDefault()
-      return false
-    })
-
-    // 阻止键盘 Enter 触发
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-        e.preventDefault()
-        return false
-      }
-    })
-    function showRecoveringUI(session) {
-      const el = document.getElementById('status')
-      el.textContent = '检测到未完成录音，正在生成音频...'
-
-      // 轮询结果
-      pollUntilMerged(session.sessionId)
-    }
-    function showPlaybackUI(session) {
-      // const audio = document.getElementById('audio')
-      // audio.src = `http://localhost:3000/download/${session.sessionId}`
-      // audio.style.display = 'block'
-      alert('检测到已完成录音，您可以下载音频文件。')
-    }
-
-
-    function handleExistingSession(session) {
-      if (session.status === 'recording') {
-        showRecoveringUI(session)
-      } else if (session.status === 'merged') {
-        showPlaybackUI(session)
       }
     }
 
     async function checkExistingRecording() {
-      const res = await fetch('http://localhost:3000/recording/active')
-      if (!res.ok) return
+      try {
+        const res = await fetch(`${API_BASE}/recording/active`)
+        if (!res.ok) return
 
-      const sessions = await res.json()
-      if (!sessions.length) return
+        const sessions = await res.json()
+        if (!sessions.length) return
 
-      // 简单策略：取最新的一个
-      const latest = sessions[0]
+        const latest = sessions.length > 1 ? sessions.sort((a, b) => b.lastActive - a.lastActive)[0] : sessions[0];
 
-      handleExistingSession(latest)
+        dom.sessionId.textContent = latest.sessionId
+
+        if (latest.status === 'recording') {
+          dom.recordStatus.textContent = '恢复中'
+          pollUntilMerged(latest.sessionId)
+        } else if (latest.status === 'merged') {
+          log(`发现已完成录音 ${latest.sessionId}`, 'success')
+          log(`下载地址: ${API_BASE}/download/${latest.sessionId}`, 'success')
+        }
+
+      } catch (err) {
+        log(`恢复检测失败: ${err.message}`, 'error')
+      }
     }
 
-    window.addEventListener('load', checkExistingRecording)
+    /*************************************************
+     * 7. 按钮事件
+     *************************************************/
+    dom.startBtn.onclick = async e => {
+      e.preventDefault()
+      try { await startRecording() }
+      catch (err) { log(err.message, 'error') }
+    }
 
+    dom.stopBtn.onclick = async e => {
+      e.preventDefault()
+      try { await stopRecording() }
+      catch (err) { log(err.message, 'error') }
+      finally { updateButtons({ start: true, stop: false, abort: false }) }
+    }
+
+    dom.abortBtn.onclick = async e => {
+      e.preventDefault()
+      await abortAll()
+      updateButtons({ start: true, stop: false, abort: false })
+    }
+
+    /*************************************************
+     * 8. 上传状态轮询
+     *************************************************/
+    setInterval(() => {
+      if (!state.uploader) return
+      const info = state.uploader.getStateInfo()
+      dom.uploadStatus.textContent =
+        `${state.uploader.getState()} 队列:${info.queueLength} 缓冲:${(info.bufferSize / 1024).toFixed(0)}KB`
+    }, 500)
+
+    /*************************************************
+     * 9. 页面加载恢复检测
+     *************************************************/
+    window.addEventListener('load', checkExistingRecording)
   </script>
+
+
 </body>
 
 </html>
