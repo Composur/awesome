@@ -20,6 +20,8 @@ export function createRecorderUploader(options) {
 
   let state = 'idle' // idle | uploading | flushing | stopped | error | aborted
   let fatalError = null
+  let drainResolve = null
+  let drainPromise = null
 
   const callHook = (name, payload) => {
     try {
@@ -86,6 +88,11 @@ export function createRecorderUploader(options) {
     if (state !== 'flushing') {
       state = 'uploading'
     }
+    if (!drainPromise) {
+      drainPromise = new Promise(resolve => {
+        drainResolve = resolve
+      })
+    }
 
     try {
       while (uploadQueue.length > 0) {
@@ -119,6 +126,11 @@ export function createRecorderUploader(options) {
       throw err
     } finally {
       uploading = false
+      if (uploadQueue.length === 0) {
+        drainResolve?.()
+        drainResolve = null
+        drainPromise = null
+      }
     }
   }
 
