@@ -247,7 +247,7 @@
     function createUploader() {
       return createRecorderUploader({
         // chunkSize: 2 * 1024 * 1024,
-        chunkSize: 100,
+        chunkSize: 0.2 * 1024 * 1024,
         maxRetry: 3,
         maxQueueSize: 10,
         upload: uploadChunk,
@@ -460,6 +460,44 @@
         return false
       }
     })
+    function showRecoveringUI(session) {
+      const el = document.getElementById('status')
+      el.textContent = '检测到未完成录音，正在生成音频...'
+
+      // 轮询结果
+      pollUntilMerged(session.sessionId)
+    }
+    function showPlaybackUI(session) {
+      // const audio = document.getElementById('audio')
+      // audio.src = `http://localhost:3000/download/${session.sessionId}`
+      // audio.style.display = 'block'
+      alert('检测到已完成录音，您可以下载音频文件。')
+    }
+
+
+    function handleExistingSession(session) {
+      if (session.status === 'recording') {
+        showRecoveringUI(session)
+      } else if (session.status === 'merged') {
+        showPlaybackUI(session)
+      }
+    }
+
+    async function checkExistingRecording() {
+      const res = await fetch('http://localhost:3000/recording/active')
+      if (!res.ok) return
+
+      const sessions = await res.json()
+      if (!sessions.length) return
+
+      // 简单策略：取最新的一个
+      const latest = sessions[0]
+
+      handleExistingSession(latest)
+    }
+
+    window.addEventListener('load', checkExistingRecording)
+
   </script>
 </body>
 

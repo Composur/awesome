@@ -10,6 +10,8 @@ const UPLOAD_ROOT = path.join(__dirname, 'uploads')
 fs.mkdirSync(UPLOAD_ROOT, { recursive: true })
 
 const mergingSessions = new Set()
+const sessions = new Map()
+
 
 // 全局上传锁 - 简单粗暴但有效
 let uploadLock = Promise.resolve()
@@ -89,6 +91,11 @@ const server = http.createServer(async (req, res) => {
           fs.renameSync(file.filepath, targetPath)
           console.log(`✓ Chunk ${chunkIndex}: ${(file.size / 1024).toFixed(2)} KB`)
 
+          sessions.set(sessionId, {
+            lastChunkAt: Date.now(),
+            status: 'recording',
+          })
+
           resolve({
             success: true,
             sessionId,
@@ -119,6 +126,7 @@ const server = http.createServer(async (req, res) => {
 
     req.on('end', async () => {
       try {
+        // mergeSession(JSON.parse(body).sessionId)
         const { sessionId } = JSON.parse(body)
         console.log(`\n📦 Complete: ${sessionId}`)
 
@@ -223,10 +231,79 @@ const server = http.createServer(async (req, res) => {
     readStream.pipe(res)
     return
   }
+  /* ================= 活动的录制会话列表 ================= */
+  if (url === '/recording/active' && req.method === 'GET') {
+    const result = []
+
+    for (const [sessionId, meta] of sessions.entries()) {
+      result.push({
+        sessionId,
+        status: meta.status,
+        lastActive: meta.lastChunkAt,
+      })
+    }
+
+    return send(res, 200, result)
+  }
+
 
   res.writeHead(404)
   res.end('Not Found')
 })
+async function mergeSession(sessionId) {
+  if (mergingSessions.has(sessionId)) return
+  mergingSessions.add(sessionId)
+
+  try {
+    const sessionDir = path.join(UPLOAD_ROOT, sessionId)
+    const outputFile = path.join(sessionDir, 'merged.webm')
+
+    if (!fs.existsSync(sessionDir)) return
+    if (fs.existsSync(outputFile)) return
+
+    const files = fs.readdirSync(sessionDir)
+      .filter(f => f.startsWith('chunk-'))
+      .sort()
+
+    if (files.length === 0) return
+
+    const writeStream = fs.createWriteStream(outputFile)
+
+    for (const file of files) {
+      const readStream = fs.createReadStream(path.join(sessionDir, file))
+      await pipeline(readStream, writeStream, { end: false })
+    }
+
+    writeStream.end()
+    await new Promise(r => writeStream.on('finish', r))
+
+    const meta = sessions.get(sessionId)
+    if (meta) meta.status = 'merged'
+
+    console.log(`🧩 Auto merged: ${sessionId}`)
+  } finally {
+    mergingSessions.delete(sessionId)
+  }
+}
+
+const INACTIVE_TIMEOUT = 30 * 1000 // 30 秒
+const SCAN_INTERVAL = 5 * 1000
+
+setInterval(async () => {
+  const now = Date.now()
+
+  for (const [sessionId, meta] of sessions.entries()) {
+    if (
+      meta.status === 'recording' &&
+      now - meta.lastChunkAt > INACTIVE_TIMEOUT
+    ) {
+      console.log(`⏱ Session inactive, auto merging: ${sessionId}`)
+      await uploadLock      // 等待所有上传完成
+      await mergeSession(sessionId)
+    }
+  }
+}, SCAN_INTERVAL)
+
 
 server.listen(PORT, () => {
   console.log(`\n${'='.repeat(50)}`)
